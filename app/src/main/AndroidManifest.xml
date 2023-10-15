@@ -16,7 +16,7 @@
             android:usesCleartextTraffic="true"
             tools:targetApi="31">
         <activity
-                android:name=".activities.VideoPlayerActivity"
+                android:name=".views.activities.VideoPlayerActivity"
                 android:configChanges="keyboardHidden|screenSize|orientation"
                 android:exported="false"/>
         <activity

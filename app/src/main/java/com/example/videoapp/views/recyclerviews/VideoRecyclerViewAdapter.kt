@@ -1,15 +1,16 @@
-package com.example.videoapp.recyclerviews
+package com.example.videoapp.views.recyclerviews
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.videoapp.R
-import com.example.videoapp.activities.VideoPlayerActivity
+import com.example.videoapp.views.activities.VideoPlayerActivity
 import com.example.videoapp.entities.VideoEntity
 
-class VideoRecyclerViewAdapter(context: Context, videoEntities: List<VideoEntity>): RecyclerView.Adapter<VideoItemViewHolder>() {
-    private val mVideoEntities: List<VideoEntity>
+class VideoRecyclerViewAdapter(context: Context, videoEntities: ArrayList<VideoEntity>): RecyclerView.Adapter<VideoItemViewHolder>() {
+    private var mVideoEntities: ArrayList<VideoEntity>
     private val mContext: Context
 
     init {
@@ -36,5 +37,11 @@ class VideoRecyclerViewAdapter(context: Context, videoEntities: List<VideoEntity
         holder.mVideoItemImage.setOnClickListener {
             VideoPlayerActivity.startVideoPlayerActivity(mContext, mVideoEntities[position].mVideoUrl)
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun updateVideoDescription(videoEntities: ArrayList<VideoEntity>) {
+        mVideoEntities = videoEntities
+        notifyDataSetChanged()
     }
 }

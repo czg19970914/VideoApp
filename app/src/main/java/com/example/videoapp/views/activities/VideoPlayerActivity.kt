@@ -1,4 +1,4 @@
-package com.example.videoapp.activities
+package com.example.videoapp.views.activities
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -21,7 +21,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.example.videoapp.ConfigParams
 import com.example.videoapp.R
-import com.example.videoapp.customviews.OnDoubleClickListener
+import com.example.videoapp.views.customviews.OnDoubleClickListener
 import com.example.videoapp.utils.VideoUtils
 import java.util.Timer
 import java.util.TimerTask

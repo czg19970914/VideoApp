@@ -7,7 +7,7 @@
         android:layout_height="match_parent"
         android:background="@color/black"
         android:layout_gravity="center"
-        tools:context=".activities.VideoPlayerActivity"
+        tools:context=".views.activities.VideoPlayerActivity"
         android:orientation="vertical">
 
     <TextureView

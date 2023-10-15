@@ -1,4 +1,4 @@
-package com.example.videoapp.recyclerviews
+package com.example.videoapp.views.recyclerviews
 
 import android.view.View
 import android.widget.ImageView

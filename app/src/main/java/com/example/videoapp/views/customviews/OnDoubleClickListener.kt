@@ -1,4 +1,4 @@
-package com.example.videoapp.customviews
+package com.example.videoapp.views.customviews
 
 import android.annotation.SuppressLint
 import android.view.MotionEvent

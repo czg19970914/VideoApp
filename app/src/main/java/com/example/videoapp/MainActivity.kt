@@ -1,107 +1,60 @@
 package com.example.videoapp
 
 import android.app.AlertDialog
-import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.videoapp.customviews.VideoAsyncTask
-import com.example.videoapp.recyclerviews.VideoRecyclerViewAdapter
-import com.example.videoapp.utils.VideoUtils
-import com.ywl5320.wlmedia.WlMediaUtil
 import com.example.videoapp.entities.VideoEntity
+import com.example.videoapp.interfaces.VideoPresenter
+import com.example.videoapp.interfaces.VideoView
+import com.example.videoapp.presenters.VideoDescriptionPresenter
+import com.example.videoapp.views.recyclerviews.VideoRecyclerViewAdapter
+import com.scwang.smart.refresh.footer.ClassicsFooter
+import com.scwang.smart.refresh.header.ClassicsHeader
+import com.scwang.smart.refresh.layout.SmartRefreshLayout
+import com.scwang.smart.refresh.layout.api.RefreshLayout
 import kotlinx.coroutines.*
-import java.io.InputStream
-import java.util.concurrent.CopyOnWriteArrayList
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), VideoView {
+    private val mRefreshLayout: SmartRefreshLayout by lazy {
+        findViewById(R.id.smart_refresh_layout)
+    }
     private val mVideoRecyclerView: RecyclerView by lazy {
         findViewById(R.id.video_recycler_view)
-    }
-    private val mBlankVideoImage: Bitmap by lazy {
-        VideoUtils.vectorDrawableToBitmap(this, R.drawable.blank_video_image)
     }
 
     private var mWaitingDialogBuilder: AlertDialog.Builder? = null
     private var mWaitingDialog: AlertDialog? = null
 
-    private var mWlMediaUtil: WlMediaUtil? = null
-
-    private var mVideoEntities: List<VideoEntity>? = null
+    private var mVideoListLayoutManager: GridLayoutManager? = null
     private var mVideoListAdapter: VideoRecyclerViewAdapter? = null
 
-    private var mAddResourceJob: Job? = null
+    private var mDescriptionPresenter: VideoPresenter? = null
+
+    init {
+        mDescriptionPresenter = VideoDescriptionPresenter()
+        (mDescriptionPresenter as VideoDescriptionPresenter).setView(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         window.statusBarColor = ContextCompat.getColor(this, R.color.light_gray)
         window.navigationBarColor = ContextCompat.getColor(this, R.color.light_gray)
+        initRefreshLayout()
         initWaitingDialog()
 
-        // 协程多线程来加载资源链表
-        mWaitingDialog = mWaitingDialogBuilder?.show()
-        mAddResourceJob = CoroutineScope(Dispatchers.IO).launch {
-            // 多协程来请求网络，但是有问题后续优化
-//            val videEntities = CopyOnWriteArrayList<VideoEntity>()
-//            val getNetWorkInfoJob = launch {
-//                val jsonStream: InputStream = resources.openRawResource(R.raw.video_data)
-//                val jsonArray = VideoUtils.parseJSON(jsonStream)
-//
-//                var completeUrl = ""
-//                var videoTitle = ""
-//                var videoImage: Bitmap
-//                var videoEntity: VideoEntity
-//
-//                for(i in 0 until jsonArray.size()) {
-//                    launch {
-//                        mWlMediaUtil = WlMediaUtil()
-//                        completeUrl = ConfigParams.baseUrl + jsonArray[i].asJsonObject.get("file_name").asString
-//                        videoTitle = jsonArray[i].asJsonObject.get("video_title").asString
-//                        videoImage = VideoUtils.getVideoImage(completeUrl, mWlMediaUtil!!, mBlankVideoImage)
-//                        videoEntity = VideoEntity(completeUrl, videoTitle, videoImage)
-//                        videEntities.add(videoEntity)
-//                    }
-//                }
-//            }
-//            getNetWorkInfoJob.join()
-//            mVideoEntities = videEntities
-            mVideoEntities = initVideoEntities()
-            showVideoInfoRecyclerView()
-        }
+        showWaitingDialog()
+        (mDescriptionPresenter as VideoDescriptionPresenter).initServerData()
     }
 
-    private fun initVideoEntities(): List<VideoEntity> {
-        val videEntities = ArrayList<VideoEntity>()
-//        val videEntities = CopyOnWriteArrayList<VideoEntity>()
-
-        val jsonStream: InputStream = resources.openRawResource(R.raw.video_data)
-        val jsonArray = VideoUtils.parseJSON(jsonStream)
-
-        var completeUrl = ""
-        var videoTitle = ""
-        var videoImage: Bitmap
-        var videoEntity: VideoEntity
-
-        for(i in 0 until jsonArray.size()) {
-            mWlMediaUtil = WlMediaUtil()
-            completeUrl = ConfigParams.baseUrl + jsonArray[i].asJsonObject.get("file_name").asString
-            videoTitle = jsonArray[i].asJsonObject.get("video_title").asString
-            videoImage = VideoUtils.getVideoImage(completeUrl, mWlMediaUtil!!, mBlankVideoImage)
-            videoEntity = VideoEntity(completeUrl, videoTitle, videoImage)
-            videEntities.add(videoEntity)
-        }
-
-        return videEntities
-    }
-
-    private fun initRecyclerView(videoEntities: List<VideoEntity>) {
+    private fun initRecyclerView(videoEntities: ArrayList<VideoEntity>) {
         mVideoListAdapter = VideoRecyclerViewAdapter(this, videoEntities)
-        val layoutManager: RecyclerView.LayoutManager = GridLayoutManager(this, 2)
-        mVideoRecyclerView.layoutManager = layoutManager
+        mVideoListLayoutManager = GridLayoutManager(this, 2)
+        mVideoRecyclerView.layoutManager = mVideoListLayoutManager
         mVideoRecyclerView.adapter = mVideoListAdapter
     }
 
@@ -111,10 +64,55 @@ class MainActivity : AppCompatActivity() {
         mWaitingDialogBuilder!!.setView(R.layout.dialog_waiting)
     }
 
-    private suspend fun showVideoInfoRecyclerView()= withContext(Dispatchers.Main) {
-        mVideoEntities?.let {
-            mWaitingDialog?.dismiss()
-            initRecyclerView(it)
+    private fun initRefreshLayout() {
+        //设置头部刷新的样式
+        mRefreshLayout.setRefreshHeader(ClassicsHeader(this))
+        //设置页脚刷新的样式
+        mRefreshLayout.setRefreshFooter(ClassicsFooter(this))
+        //设置头部刷新时间监听
+        mRefreshLayout.setOnRefreshListener { it ->
+            (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(false,
+                it
+            ) { refreshLayout -> refreshLayout.finishRefresh() }
         }
+        //设置尾部刷新时间监听
+        mRefreshLayout.setOnLoadMoreListener {
+            (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(true,
+                it
+            ) { refreshLayout -> refreshLayout.finishLoadMore() }
+        }
+    }
+
+    suspend fun showVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>)= withContext(Dispatchers.Main) {
+        initRecyclerView(videoEntities)
+        closeWaitingDialog()
+    }
+
+    suspend fun updateVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>, isDown: Boolean,
+                                            refreshLayout: RefreshLayout, refreshOperation: (RefreshLayout) -> Unit)
+    = withContext(Dispatchers.Main) {
+        if(videoEntities.size == 0){
+
+        }else{
+            mVideoListAdapter?.updateVideoDescription(videoEntities)
+            if(isDown)
+                mVideoListLayoutManager?.scrollToPosition(0)
+            else
+                mVideoListLayoutManager?.scrollToPosition(
+                    mVideoListAdapter!!.itemCount.coerceAtMost(ConfigParams.getDescriptionNum - 1)
+                )
+        }
+        refreshOperation(refreshLayout)
+    }
+
+    private fun showWaitingDialog() {
+        mWaitingDialog = mWaitingDialogBuilder?.show()
+    }
+    private fun closeWaitingDialog() {
+        mWaitingDialog?.dismiss()
+    }
+
+    override fun setPresenter(presenter: VideoPresenter) {
+        mDescriptionPresenter = presenter
     }
 }
