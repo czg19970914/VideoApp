@@ -6,28 +6,24 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.SurfaceTexture
-import android.media.MediaPlayer
-import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.Surface
 import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.example.videoapp.ConfigParams
 import com.example.videoapp.R
+import com.example.videoapp.interfaces.VideoPresenter
+import com.example.videoapp.interfaces.VideoView
+import com.example.videoapp.presenters.VideoPlayerPresenter
 import com.example.videoapp.views.customviews.OnDoubleClickListener
 import com.example.videoapp.utils.VideoUtils
-import java.util.Timer
-import java.util.TimerTask
-import kotlin.math.abs
 
-class VideoPlayerActivity : AppCompatActivity() {
+class VideoPlayerActivity : AppCompatActivity(), VideoView {
     private val mVideoTextureView: TextureView by lazy {
         findViewById(R.id.video_texture_view)
     }
@@ -53,9 +49,11 @@ class VideoPlayerActivity : AppCompatActivity() {
         findViewById(R.id.video_paused_image)
     }
 
-    private var mMediaPlayer: MediaPlayer? = null
-    private var mSeekBarTimer: Timer? = null
-    private var mIsSeekbarChanging = false // 互斥变量，防止进度条和定时器冲突
+    private var mVideoPlayerPresenter: VideoPresenter = VideoPlayerPresenter()
+
+    init {
+        mVideoPlayerPresenter.setView(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,24 +61,21 @@ class VideoPlayerActivity : AppCompatActivity() {
         window.statusBarColor = ContextCompat.getColor(this, R.color.black)
         window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
 
-        mMediaPlayer = MediaPlayer()
-        mSeekBarTimer = Timer()
+        (mVideoPlayerPresenter as VideoPlayerPresenter).initMediaPlayer()
         mVideoTextureView.surfaceTextureListener = object: SurfaceTextureListener {
             @SuppressLint("ClickableViewAccessibility")
             override fun onSurfaceTextureAvailable(p0: SurfaceTexture, p1: Int, p2: Int) {
-                startMediaPlayer(intent.getStringExtra("video_url")!!)
+                (mVideoPlayerPresenter as VideoPlayerPresenter).startMediaPlayer(
+                    intent.getStringExtra("video_url")!!,
+                    mVideoTextureView, mVideoSeekBar,
+                    resources.displayMetrics.widthPixels,
+                    resources.displayMetrics.heightPixels-ConfigParams.viewHeightOffset
+                )
 
                 mVideoTextureView.setOnTouchListener(
                     OnDoubleClickListener(object : OnDoubleClickListener.DoubleClickCallback{
                         override fun onDoubleClick() {
-                            if(mMediaPlayer!!.isPlaying) {
-                                mMediaPlayer?.pause()
-                                videoPauseOrPlay(true)
-                            }else {
-                                mMediaPlayer?.start()
-                                videoPauseOrPlay(false)
-
-                            }
+                            (mVideoPlayerPresenter as VideoPlayerPresenter).pauseStateChanged()
                         }
 
                     })
@@ -99,8 +94,7 @@ class VideoPlayerActivity : AppCompatActivity() {
             }
 
             override fun onSurfaceTextureDestroyed(p0: SurfaceTexture): Boolean {
-                mSeekBarTimer?.cancel()
-                mMediaPlayer?.release()
+                (mVideoPlayerPresenter as VideoPlayerPresenter).destroyMediaPlayer()
                 return false
             }
 
@@ -113,21 +107,25 @@ class VideoPlayerActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        mSeekBarTimer?.cancel()
-        mSeekBarTimer = null
-
-        mMediaPlayer?.release()
-        mMediaPlayer = null
+        (mVideoPlayerPresenter as VideoPlayerPresenter).destroyMediaPlayer()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             //变成横屏了
-            screenOrientationChanged(false)
+            (mVideoPlayerPresenter as VideoPlayerPresenter).screenOrientationChanged(
+                false, mVideoTextureView,
+                resources.displayMetrics.widthPixels,
+                resources.displayMetrics.heightPixels-ConfigParams.viewHeightOffset
+            )
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             //变成竖屏了
-            screenOrientationChanged(true)
+            (mVideoPlayerPresenter as VideoPlayerPresenter).screenOrientationChanged(
+                true, mVideoTextureView,
+                resources.displayMetrics.widthPixels,
+                resources.displayMetrics.heightPixels-ConfigParams.viewHeightOffset
+            )
         }
     }
 
@@ -141,92 +139,33 @@ class VideoPlayerActivity : AppCompatActivity() {
         }
     }
 
-    private fun startMediaPlayer(url: String) {
-
-        mMediaPlayer?.setSurface(Surface(mVideoTextureView.surfaceTexture))
-
-        // 解决视频拉伸问题
-        mMediaPlayer?.setOnVideoSizeChangedListener { p0, p1, p2 ->
-            adjustTextureViewSize(mVideoTextureView,
-                resources.displayMetrics.widthPixels,
-                resources.displayMetrics.heightPixels-ConfigParams.viewHeightOffset,
-                p1, p2)
-        }
-
-        val uri = Uri.parse(url)
-        mMediaPlayer?.setDataSource(this, uri)
-        mMediaPlayer?.prepareAsync()
-
-        mMediaPlayer?.setOnPreparedListener {
-            it.start()
-            startVideoSeekBar()
-        }
-        mMediaPlayer?.setOnCompletionListener {
-            it.seekTo(0)
-            videoPauseOrPlay(true)
-        }
-
-    }
-
-    private fun adjustTextureViewSize(textureView: TextureView,
-                                      viewWidth: Int, viewHeight: Int,
-                                      videoWidth: Int, videoHeight: Int) {
-        val layoutParams: ConstraintLayout.LayoutParams = textureView.layoutParams as ConstraintLayout.LayoutParams
-
-        val sx: Float = viewWidth.toFloat() / videoWidth.toFloat()
-        val sy: Float = viewHeight.toFloat() / videoHeight.toFloat()
-
-        if(sx >= sy) {
-            layoutParams.width = (videoWidth * sy).toInt()
-            layoutParams.height = (videoHeight * sy).toInt()
-            layoutParams.topMargin = 0
-            layoutParams.leftMargin = abs((viewWidth - (videoWidth * sy).toInt()) / 2)
-        } else {
-            layoutParams.width = (videoWidth * sx).toInt()
-            layoutParams.height = (videoHeight * sx).toInt()
-            layoutParams.topMargin = abs((viewHeight - (videoHeight * sx).toInt()) / 2)
-            layoutParams.leftMargin = 0
-        }
-        textureView.layoutParams = layoutParams
-    }
-
-    private fun startVideoSeekBar() {
-        var startTime = mMediaPlayer?.currentPosition //获取当前播放的位置
-        val endTime = mMediaPlayer?.duration //获取音乐总时长
+    fun initVideoSeekBar() {
+        var startTime = (mVideoPlayerPresenter as VideoPlayerPresenter).getCurrentVideoTime() //获取当前播放的位置
+        val endTime = (mVideoPlayerPresenter as VideoPlayerPresenter).getAllVideoTime() //获取总时长
         videoTimeChanged(startTime, endTime)
-
         mVideoSeekBar.max = endTime!!
         mVideoSeekBar.setOnSeekBarChangeListener(
             object :SeekBar.OnSeekBarChangeListener{
                 override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                    startTime = mMediaPlayer?.currentPosition //获取当前播放的位置
+                    startTime = (mVideoPlayerPresenter as VideoPlayerPresenter).getCurrentVideoTime()
                     videoTimeChanged(startTime, endTime)
                 }
 
                 override fun onStartTrackingTouch(p0: SeekBar?) {
-                    mIsSeekbarChanging = true
+                    (mVideoPlayerPresenter as VideoPlayerPresenter).setSeekbarChangingFlag(true)
                 }
 
                 override fun onStopTrackingTouch(p0: SeekBar?) {
-                    mIsSeekbarChanging = false
+                    (mVideoPlayerPresenter as VideoPlayerPresenter).setSeekbarChangingFlag(false)
 
                     if (p0 != null) {
-                        mMediaPlayer?.seekTo(p0.progress)
-                        startTime = mMediaPlayer?.currentPosition //获取当前播放的位置
+                        (mVideoPlayerPresenter as VideoPlayerPresenter).videoSeekTo(p0.progress)
+                        startTime = (mVideoPlayerPresenter as VideoPlayerPresenter).getCurrentVideoTime()
                         videoTimeChanged(startTime, endTime)
                     }
                 }
 
             }
-        )
-        mSeekBarTimer?.schedule(
-            object : TimerTask() {
-                override fun run() {
-                    if(!mIsSeekbarChanging) {
-                        mVideoSeekBar.progress = mMediaPlayer!!.currentPosition
-                    }
-                }
-            }, 0, 50
         )
     }
 
@@ -238,12 +177,17 @@ class VideoPlayerActivity : AppCompatActivity() {
         mVideoEndTime.text = VideoUtils.calculateTime(endTime / 1000) //总时长
     }
 
-    private fun screenOrientationChanged(isVertical: Boolean) {
-        adjustTextureViewSize(mVideoTextureView,
-            resources.displayMetrics.widthPixels,
-            resources.displayMetrics.heightPixels-ConfigParams.viewHeightOffset,
-            mMediaPlayer!!.videoWidth, mMediaPlayer!!.videoHeight)
+    fun showPauseView(isPaused: Boolean) {
+        if(isPaused) {
+            mVideoPausedImage.visibility = View.VISIBLE
+            mVideoPlayedImage.visibility = View.GONE
+        }else {
+            mVideoPausedImage.visibility = View.GONE
+            mVideoPlayedImage.visibility = View.VISIBLE
+        }
+    }
 
+    fun showOrientationView(isVertical: Boolean) {
         if(isVertical) {
             mVerticalScreenButton.visibility = View.GONE
             mHorizontalScreenButton.visibility = View.VISIBLE
@@ -253,13 +197,7 @@ class VideoPlayerActivity : AppCompatActivity() {
         }
     }
 
-    private fun videoPauseOrPlay(isPaused: Boolean) {
-        if(isPaused) {
-            mVideoPausedImage.visibility = View.VISIBLE
-            mVideoPlayedImage.visibility = View.GONE
-        }else {
-            mVideoPausedImage.visibility = View.GONE
-            mVideoPlayedImage.visibility = View.VISIBLE
-        }
+    override fun setPresenter(presenter: VideoPresenter) {
+        mVideoPlayerPresenter = presenter
     }
 }

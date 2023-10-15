@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity(), VideoView {
     private var mVideoListLayoutManager: GridLayoutManager? = null
     private var mVideoListAdapter: VideoRecyclerViewAdapter? = null
 
-    private var mDescriptionPresenter: VideoPresenter? = null
+    private var mDescriptionPresenter: VideoPresenter
 
     init {
         mDescriptionPresenter = VideoDescriptionPresenter()
