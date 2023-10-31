@@ -46,7 +46,8 @@ class VideoDescriptionModel: VideoModel {
             if(DescriptionCache.getInstance()?.containsKey(id) == true) {
                 videoImage = DescriptionCache.getInstance()?.get(id)!!
             }else {
-                videoImage = VideoUtils.getVideoImage(completeUrl, mWlMediaUtil!!, blankViewImage)
+//                videoImage = VideoUtils.getVideoImage(completeUrl, mWlMediaUtil!!, blankViewImage)
+                videoImage = blankViewImage
                 DescriptionCache.getInstance()?.put(id, videoImage)
             }
             videoEntity = VideoEntity(id, completeUrl, videoTitle, videoImage)

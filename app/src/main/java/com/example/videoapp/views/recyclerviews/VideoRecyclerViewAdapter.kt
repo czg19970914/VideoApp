@@ -13,6 +13,8 @@ class VideoRecyclerViewAdapter(context: Context, videoEntities: ArrayList<VideoE
     private var mVideoEntities: ArrayList<VideoEntity>
     private val mContext: Context
 
+    private var mOnImageClickListener: OnImageClickListener? = null
+
     init {
         mVideoEntities = videoEntities
         mContext = context
@@ -35,7 +37,8 @@ class VideoRecyclerViewAdapter(context: Context, videoEntities: ArrayList<VideoE
 
         holder.mVideoItemImage.setOnClickListener(null)
         holder.mVideoItemImage.setOnClickListener {
-            VideoPlayerActivity.startVideoPlayerActivity(mContext, mVideoEntities[position].mVideoUrl)
+//            VideoPlayerActivity.startVideoPlayerActivity(mContext, mVideoEntities[position].mVideoUrl)
+            mOnImageClickListener?.showLeftMenu()
         }
     }
 
@@ -43,5 +46,14 @@ class VideoRecyclerViewAdapter(context: Context, videoEntities: ArrayList<VideoE
     fun updateVideoDescription(videoEntities: ArrayList<VideoEntity>) {
         mVideoEntities = videoEntities
         notifyDataSetChanged()
+    }
+
+    fun setImageClickListener(onImageClickListener: OnImageClickListener){
+        mOnImageClickListener = onImageClickListener
+    }
+
+    // 回调接口，调用activity的方法
+    interface OnImageClickListener{
+        fun showLeftMenu()
     }
 }

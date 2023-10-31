@@ -2,6 +2,8 @@ package com.example.videoapp
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.view.View
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
@@ -17,6 +19,8 @@ import com.scwang.smart.refresh.layout.SmartRefreshLayout
 import com.scwang.smart.refresh.layout.api.RefreshLayout
 import kotlinx.coroutines.*
 
+import com.example.videoapp.views.recyclerviews.VideoRecyclerViewAdapter.OnImageClickListener
+
 
 class MainActivity : AppCompatActivity(), VideoView {
     private val mRefreshLayout: SmartRefreshLayout by lazy {
@@ -24,6 +28,9 @@ class MainActivity : AppCompatActivity(), VideoView {
     }
     private val mVideoRecyclerView: RecyclerView by lazy {
         findViewById(R.id.video_recycler_view)
+    }
+    private val mLeftMenu: LinearLayout by lazy {
+        findViewById(R.id.left_menu)
     }
 
     private var mWaitingDialogBuilder: AlertDialog.Builder? = null
@@ -53,6 +60,13 @@ class MainActivity : AppCompatActivity(), VideoView {
 
     private fun initRecyclerView(videoEntities: ArrayList<VideoEntity>) {
         mVideoListAdapter = VideoRecyclerViewAdapter(this, videoEntities)
+        mVideoListAdapter!!.setImageClickListener(object: OnImageClickListener{
+            override fun showLeftMenu() {
+                openLeftMenu()
+            }
+
+        })
+
         mVideoListLayoutManager = GridLayoutManager(this, 2)
         mVideoRecyclerView.layoutManager = mVideoListLayoutManager
         mVideoRecyclerView.adapter = mVideoListAdapter
@@ -114,5 +128,12 @@ class MainActivity : AppCompatActivity(), VideoView {
 
     override fun setPresenter(presenter: VideoPresenter) {
         mDescriptionPresenter = presenter
+    }
+
+    fun openLeftMenu(){
+        mLeftMenu.visibility = View.VISIBLE
+    }
+    fun closeLeftMenu(){
+        mLeftMenu.visibility = View.GONE
     }
 }
