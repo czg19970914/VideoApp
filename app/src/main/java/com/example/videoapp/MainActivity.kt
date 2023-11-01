@@ -80,8 +80,8 @@ class MainActivity : AppCompatActivity(), VideoView {
     private fun initRecyclerView(videoEntities: ArrayList<VideoEntity>) {
         mVideoListAdapter = VideoRecyclerViewAdapter(this, videoEntities)
         mVideoListAdapter!!.setImageClickListener(object: OnImageClickListener{
-            override fun showLeftMenu() {
-                openLeftMenu()
+            override fun showLeftMenu(detailData: ArrayList<VideoEntity>) {
+                openLeftMenu(detailData)
             }
 
         })
@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity(), VideoView {
         detailData.add(VideoEntity(6, "dfdf", "test", blankView))
         detailData.add(VideoEntity(7, "dfdf", "test", blankView))
 
-        mDetailListAdapter = DetailRecyclerViewAdapter(detailData)
+        mDetailListAdapter = DetailRecyclerViewAdapter(this, detailData)
         mDetailListLayoutManager = LinearLayoutManager(this)
         mDetailListLayoutManager?.orientation = LinearLayoutManager.HORIZONTAL
         mDetailRecyclerView.layoutManager = mDetailListLayoutManager
@@ -167,7 +167,9 @@ class MainActivity : AppCompatActivity(), VideoView {
         mDescriptionPresenter = presenter
     }
 
-    fun openLeftMenu(){
+    fun openLeftMenu(detailData: ArrayList<VideoEntity>){
+        mDetailListAdapter?.updateDetailData(detailData)
+
         mLeftMenu.visibility = View.VISIBLE
     }
     fun closeLeftMenu(){

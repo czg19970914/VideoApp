@@ -9,6 +9,7 @@ class VideoEntity(id: Int, videoUrl: String, videoTitle: String, bitmap: Bitmap)
     var mBitmap: Bitmap
 
     // 在新的版本中，mVideoUrl应该是一个字符串数组，在一个文件夹下有多个链接
+    var mBitmapArray: ArrayList<Pair<String, Bitmap>>? = null
 
     init {
         mId = id
