@@ -3,15 +3,20 @@ package com.example.videoapp
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.videoapp.entities.VideoEntity
 import com.example.videoapp.interfaces.VideoPresenter
 import com.example.videoapp.interfaces.VideoView
 import com.example.videoapp.presenters.VideoDescriptionPresenter
+import com.example.videoapp.utils.VideoUtils
+import com.example.videoapp.views.recyclerviews.DetailRecyclerViewAdapter
 import com.example.videoapp.views.recyclerviews.VideoRecyclerViewAdapter
 import com.scwang.smart.refresh.footer.ClassicsFooter
 import com.scwang.smart.refresh.header.ClassicsHeader
@@ -29,8 +34,14 @@ class MainActivity : AppCompatActivity(), VideoView {
     private val mVideoRecyclerView: RecyclerView by lazy {
         findViewById(R.id.video_recycler_view)
     }
-    private val mLeftMenu: LinearLayout by lazy {
+    private val mLeftMenu: RelativeLayout by lazy {
         findViewById(R.id.left_menu)
+    }
+    private val mLeftMenuCancel: ImageView by lazy {
+        findViewById(R.id.left_menu_cancel)
+    }
+    private val mDetailRecyclerView: RecyclerView by lazy {
+        findViewById(R.id.left_menu_recycler_view)
     }
 
     private var mWaitingDialogBuilder: AlertDialog.Builder? = null
@@ -38,6 +49,9 @@ class MainActivity : AppCompatActivity(), VideoView {
 
     private var mVideoListLayoutManager: GridLayoutManager? = null
     private var mVideoListAdapter: VideoRecyclerViewAdapter? = null
+
+    private var mDetailListLayoutManager: LinearLayoutManager? = null
+    private var mDetailListAdapter: DetailRecyclerViewAdapter? = null
 
     private var mDescriptionPresenter: VideoPresenter
 
@@ -56,6 +70,11 @@ class MainActivity : AppCompatActivity(), VideoView {
 
         showWaitingDialog()
         (mDescriptionPresenter as VideoDescriptionPresenter).initServerData()
+
+        mLeftMenuCancel.setOnClickListener {
+            closeLeftMenu()
+        }
+        initDetailRecyclerView()
     }
 
     private fun initRecyclerView(videoEntities: ArrayList<VideoEntity>) {
@@ -70,6 +89,24 @@ class MainActivity : AppCompatActivity(), VideoView {
         mVideoListLayoutManager = GridLayoutManager(this, 2)
         mVideoRecyclerView.layoutManager = mVideoListLayoutManager
         mVideoRecyclerView.adapter = mVideoListAdapter
+    }
+
+    private fun initDetailRecyclerView() {
+        val blankView = VideoUtils.vectorDrawableToBitmap(this, R.drawable.blank_video_image)
+        val detailData = ArrayList<VideoEntity>()
+        detailData.add(VideoEntity(1, "dfdf", "test", blankView))
+        detailData.add(VideoEntity(2, "dfdf", "test", blankView))
+        detailData.add(VideoEntity(3, "dfdf", "test", blankView))
+        detailData.add(VideoEntity(4, "dfdf", "test", blankView))
+        detailData.add(VideoEntity(5, "dfdf", "test", blankView))
+        detailData.add(VideoEntity(6, "dfdf", "test", blankView))
+        detailData.add(VideoEntity(7, "dfdf", "test", blankView))
+
+        mDetailListAdapter = DetailRecyclerViewAdapter(detailData)
+        mDetailListLayoutManager = LinearLayoutManager(this)
+        mDetailListLayoutManager?.orientation = LinearLayoutManager.HORIZONTAL
+        mDetailRecyclerView.layoutManager = mDetailListLayoutManager
+        mDetailRecyclerView.adapter = mDetailListAdapter
     }
 
     private fun initWaitingDialog(){

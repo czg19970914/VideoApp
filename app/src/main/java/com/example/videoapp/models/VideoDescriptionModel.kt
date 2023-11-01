@@ -42,7 +42,8 @@ class VideoDescriptionModel: VideoModel {
         for(id in mMinId..mMaxId) {
             mWlMediaUtil = WlMediaUtil()
             completeUrl = ConfigParams.baseUrl + jsonObject.getJSONObject(id.toString()).get("file_name").toString()
-            videoTitle = jsonObject.getJSONObject(id.toString()).get("video_title").toString()
+//            videoTitle = jsonObject.getJSONObject(id.toString()).get("video_title").toString()
+            videoTitle = "测试文本!!!!"
             if(DescriptionCache.getInstance()?.containsKey(id) == true) {
                 videoImage = DescriptionCache.getInstance()?.get(id)!!
             }else {
