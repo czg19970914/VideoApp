@@ -37,33 +37,22 @@ class VideoDescriptionPresenter: VideoPresenter {
 
     fun initServerData() {
         CoroutineScope(Dispatchers.IO).launch{
-//            mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(R.raw.video_data_dict)
-//            val videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerDataDict(mJsonDictStream!!,
-//                mBlankVideoImage, false)
-//            (mDescriptionView as MainActivity).showVideoInfoRecyclerView(videoEntities)
-
             mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(R.raw.complete_video_data)
             // TODO 这里需要判断键值，防止FC
             val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject("奈汐酱")
             val videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(jsonObject,
-                mBlankVideoImage, false)
+                mBlankVideoImage, false, "奈汐酱")
             (mDescriptionView as MainActivity).showVideoInfoRecyclerView(videoEntities)
         }
     }
 
     fun updateServerData(isDown: Boolean, refreshLayout: RefreshLayout, refreshOperation: (RefreshLayout) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
-//            mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(R.raw.video_data_dict)
-//            val videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerDataDict(mJsonDictStream!!,
-//                mBlankVideoImage, isDown)
-//            (mDescriptionView as MainActivity).updateVideoInfoRecyclerView(videoEntities, isDown,
-//                refreshLayout, refreshOperation)
-
             mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(R.raw.complete_video_data)
             val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject("奈汐酱")
             // TODO 这里需要判断键值，防止FC
             val videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(jsonObject,
-                mBlankVideoImage, isDown)
+                mBlankVideoImage, isDown, "奈汐酱")
             (mDescriptionView as MainActivity).updateVideoInfoRecyclerView(videoEntities, isDown,
                 refreshLayout, refreshOperation)
         }

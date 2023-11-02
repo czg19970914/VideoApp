@@ -2,12 +2,10 @@ package com.example.videoapp.views.recyclerviews
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.videoapp.R
-import com.example.videoapp.views.activities.VideoPlayerActivity
 import com.example.videoapp.entities.VideoEntity
 
 class VideoRecyclerViewAdapter(context: Context, videoEntities: ArrayList<VideoEntity>): RecyclerView.Adapter<VideoItemViewHolder>() {
@@ -38,10 +36,9 @@ class VideoRecyclerViewAdapter(context: Context, videoEntities: ArrayList<VideoE
 
         holder.mVideoItemImage.setOnClickListener(null)
         holder.mVideoItemImage.setOnClickListener {
-//            VideoPlayerActivity.startVideoPlayerActivity(mContext, mVideoEntities[position].mVideoUrl)
             val detailData = ArrayList<VideoEntity>()
             var videoEntity: VideoEntity
-            //TODO 需不需要人为判空？？？？？
+            //TODO 需不需要为判空？？？？？
             for(videoMessage in mVideoEntities[position].mBitmapArray!!){
                 videoEntity = VideoEntity(-1, videoMessage.first, "XXX", videoMessage.second)
                 detailData.add(videoEntity)

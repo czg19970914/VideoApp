@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -98,9 +97,6 @@ class MainActivity : AppCompatActivity(), VideoView {
         detailData.add(VideoEntity(2, "dfdf", "test", blankView))
         detailData.add(VideoEntity(3, "dfdf", "test", blankView))
         detailData.add(VideoEntity(4, "dfdf", "test", blankView))
-        detailData.add(VideoEntity(5, "dfdf", "test", blankView))
-        detailData.add(VideoEntity(6, "dfdf", "test", blankView))
-        detailData.add(VideoEntity(7, "dfdf", "test", blankView))
 
         mDetailListAdapter = DetailRecyclerViewAdapter(this, detailData)
         mDetailListLayoutManager = LinearLayoutManager(this)
