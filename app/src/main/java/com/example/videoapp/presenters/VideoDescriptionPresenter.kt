@@ -3,6 +3,7 @@ package com.example.videoapp.presenters
 import android.graphics.Bitmap
 import com.example.videoapp.MainActivity
 import com.example.videoapp.R
+import com.example.videoapp.entities.VideoEntity
 import com.example.videoapp.interfaces.VideoModel
 import com.example.videoapp.interfaces.VideoPresenter
 import com.example.videoapp.interfaces.VideoView
@@ -56,5 +57,18 @@ class VideoDescriptionPresenter: VideoPresenter {
             (mDescriptionView as MainActivity).updateVideoInfoRecyclerView(videoEntities, isDown,
                 refreshLayout, refreshOperation)
         }
+    }
+
+    fun getDetailData(videoEntity: VideoEntity): ArrayList<VideoEntity> {
+        val detailData = ArrayList<VideoEntity>()
+        var detailEntity: VideoEntity
+
+        //TODO 需不需要为判空？？？？？
+        for(videoMessage in videoEntity.mBitmapArray!!){
+            detailEntity = VideoEntity(-1, videoMessage.first, "XXX", videoMessage.second)
+            detailData.add(detailEntity)
+        }
+
+        return detailData
     }
 }

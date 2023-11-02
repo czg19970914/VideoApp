@@ -36,14 +36,7 @@ class VideoRecyclerViewAdapter(context: Context, videoEntities: ArrayList<VideoE
 
         holder.mVideoItemImage.setOnClickListener(null)
         holder.mVideoItemImage.setOnClickListener {
-            val detailData = ArrayList<VideoEntity>()
-            var videoEntity: VideoEntity
-            //TODO 需不需要为判空？？？？？
-            for(videoMessage in mVideoEntities[position].mBitmapArray!!){
-                videoEntity = VideoEntity(-1, videoMessage.first, "XXX", videoMessage.second)
-                detailData.add(videoEntity)
-            }
-            mOnImageClickListener?.showLeftMenu(detailData)
+            mOnImageClickListener?.showLeftMenu(mVideoEntities[position])
         }
     }
 
@@ -59,6 +52,6 @@ class VideoRecyclerViewAdapter(context: Context, videoEntities: ArrayList<VideoE
 
     // 回调接口，调用activity的方法
     interface OnImageClickListener{
-        fun showLeftMenu(detailData: ArrayList<VideoEntity>)
+        fun showLeftMenu(videoEntity: VideoEntity)
     }
 }

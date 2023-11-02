@@ -79,8 +79,8 @@ class MainActivity : AppCompatActivity(), VideoView {
     private fun initRecyclerView(videoEntities: ArrayList<VideoEntity>) {
         mVideoListAdapter = VideoRecyclerViewAdapter(this, videoEntities)
         mVideoListAdapter!!.setImageClickListener(object: OnImageClickListener{
-            override fun showLeftMenu(detailData: ArrayList<VideoEntity>) {
-                openLeftMenu(detailData)
+            override fun showLeftMenu(videoEntity: VideoEntity) {
+                openLeftMenu(videoEntity)
             }
 
         })
@@ -91,12 +91,7 @@ class MainActivity : AppCompatActivity(), VideoView {
     }
 
     private fun initDetailRecyclerView() {
-        val blankView = VideoUtils.vectorDrawableToBitmap(this, R.drawable.blank_video_image)
         val detailData = ArrayList<VideoEntity>()
-        detailData.add(VideoEntity(1, "dfdf", "test", blankView))
-        detailData.add(VideoEntity(2, "dfdf", "test", blankView))
-        detailData.add(VideoEntity(3, "dfdf", "test", blankView))
-        detailData.add(VideoEntity(4, "dfdf", "test", blankView))
 
         mDetailListAdapter = DetailRecyclerViewAdapter(this, detailData)
         mDetailListLayoutManager = LinearLayoutManager(this)
@@ -163,8 +158,10 @@ class MainActivity : AppCompatActivity(), VideoView {
         mDescriptionPresenter = presenter
     }
 
-    fun openLeftMenu(detailData: ArrayList<VideoEntity>){
-        mDetailListAdapter?.updateDetailData(detailData)
+    fun openLeftMenu(videoEntity: VideoEntity){
+        mDetailListAdapter?.updateDetailData(
+            (mDescriptionPresenter as VideoDescriptionPresenter).getDetailData(videoEntity)
+        )
 
         mLeftMenu.visibility = View.VISIBLE
     }
