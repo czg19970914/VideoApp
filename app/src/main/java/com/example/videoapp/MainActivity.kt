@@ -16,6 +16,7 @@ import com.example.videoapp.interfaces.VideoView
 import com.example.videoapp.presenters.VideoDescriptionPresenter
 import com.example.videoapp.utils.VideoUtils
 import com.example.videoapp.views.recyclerviews.DetailRecyclerViewAdapter
+import com.example.videoapp.views.recyclerviews.SelectBarAdapter
 import com.example.videoapp.views.recyclerviews.VideoRecyclerViewAdapter
 import com.scwang.smart.refresh.footer.ClassicsFooter
 import com.scwang.smart.refresh.header.ClassicsHeader
@@ -27,6 +28,9 @@ import com.example.videoapp.views.recyclerviews.VideoRecyclerViewAdapter.OnImage
 
 
 class MainActivity : AppCompatActivity(), VideoView {
+    private val mSelectNameBar: RecyclerView by lazy {
+        findViewById(R.id.select_name_bar)
+    }
     private val mRefreshLayout: SmartRefreshLayout by lazy {
         findViewById(R.id.smart_refresh_layout)
     }
@@ -42,6 +46,9 @@ class MainActivity : AppCompatActivity(), VideoView {
     private val mDetailRecyclerView: RecyclerView by lazy {
         findViewById(R.id.left_menu_recycler_view)
     }
+
+    private var mSelectBarLayoutManager: LinearLayoutManager? = null
+    private var mSelectBarAdapter: SelectBarAdapter? = null
 
     private var mWaitingDialogBuilder: AlertDialog.Builder? = null
     private var mWaitingDialog: AlertDialog? = null
@@ -64,6 +71,7 @@ class MainActivity : AppCompatActivity(), VideoView {
         setContentView(R.layout.activity_main)
         window.statusBarColor = ContextCompat.getColor(this, R.color.light_gray)
         window.navigationBarColor = ContextCompat.getColor(this, R.color.light_gray)
+        initSelectNameBar()
         initRefreshLayout()
         initWaitingDialog()
 
@@ -74,6 +82,17 @@ class MainActivity : AppCompatActivity(), VideoView {
             closeLeftMenu()
         }
         initDetailRecyclerView()
+    }
+
+    private fun initSelectNameBar() {
+        val nameList = ArrayList<String>()
+        nameList.add("奈夕酱")
+        nameList.add("宝儿")
+        mSelectBarAdapter = SelectBarAdapter(nameList)
+        mSelectBarLayoutManager = LinearLayoutManager(this)
+        mSelectBarLayoutManager?.orientation = LinearLayoutManager.HORIZONTAL
+        mSelectNameBar.layoutManager = mSelectBarLayoutManager
+        mSelectNameBar.adapter = mSelectBarAdapter
     }
 
     private fun initRecyclerView(videoEntities: ArrayList<VideoEntity>) {

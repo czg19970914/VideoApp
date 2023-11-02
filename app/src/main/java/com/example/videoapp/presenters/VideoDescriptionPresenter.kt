@@ -40,9 +40,9 @@ class VideoDescriptionPresenter: VideoPresenter {
         CoroutineScope(Dispatchers.IO).launch{
             mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(R.raw.complete_video_data)
             // TODO 这里需要判断键值，防止FC
-            val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject("奈汐酱")
+            val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject("宝儿")
             val videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(jsonObject,
-                mBlankVideoImage, false, "奈汐酱")
+                mBlankVideoImage, false, "宝儿")
             (mDescriptionView as MainActivity).showVideoInfoRecyclerView(videoEntities)
         }
     }
@@ -50,10 +50,10 @@ class VideoDescriptionPresenter: VideoPresenter {
     fun updateServerData(isDown: Boolean, refreshLayout: RefreshLayout, refreshOperation: (RefreshLayout) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(R.raw.complete_video_data)
-            val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject("奈汐酱")
+            val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject("宝儿")
             // TODO 这里需要判断键值，防止FC
             val videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(jsonObject,
-                mBlankVideoImage, isDown, "奈汐酱")
+                mBlankVideoImage, isDown, "宝儿")
             (mDescriptionView as MainActivity).updateVideoInfoRecyclerView(videoEntities, isDown,
                 refreshLayout, refreshOperation)
         }
