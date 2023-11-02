@@ -77,4 +77,9 @@ class VideoDescriptionModel: VideoModel {
 
         return videoEntity
     }
+
+    fun resetIndex(){
+        mMinId = 1
+        mMaxId = 23
+    }
 }

@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.videoapp.entities.NameEntity
 import com.example.videoapp.entities.VideoEntity
 import com.example.videoapp.interfaces.VideoPresenter
 import com.example.videoapp.interfaces.VideoView
@@ -27,7 +28,7 @@ import kotlinx.coroutines.*
 import com.example.videoapp.views.recyclerviews.VideoRecyclerViewAdapter.OnImageClickListener
 
 
-class MainActivity : AppCompatActivity(), VideoView {
+class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBarClickListener {
     private val mSelectNameBar: RecyclerView by lazy {
         findViewById(R.id.select_name_bar)
     }
@@ -71,12 +72,12 @@ class MainActivity : AppCompatActivity(), VideoView {
         setContentView(R.layout.activity_main)
         window.statusBarColor = ContextCompat.getColor(this, R.color.light_gray)
         window.navigationBarColor = ContextCompat.getColor(this, R.color.light_gray)
-        initSelectNameBar()
-        initRefreshLayout()
         initWaitingDialog()
+        initSelectNameBar()
 
-        showWaitingDialog()
-        (mDescriptionPresenter as VideoDescriptionPresenter).initServerData()
+//        initRefreshLayout("奈汐酱")
+//        showWaitingDialog()
+//        (mDescriptionPresenter as VideoDescriptionPresenter).initServerData("奈汐酱")
 
         mLeftMenuCancel.setOnClickListener {
             closeLeftMenu()
@@ -85,14 +86,18 @@ class MainActivity : AppCompatActivity(), VideoView {
     }
 
     private fun initSelectNameBar() {
-        val nameList = ArrayList<String>()
-        nameList.add("奈夕酱")
-        nameList.add("宝儿")
-        mSelectBarAdapter = SelectBarAdapter(nameList)
+        val nameList = ArrayList<NameEntity>()
+        nameList.add(NameEntity("奈汐酱", true))
+        nameList.add(NameEntity("宝儿", false))
+        mSelectBarAdapter = SelectBarAdapter(this, nameList)
+        mSelectBarAdapter!!.setOnSelectBarClickListener(this)
         mSelectBarLayoutManager = LinearLayoutManager(this)
         mSelectBarLayoutManager?.orientation = LinearLayoutManager.HORIZONTAL
         mSelectNameBar.layoutManager = mSelectBarLayoutManager
         mSelectNameBar.adapter = mSelectBarAdapter
+
+        // TODO 需要判空
+        initShowRecyclerView(nameList[0].mNameContent)
     }
 
     private fun initRecyclerView(videoEntities: ArrayList<VideoEntity>) {
@@ -125,20 +130,20 @@ class MainActivity : AppCompatActivity(), VideoView {
         mWaitingDialogBuilder!!.setView(R.layout.dialog_waiting)
     }
 
-    private fun initRefreshLayout() {
+    private fun initRefreshLayout(selectName: String) {
         //设置头部刷新的样式
         mRefreshLayout.setRefreshHeader(ClassicsHeader(this))
         //设置页脚刷新的样式
         mRefreshLayout.setRefreshFooter(ClassicsFooter(this))
         //设置头部刷新时间监听
         mRefreshLayout.setOnRefreshListener { it ->
-            (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(false,
+            (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(selectName, false,
                 it
             ) { refreshLayout -> refreshLayout.finishRefresh() }
         }
         //设置尾部刷新时间监听
         mRefreshLayout.setOnLoadMoreListener {
-            (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(true,
+            (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(selectName, true,
                 it
             ) { refreshLayout -> refreshLayout.finishLoadMore() }
         }
@@ -166,6 +171,11 @@ class MainActivity : AppCompatActivity(), VideoView {
         refreshOperation(refreshLayout)
     }
 
+    suspend fun switchNameRecyclerView(videoEntities: ArrayList<VideoEntity>)= withContext(Dispatchers.Main) {
+        mVideoListAdapter?.updateVideoDescription(videoEntities)
+        closeWaitingDialog()
+    }
+
     private fun showWaitingDialog() {
         mWaitingDialog = mWaitingDialogBuilder?.show()
     }
@@ -186,5 +196,21 @@ class MainActivity : AppCompatActivity(), VideoView {
     }
     fun closeLeftMenu(){
         mLeftMenu.visibility = View.GONE
+    }
+
+    private fun initShowRecyclerView(selectName: String){
+        initRefreshLayout(selectName)
+        showWaitingDialog()
+        (mDescriptionPresenter as VideoDescriptionPresenter).initServerData(selectName)
+    }
+
+    private fun switchShowRecyclerView(selectName: String) {
+        initRefreshLayout(selectName)
+        showWaitingDialog()
+        (mDescriptionPresenter as VideoDescriptionPresenter).switchNameData(selectName)
+    }
+
+    override fun onSelectBarClick(selectName: String) {
+        switchShowRecyclerView(selectName)
     }
 }

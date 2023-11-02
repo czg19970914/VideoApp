@@ -36,24 +36,40 @@ class VideoDescriptionPresenter: VideoPresenter {
         mDescriptionView = view
     }
 
-    fun initServerData() {
+    fun initServerData(selectName: String) {
         CoroutineScope(Dispatchers.IO).launch{
             mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(R.raw.complete_video_data)
             // TODO 这里需要判断键值，防止FC
-            val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject("宝儿")
+            val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject(selectName)
             val videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(jsonObject,
-                mBlankVideoImage, false, "宝儿")
+                mBlankVideoImage, false, selectName)
             (mDescriptionView as MainActivity).showVideoInfoRecyclerView(videoEntities)
         }
     }
 
-    fun updateServerData(isDown: Boolean, refreshLayout: RefreshLayout, refreshOperation: (RefreshLayout) -> Unit) {
+    fun switchNameData(selectName: String) {
+        CoroutineScope(Dispatchers.IO).launch{
+            mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(R.raw.complete_video_data)
+            // TODO 这里需要判断键值，防止FC
+            val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject(selectName)
+            // 注意这里需要重置model中算法的id!!!!!
+            (mDescriptionModel as VideoDescriptionModel).resetIndex()
+            val videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(jsonObject,
+                mBlankVideoImage, false, selectName)
+            println(selectName)
+            println(videoEntities.size)
+            (mDescriptionView as MainActivity).switchNameRecyclerView(videoEntities)
+        }
+    }
+
+    fun updateServerData(selectName: String, isDown: Boolean, refreshLayout: RefreshLayout,
+                         refreshOperation: (RefreshLayout) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(R.raw.complete_video_data)
-            val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject("宝儿")
+            val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject(selectName)
             // TODO 这里需要判断键值，防止FC
             val videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(jsonObject,
-                mBlankVideoImage, isDown, "宝儿")
+                mBlankVideoImage, isDown, selectName)
             (mDescriptionView as MainActivity).updateVideoInfoRecyclerView(videoEntities, isDown,
                 refreshLayout, refreshOperation)
         }
