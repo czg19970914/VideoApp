@@ -9,7 +9,8 @@ import com.example.videoapp.R
 import com.example.videoapp.entities.VideoEntity
 import com.example.videoapp.views.activities.VideoPlayerActivity
 
-class DetailRecyclerViewAdapter(context: Context, videoEntities: ArrayList<VideoEntity>): RecyclerView.Adapter<DetailItemViewHolder>() {
+class DetailRecyclerViewAdapter(context: Context, videoEntities: ArrayList<VideoEntity>):
+    RecyclerView.Adapter<DetailItemViewHolder>() {
     private var mDetailEntities: ArrayList<VideoEntity>
     private val mContext: Context
 
@@ -34,7 +35,8 @@ class DetailRecyclerViewAdapter(context: Context, videoEntities: ArrayList<Video
 
         holder.mDetailItemImage.setOnClickListener(null)
         holder.mDetailItemImage.setOnClickListener {
-            VideoPlayerActivity.startVideoPlayerActivity(mContext, mDetailEntities[position].mVideoUrl)
+            VideoPlayerActivity.startVideoPlayerActivity(
+                mContext, mDetailEntities[position].mVideoUrl)
         }
     }
 

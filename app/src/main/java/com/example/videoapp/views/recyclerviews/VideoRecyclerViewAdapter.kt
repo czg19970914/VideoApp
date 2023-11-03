@@ -8,7 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.videoapp.R
 import com.example.videoapp.entities.VideoEntity
 
-class VideoRecyclerViewAdapter(context: Context, videoEntities: ArrayList<VideoEntity>): RecyclerView.Adapter<VideoItemViewHolder>() {
+class VideoRecyclerViewAdapter(context: Context, videoEntities: ArrayList<VideoEntity>):
+    RecyclerView.Adapter<VideoItemViewHolder>() {
     private var mVideoEntities: ArrayList<VideoEntity>
     private val mContext: Context
 

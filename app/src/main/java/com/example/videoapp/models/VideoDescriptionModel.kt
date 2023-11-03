@@ -20,7 +20,8 @@ class VideoDescriptionModel: VideoModel {
         mDescriptionPresenter = presenter
     }
 
-    fun getServerData(jsonObject: JSONObject, blankViewImage: Bitmap, isDown: Boolean, detailName: String): ArrayList<VideoEntity> {
+    fun getServerData(jsonObject: JSONObject, blankViewImage: Bitmap,
+                      isDown: Boolean, detailName: String): ArrayList<VideoEntity> {
         val videEntities = ArrayList<VideoEntity>()
 
         var selectId = mMinId - 1
@@ -55,7 +56,8 @@ class VideoDescriptionModel: VideoModel {
         return videEntities
     }
 
-    private fun analysisVideoJSONObject(jsonObject: JSONObject, id: Int, blankViewImage: Bitmap): VideoEntity {
+    private fun analysisVideoJSONObject(jsonObject: JSONObject, id: Int,
+                                        blankViewImage: Bitmap): VideoEntity {
         mWlMediaUtil = WlMediaUtil()
 
         val videoTitle = "测试文本!!!!"

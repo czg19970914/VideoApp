@@ -78,7 +78,8 @@ class VideoUtils {
         fun parseJSON(jsonStream: InputStream): JsonArray {
             val writer: Writer = StringWriter()
             val buffer: CharArray = CharArray(jsonStream.available())
-            val reader: Reader = BufferedReader(InputStreamReader(jsonStream, StandardCharsets.UTF_8))
+            val reader: Reader = BufferedReader(
+                InputStreamReader(jsonStream, StandardCharsets.UTF_8))
 
             var n = -1
             while (true) {
@@ -98,7 +99,8 @@ class VideoUtils {
         fun parseJSONtoDict(jsonStream: InputStream): JSONObject {
             val writer: Writer = StringWriter()
             val buffer: CharArray = CharArray(jsonStream.available())
-            val reader: Reader = BufferedReader(InputStreamReader(jsonStream, StandardCharsets.UTF_8))
+            val reader: Reader = BufferedReader(
+                InputStreamReader(jsonStream, StandardCharsets.UTF_8))
 
             var n = -1
             while (true) {

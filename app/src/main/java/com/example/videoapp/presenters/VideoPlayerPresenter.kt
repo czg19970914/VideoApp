@@ -66,7 +66,8 @@ class VideoPlayerPresenter: VideoPresenter {
     private fun adjustTextureViewSize(textureView: TextureView,
                                       viewWidth: Int, viewHeight: Int,
                                       videoWidth: Int, videoHeight: Int) {
-        val layoutParams: ConstraintLayout.LayoutParams = textureView.layoutParams as ConstraintLayout.LayoutParams
+        val layoutParams: ConstraintLayout.LayoutParams =
+            textureView.layoutParams as ConstraintLayout.LayoutParams
 
         val sx: Float = viewWidth.toFloat() / videoWidth.toFloat()
         val sy: Float = viewHeight.toFloat() / videoHeight.toFloat()

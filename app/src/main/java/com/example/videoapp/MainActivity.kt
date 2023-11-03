@@ -75,10 +75,6 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         initWaitingDialog()
         initSelectNameBar()
 
-//        initRefreshLayout("奈汐酱")
-//        showWaitingDialog()
-//        (mDescriptionPresenter as VideoDescriptionPresenter).initServerData("奈汐酱")
-
         mLeftMenuCancel.setOnClickListener {
             closeLeftMenu()
         }
@@ -106,7 +102,6 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
             override fun showLeftMenu(videoEntity: VideoEntity) {
                 openLeftMenu(videoEntity)
             }
-
         })
 
         mVideoListLayoutManager = GridLayoutManager(this, 2)
@@ -137,25 +132,27 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         mRefreshLayout.setRefreshFooter(ClassicsFooter(this))
         //设置头部刷新时间监听
         mRefreshLayout.setOnRefreshListener { it ->
-            (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(selectName, false,
-                it
+            (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(
+                selectName, false, it
             ) { refreshLayout -> refreshLayout.finishRefresh() }
         }
         //设置尾部刷新时间监听
         mRefreshLayout.setOnLoadMoreListener {
-            (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(selectName, true,
-                it
+            (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(
+                selectName, true, it
             ) { refreshLayout -> refreshLayout.finishLoadMore() }
         }
     }
 
-    suspend fun showVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>)= withContext(Dispatchers.Main) {
+    suspend fun showVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>)
+    = withContext(Dispatchers.Main) {
         initRecyclerView(videoEntities)
         closeWaitingDialog()
     }
 
     suspend fun updateVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>, isDown: Boolean,
-                                            refreshLayout: RefreshLayout, refreshOperation: (RefreshLayout) -> Unit)
+                                            refreshLayout: RefreshLayout,
+                                            refreshOperation: (RefreshLayout) -> Unit)
     = withContext(Dispatchers.Main) {
         if(videoEntities.size == 0){
 
@@ -165,13 +162,15 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
                 mVideoListLayoutManager?.scrollToPosition(0)
             else
                 mVideoListLayoutManager?.scrollToPosition(
-                    mVideoListAdapter!!.itemCount.coerceAtMost(ConfigParams.getDescriptionNum - 1)
+                    mVideoListAdapter!!.itemCount.coerceAtMost(
+                        ConfigParams.getDescriptionNum - 1)
                 )
         }
         refreshOperation(refreshLayout)
     }
 
-    suspend fun switchNameRecyclerView(videoEntities: ArrayList<VideoEntity>)= withContext(Dispatchers.Main) {
+    suspend fun switchNameRecyclerView(videoEntities: ArrayList<VideoEntity>)
+    = withContext(Dispatchers.Main) {
         mVideoListAdapter?.updateVideoDescription(videoEntities)
         closeWaitingDialog()
     }
@@ -201,13 +200,13 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
     private fun initShowRecyclerView(selectName: String){
         initRefreshLayout(selectName)
         showWaitingDialog()
-        (mDescriptionPresenter as VideoDescriptionPresenter).initServerData(selectName)
+        (mDescriptionPresenter as VideoDescriptionPresenter).getServerData(selectName, true)
     }
 
     private fun switchShowRecyclerView(selectName: String) {
         initRefreshLayout(selectName)
         showWaitingDialog()
-        (mDescriptionPresenter as VideoDescriptionPresenter).switchNameData(selectName)
+        (mDescriptionPresenter as VideoDescriptionPresenter).getServerData(selectName, false)
     }
 
     override fun onSelectBarClick(selectName: String) {

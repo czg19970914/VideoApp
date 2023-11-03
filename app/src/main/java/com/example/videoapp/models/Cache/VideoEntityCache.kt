@@ -20,7 +20,7 @@ class VideoEntityCache private constructor(): HashMap<String, VideoEntity>() {
     }
 
     override fun put(key: String, value: VideoEntity): VideoEntity? {
-        // 后续这里可以规定一下缓存的大小，并且根据key优化插入删除元素的算法
+        //TODO 后续这里可以规定一下缓存的大小，并且根据key优化插入删除元素的算法
         // 这里key为“name_id”,到时候写算法
         return super.put(key, value)
     }

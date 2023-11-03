@@ -10,7 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.videoapp.R
 import com.example.videoapp.entities.NameEntity
 
-class SelectBarAdapter(context: Context, nameList: ArrayList<NameEntity>): RecyclerView.Adapter<SelectBarViewHolder>() {
+class SelectBarAdapter(context: Context, nameList: ArrayList<NameEntity>):
+    RecyclerView.Adapter<SelectBarViewHolder>() {
     private val mNameList: ArrayList<NameEntity>
     private val mContext: Context
 
