@@ -15,7 +15,6 @@ import com.example.videoapp.entities.VideoEntity
 import com.example.videoapp.interfaces.VideoPresenter
 import com.example.videoapp.interfaces.VideoView
 import com.example.videoapp.presenters.VideoDescriptionPresenter
-import com.example.videoapp.utils.VideoUtils
 import com.example.videoapp.views.recyclerviews.DetailRecyclerViewAdapter
 import com.example.videoapp.views.recyclerviews.SelectBarAdapter
 import com.example.videoapp.views.recyclerviews.VideoRecyclerViewAdapter
@@ -73,7 +72,7 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         window.statusBarColor = ContextCompat.getColor(this, R.color.light_gray)
         window.navigationBarColor = ContextCompat.getColor(this, R.color.light_gray)
         initWaitingDialog()
-        initSelectNameBar()
+        (mDescriptionPresenter as VideoDescriptionPresenter).getNameList()
 
         mLeftMenuCancel.setOnClickListener {
             closeLeftMenu()
@@ -81,10 +80,7 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         initDetailRecyclerView()
     }
 
-    private fun initSelectNameBar() {
-        val nameList = ArrayList<NameEntity>()
-        nameList.add(NameEntity("奈汐酱", true))
-        nameList.add(NameEntity("宝儿", false))
+    private fun initSelectNameBar(nameList: ArrayList<NameEntity>) {
         mSelectBarAdapter = SelectBarAdapter(this, nameList)
         mSelectBarAdapter!!.setOnSelectBarClickListener(this)
         mSelectBarLayoutManager = LinearLayoutManager(this)
@@ -92,8 +88,10 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         mSelectNameBar.layoutManager = mSelectBarLayoutManager
         mSelectNameBar.adapter = mSelectBarAdapter
 
-        // TODO 需要判空
-        initShowRecyclerView(nameList[0].mNameContent)
+        if(nameList.size > 0) {
+            nameList[0].mIsChoose = true
+            initShowRecyclerView(nameList[0].mNameContent)
+        }
     }
 
     private fun initRecyclerView(videoEntities: ArrayList<VideoEntity>) {
@@ -142,6 +140,11 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
                 selectName, true, it
             ) { refreshLayout -> refreshLayout.finishLoadMore() }
         }
+    }
+
+    suspend fun showSelectBar(nameList: ArrayList<NameEntity>)
+    = withContext(Dispatchers.Main) {
+        initSelectNameBar(nameList)
     }
 
     suspend fun showVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>)

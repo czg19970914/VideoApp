@@ -1,8 +1,10 @@
 package com.example.videoapp.presenters
 
 import android.graphics.Bitmap
+import android.util.Log
 import com.example.videoapp.MainActivity
 import com.example.videoapp.R
+import com.example.videoapp.entities.NameEntity
 import com.example.videoapp.entities.VideoEntity
 import com.example.videoapp.interfaces.VideoModel
 import com.example.videoapp.interfaces.VideoPresenter
@@ -13,9 +15,14 @@ import com.scwang.smart.refresh.layout.api.RefreshLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.IOException
 import java.io.InputStream
 
 class VideoDescriptionPresenter: VideoPresenter {
+    companion object{
+        const val TAG = "VideoDescriptionPresenter"
+    }
+
     private var mDescriptionModel: VideoModel? = null
     private var mDescriptionView: VideoView? = null
 
@@ -37,34 +44,73 @@ class VideoDescriptionPresenter: VideoPresenter {
         mDescriptionView = view
     }
 
+    fun getNameList() {
+        CoroutineScope(Dispatchers.IO).launch{
+            var nameList = ArrayList<NameEntity>()
+            try {
+                mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(
+                    R.raw.complete_video_data
+                )
+                val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!)
+                nameList = (mDescriptionModel as VideoDescriptionModel).getNameList(jsonObject)
+            }catch (e: IOException){
+                e.message?.let { Log.e(TAG, it) }
+            } catch (e: NullPointerException){
+                e.message?.let { Log.e(TAG, it) }
+            } finally {
+                (mDescriptionView as MainActivity).showSelectBar(nameList)
+            }
+        }
+    }
+
     fun getServerData(selectName: String, isInit: Boolean) {
         CoroutineScope(Dispatchers.IO).launch{
-            mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(
-                R.raw.complete_video_data)
-            // TODO 这里需要判断键值，防止FC
-            val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject(selectName)
-            // 注意这里需要重置model中算法的id!!!!!
-            (mDescriptionModel as VideoDescriptionModel).resetIndex()
-            val videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(
-                jsonObject, mBlankVideoImage, false, selectName)
-            if(isInit)
-                (mDescriptionView as MainActivity).showVideoInfoRecyclerView(videoEntities)
-            else
-                (mDescriptionView as MainActivity).switchNameRecyclerView(videoEntities)
+            var videoEntities = ArrayList<VideoEntity>()
+            try {
+                mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(
+                    R.raw.complete_video_data
+                )
+                val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject(selectName)
+                // 注意这里需要重置model中算法的id!!!!!
+                (mDescriptionModel as VideoDescriptionModel).resetIndex()
+                videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(
+                    jsonObject, mBlankVideoImage, false, selectName)
+            }catch (e: IOException){
+                e.message?.let { Log.e(TAG, it) }
+            }catch (e: NullPointerException){
+                e.message?.let { Log.e(TAG, it) }
+            } catch (e: NoSuchElementException) {
+                e.message?.let { Log.e(TAG, it) }
+            } finally {
+                if(isInit)
+                    (mDescriptionView as MainActivity).showVideoInfoRecyclerView(videoEntities)
+                else
+                    (mDescriptionView as MainActivity).switchNameRecyclerView(videoEntities)
+            }
         }
     }
 
     fun updateServerData(selectName: String, isDown: Boolean, refreshLayout: RefreshLayout,
                          refreshOperation: (RefreshLayout) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
-            mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(
-                R.raw.complete_video_data)
-            val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject(selectName)
-            // TODO 这里需要判断键值，防止FC
-            val videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(
-                jsonObject, mBlankVideoImage, isDown, selectName)
-            (mDescriptionView as MainActivity).updateVideoInfoRecyclerView(videoEntities, isDown,
-                refreshLayout, refreshOperation)
+            var videoEntities = ArrayList<VideoEntity>()
+            try {
+                mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(
+                    R.raw.complete_video_data
+                )
+                val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject(selectName)
+                videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(
+                    jsonObject, mBlankVideoImage, isDown, selectName)
+            }catch (e: IOException){
+                e.message?.let { Log.e(TAG, it) }
+            }catch (e: NullPointerException){
+                e.message?.let { Log.e(TAG, it) }
+            } catch (e: NoSuchElementException) {
+                e.message?.let { Log.e(TAG, it) }
+            } finally {
+                (mDescriptionView as MainActivity).updateVideoInfoRecyclerView(videoEntities, isDown,
+                    refreshLayout, refreshOperation)
+            }
         }
     }
 
@@ -72,7 +118,9 @@ class VideoDescriptionPresenter: VideoPresenter {
         val detailData = ArrayList<VideoEntity>()
         var detailEntity: VideoEntity
 
-        //TODO 需不需要为判空？？？？？
+        if(videoEntity.mBitmapArray == null) {
+            return detailData
+        }
         for(videoMessage in videoEntity.mBitmapArray!!){
             detailEntity = VideoEntity(
                 -1, videoMessage.first, "XXX", videoMessage.second)
