@@ -38,8 +38,10 @@ class SelectBarAdapter(context: Context, nameList: ArrayList<NameEntity>):
         holder.mNameItemText.text = mNameList[position].mNameContent
         if(mNameList[position].mIsChoose){
             holder.mNameItemText.setTextColor(ContextCompat.getColor(mContext, R.color.purple_200))
+            holder.mBottomLine.setBackgroundColor(ContextCompat.getColor(mContext, R.color.purple_200))
         }else {
             holder.mNameItemText.setTextColor(ContextCompat.getColor(mContext, R.color.black))
+            holder.mBottomLine.setBackgroundColor(ContextCompat.getColor(mContext, R.color.transparent))
         }
         holder.mNameItemText.setOnClickListener(null)
         holder.mNameItemText.setOnClickListener {

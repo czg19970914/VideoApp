@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -69,7 +70,8 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        window.statusBarColor = ContextCompat.getColor(this, R.color.light_gray)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.white)
+        ViewCompat.getWindowInsetsController(window.decorView)?.isAppearanceLightStatusBars = true
         window.navigationBarColor = ContextCompat.getColor(this, R.color.light_gray)
         initWaitingDialog()
         (mDescriptionPresenter as VideoDescriptionPresenter).getNameList()

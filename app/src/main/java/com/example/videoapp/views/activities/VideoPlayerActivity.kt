@@ -15,6 +15,7 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import com.example.videoapp.ConfigParams
 import com.example.videoapp.R
 import com.example.videoapp.interfaces.VideoPresenter
@@ -59,6 +60,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_video_player)
         window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+        ViewCompat.getWindowInsetsController(window.decorView)?.isAppearanceLightStatusBars = false
         window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
 
         (mVideoPlayerPresenter as VideoPlayerPresenter).initMediaPlayer()

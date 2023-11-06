@@ -56,6 +56,15 @@ class VideoPlayerPresenter: VideoPresenter {
         mMediaPlayer?.setOnPreparedListener {
             it.start()
             (mVideoPlayerView as VideoPlayerActivity).initVideoSeekBar()
+
+            // 启动timer
+            mSeekBarTimer?.schedule(object :TimerTask(){
+                override fun run() {
+                    if(!mIsSeekbarChanging){
+                        videoSeekBar.progress = mMediaPlayer!!.currentPosition
+                    }
+                }
+            }, 0, 50)
         }
         mMediaPlayer?.setOnCompletionListener {
             it.seekTo(0)
