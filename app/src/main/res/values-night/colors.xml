@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="transparent">#00000000</color>
+
+    <color name="status_bar">#FF000000</color>
+    <color name="main_background">#FF262626</color>
+    <color name="name_select_bar">#FF000000</color>
+    <color name="name_select_item">#FF000000</color>
+    <color name="name_select_item_text">#FFFFFFFF</color>
+</resources>

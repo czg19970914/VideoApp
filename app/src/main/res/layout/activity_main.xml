@@ -5,28 +5,28 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/light_gray"
+        android:background="@color/main_background"
         tools:context=".MainActivity">
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/select_name_bar"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@color/white"/>
+                android:id="@+id/select_name_bar"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@color/name_select_bar"/>
 
         <com.scwang.smart.refresh.layout.SmartRefreshLayout
-            android:id="@+id/smart_refresh_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+                android:id="@+id/smart_refresh_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/video_recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                    android:id="@+id/video_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
 
         </com.scwang.smart.refresh.layout.SmartRefreshLayout>
 
@@ -41,23 +41,28 @@
             android:clickable="true"
             android:focusable="true"
             android:visibility="gone">
+
+        <!--里面的展示样式要修改，太丑了-->
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_centerInParent="true">
+                android:id="@+id/left_menu_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_centerInParent="true">
 
             <ImageView
-                android:id="@+id/left_menu_cancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/left_menu_cancel"/>
+                    android:id="@+id/left_menu_cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:src="@drawable/left_menu_cancel"/>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/left_menu_recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                    android:id="@+id/left_menu_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
             </LinearLayout>
+
     </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

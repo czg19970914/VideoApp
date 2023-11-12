@@ -2,6 +2,7 @@ package com.example.videoapp.views.recyclerviews
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -9,9 +10,14 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.videoapp.R
 import com.example.videoapp.entities.NameEntity
+import com.example.videoapp.presenters.VideoDescriptionPresenter
 
 class SelectBarAdapter(context: Context, nameList: ArrayList<NameEntity>):
     RecyclerView.Adapter<SelectBarViewHolder>() {
+    companion object{
+        const val TAG = "SelectBarAdapter"
+    }
+
     private val mNameList: ArrayList<NameEntity>
     private val mContext: Context
 
@@ -40,19 +46,24 @@ class SelectBarAdapter(context: Context, nameList: ArrayList<NameEntity>):
             holder.mNameItemText.setTextColor(ContextCompat.getColor(mContext, R.color.purple_200))
             holder.mBottomLine.setBackgroundColor(ContextCompat.getColor(mContext, R.color.purple_200))
         }else {
-            holder.mNameItemText.setTextColor(ContextCompat.getColor(mContext, R.color.black))
-            holder.mBottomLine.setBackgroundColor(ContextCompat.getColor(mContext, R.color.transparent))
+            holder.mNameItemText.setTextColor(ContextCompat.getColor(mContext, R.color.name_select_item_text))
+            holder.mBottomLine.setBackgroundColor(ContextCompat.getColor(mContext, R.color.name_select_item))
         }
         holder.mNameItemText.setOnClickListener(null)
         holder.mNameItemText.setOnClickListener {
-            for(nameEntity in mNameList){
-                nameEntity.mIsChoose = false
+            try {
+                if (mOnSelectBarClickListener!!.canClickItem()) {
+                    for (nameEntity in mNameList) {
+                        nameEntity.mIsChoose = false
+                    }
+                    mNameList[position].mIsChoose = true
+
+                    mOnSelectBarClickListener?.onSelectBarClick(mNameList[position].mNameContent)
+                    notifyDataSetChanged()
+                }
+            } catch (e: NullPointerException) {
+                e.message?.let { Log.e(TAG, it) }
             }
-            mNameList[position].mIsChoose = true
-
-            mOnSelectBarClickListener?.onSelectBarClick(mNameList[position].mNameContent)
-
-            notifyDataSetChanged()
         }
     }
 
@@ -63,5 +74,7 @@ class SelectBarAdapter(context: Context, nameList: ArrayList<NameEntity>):
     // 给Activity的回调接口
     interface OnSelectBarClickListener {
         fun onSelectBarClick(selectName: String)
+
+        fun canClickItem(): Boolean
     }
 }

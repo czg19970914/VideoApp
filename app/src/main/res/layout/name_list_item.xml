@@ -20,13 +20,14 @@
                 android:layout_height="match_parent"
                 android:maxLines="1"
                 android:ellipsize="end"
+                android:background="@color/name_select_item"
                 android:gravity="center"/>
 
         <View
                 android:id="@+id/name_item_bottom_line"
                 android:layout_width="match_parent"
                 android:layout_height="3dp"
-                android:background="@color/transparent"/>
+                android:background="@color/name_select_item"/>
 
     </LinearLayout>
 

@@ -10,4 +10,10 @@
     <color name="transparent">#00000000</color>
     <color name="light_gray">#FFD3D3D3</color>
     <color name="trans_blank">#66000000</color>
+
+    <color name="status_bar">#FFFFFFFF</color>
+    <color name="main_background">#FFDCDCDC</color>
+    <color name="name_select_bar">#FFFFFFFF</color>
+    <color name="name_select_item">#FFFFFFFF</color>
+    <color name="name_select_item_text">#FF000000</color>
 </resources>

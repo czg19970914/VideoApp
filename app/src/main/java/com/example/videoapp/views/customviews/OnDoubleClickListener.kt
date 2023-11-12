@@ -18,12 +18,16 @@ class OnDoubleClickListener(doubleClickCallback: DoubleClickCallback) : View.OnT
 
     interface DoubleClickCallback {
         fun onDoubleClick()
+
+        fun onClick()
     }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouch(p0: View?, p1: MotionEvent?): Boolean {
         if (p1 != null) {
             if (MotionEvent.ACTION_DOWN == p1.action) {
+                mDoubleClickCallback.onClick()
+
                 mCount++
                 if(mCount == 1){
                     mFirstTime = System.currentTimeMillis()

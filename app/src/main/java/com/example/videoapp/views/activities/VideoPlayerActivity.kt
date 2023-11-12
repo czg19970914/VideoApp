@@ -1,5 +1,8 @@
 package com.example.videoapp.views.activities
 
+import android.animation.Animator
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -12,6 +15,7 @@ import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
 import android.view.View
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -25,8 +29,14 @@ import com.example.videoapp.views.customviews.OnDoubleClickListener
 import com.example.videoapp.utils.VideoUtils
 
 class VideoPlayerActivity : AppCompatActivity(), VideoView {
+    /**
+     * 这边工具条的出现、消失动画，在快速点击时有点bug，后续改吧
+     */
     private val mVideoTextureView: TextureView by lazy {
         findViewById(R.id.video_texture_view)
+    }
+    private val mToolBarGroup: LinearLayout by lazy {
+        findViewById(R.id.tool_bar_group)
     }
     private val mVideoSeekBar: SeekBar by lazy {
         findViewById(R.id.video_seek_bar)
@@ -78,6 +88,69 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
                     OnDoubleClickListener(object : OnDoubleClickListener.DoubleClickCallback{
                         override fun onDoubleClick() {
                             (mVideoPlayerPresenter as VideoPlayerPresenter).pauseStateChanged()
+                        }
+
+                        @SuppressLint("Recycle")
+                        override fun onClick() {
+                            if(mToolBarGroup.visibility == View.VISIBLE){
+                                val alphaAnimator =
+                                    ObjectAnimator.ofFloat(mToolBarGroup, "alpha", 1f, 0f)
+                                val translationYAnimator =
+                                    ObjectAnimator.ofFloat(mToolBarGroup, "translationY", 0f, 100f)
+                                val toolBarAnimatorSet = AnimatorSet()
+                                toolBarAnimatorSet.play(alphaAnimator).with(translationYAnimator)
+                                toolBarAnimatorSet.addListener(
+                                    object : Animator.AnimatorListener{
+                                        override fun onAnimationStart(p0: Animator) {
+
+                                        }
+
+                                        override fun onAnimationEnd(p0: Animator) {
+                                            mToolBarGroup.visibility = View.GONE
+                                        }
+
+                                        override fun onAnimationCancel(p0: Animator) {
+                                            mToolBarGroup.visibility = View.GONE
+                                        }
+
+                                        override fun onAnimationRepeat(p0: Animator) {
+
+                                        }
+
+                                    }
+                                )
+                                toolBarAnimatorSet.setDuration(500)
+                                toolBarAnimatorSet.start()
+                            }else {
+                                val alphaAnimator =
+                                    ObjectAnimator.ofFloat(mToolBarGroup, "alpha", 0f, 1f)
+                                val translationYAnimator =
+                                    ObjectAnimator.ofFloat(mToolBarGroup, "translationY", 100f, 0f)
+                                val toolBarAnimatorSet = AnimatorSet()
+                                toolBarAnimatorSet.play(alphaAnimator).with(translationYAnimator)
+                                toolBarAnimatorSet.addListener(
+                                    object : Animator.AnimatorListener{
+                                        override fun onAnimationStart(p0: Animator) {
+                                            mToolBarGroup.visibility = View.VISIBLE
+                                        }
+
+                                        override fun onAnimationEnd(p0: Animator) {
+                                            mToolBarGroup.visibility = View.VISIBLE
+                                        }
+
+                                        override fun onAnimationCancel(p0: Animator) {
+                                            mToolBarGroup.visibility = View.VISIBLE
+                                        }
+
+                                        override fun onAnimationRepeat(p0: Animator) {
+
+                                        }
+
+                                    }
+                                )
+                                toolBarAnimatorSet.setDuration(500)
+                                toolBarAnimatorSet.start()
+                            }
                         }
 
                     })
