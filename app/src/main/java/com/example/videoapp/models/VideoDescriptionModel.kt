@@ -8,6 +8,7 @@ import com.example.videoapp.entities.VideoEntity
 import com.example.videoapp.interfaces.VideoModel
 import com.example.videoapp.interfaces.VideoPresenter
 import com.example.videoapp.models.Cache.VideoEntityCache
+import com.example.videoapp.network.NetworkService
 import com.example.videoapp.utils.VideoUtils
 import com.ywl5320.wlmedia.WlMediaUtil
 import org.json.JSONObject
@@ -102,6 +103,17 @@ class VideoDescriptionModel: VideoModel {
         val nameList = ArrayList<NameEntity>()
         for(key in jsonObject.keys()) {
             nameList.add(NameEntity(key, false))
+        }
+        return nameList
+    }
+
+    suspend fun getNameListByIntent(): ArrayList<NameEntity>{
+        val networkService = NetworkService.createService()
+        val videoDescriptionBarNames = networkService.getVideoDescriptionBarNames()
+        val nameList = ArrayList<NameEntity>()
+        for(name in videoDescriptionBarNames) {
+            nameList.add(NameEntity(name, false))
+
         }
         return nameList
     }
