@@ -57,7 +57,6 @@ class VideoDescriptionModel: VideoModel {
                 videoEntity = analysisVideoJSONObject(jsonObject, id, blankViewImage)
 
                 if(videoEntity != null) {
-                    println("34567")
                     videEntities.add(videoEntity)
                     VideoEntityCache.getInstance()?.put(cachedKey, videoEntity)
                 }
@@ -65,6 +64,10 @@ class VideoDescriptionModel: VideoModel {
         }
 
         return videEntities
+    }
+
+    fun getServerDataByInternet() {
+
     }
 
     private fun analysisVideoJSONObject(jsonObject: JSONObject, id: Int,
