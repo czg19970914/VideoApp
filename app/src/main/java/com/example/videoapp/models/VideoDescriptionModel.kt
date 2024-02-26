@@ -13,6 +13,8 @@ import com.example.videoapp.models.Cache.VideoEntityCache
 import com.example.videoapp.network.NetworkService
 import com.example.videoapp.utils.VideoUtils
 import com.ywl5320.wlmedia.WlMediaUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import org.json.JSONObject
 
 class VideoDescriptionModel: VideoModel {

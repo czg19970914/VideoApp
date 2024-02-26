@@ -15,6 +15,7 @@ import com.example.videoapp.utils.VideoUtils
 import com.scwang.smart.refresh.layout.api.RefreshLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.io.InputStream
@@ -80,9 +81,12 @@ class VideoDescriptionPresenter: VideoPresenter {
 
                 // 注意这里需要重置model中算法的id!!!!!
                 (mDescriptionModel as VideoDescriptionModel).resetIndex()
-                videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerDataByInternet(
-                    selectName, false, mBlankVideoImage
-                )
+                val asyncs = async(Dispatchers.IO) {
+                    videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerDataByInternet(
+                        selectName, false, mBlankVideoImage
+                    )
+                }
+                asyncs.await()
             }catch (e: IOException){
                 e.message?.let { Log.e(TAG, it) }
             }catch (e: NullPointerException){

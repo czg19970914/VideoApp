@@ -27,9 +27,9 @@ object NetworkModule {
     fun createOkHttpClient() : OkHttpClient{
         // 返回一个 OkHttpClient 实例
         return OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)// 设置连接超时时间
-            .writeTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS)
+            .connectTimeout(5, TimeUnit.MINUTES)// 设置连接超时时间
+            .writeTimeout(5, TimeUnit.MINUTES)
+            .readTimeout(5, TimeUnit.MINUTES)
             .build()
     }
 }
