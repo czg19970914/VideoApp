@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import android.util.Log
 import com.example.videoapp.ConfigParams
 import com.example.videoapp.entities.NameEntity
+import com.example.videoapp.entities.SubVideoDescriptionEntity
+import com.example.videoapp.entities.VideoDescriptionEntity
 import com.example.videoapp.entities.VideoEntity
 import com.example.videoapp.interfaces.VideoModel
 import com.example.videoapp.interfaces.VideoPresenter
@@ -23,6 +25,12 @@ class VideoDescriptionModel: VideoModel {
     private var mWlMediaUtil: WlMediaUtil? = null
     private var mMinId = 1
     private var mMaxId = 23
+
+    private var networkService: NetworkService? = null
+
+    init {
+        networkService = NetworkService.createService()
+    }
     override fun setPresenter(presenter: VideoPresenter) {
         mDescriptionPresenter = presenter
     }
@@ -66,8 +74,48 @@ class VideoDescriptionModel: VideoModel {
         return videEntities
     }
 
-    fun getServerDataByInternet() {
+    /**
+     * TODO 这部分代码的健壮性需要大大加强啊，问题不小
+     * **/
+    suspend fun getServerDataByInternet(selectName: String, isDown: Boolean, blankViewImage: Bitmap):
+            ArrayList<VideoEntity> {
+        val videEntities = ArrayList<VideoEntity>()
 
+        var selectId = mMinId - 1
+        if(isDown)
+            selectId = mMaxId + 1
+
+        mMinId = selectId - ConfigParams.getDescriptionNum / 2
+        mMaxId = selectId + ConfigParams.getDescriptionNum / 2
+
+        val videoDescriptionMap = networkService?.getVideoDescriptionMap(selectName, mMinId, mMaxId)
+            ?: return videEntities
+        // 如果id超过边界重置id
+        mMinId = 0.coerceAtLeast(mMinId)
+        mMaxId = videoDescriptionMap.size.coerceAtMost(mMaxId)
+
+        for((key : String, value : VideoDescriptionEntity) in videoDescriptionMap) {
+            val videoTitle = key
+            var completeUrl = ""
+            var videoImage = blankViewImage
+            val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
+            for(subVideo : SubVideoDescriptionEntity? in value.subImages!!) {
+                if(subVideo == null) {
+                    continue
+                }
+                completeUrl = ConfigParams.baseUrl + subVideo.subVideoPath!!
+                videoImage = VideoUtils.base64ToBitmap(subVideo.subVideoImage, blankViewImage)
+                videoBitmaps.add(
+                    Pair(
+                        completeUrl, videoImage
+                    )
+                )
+            }
+            val videoEntity = VideoEntity(0, completeUrl, videoTitle, videoImage)
+            videoEntity.mBitmapArray = videoBitmaps
+            videEntities.add(videoEntity)
+        }
+        return videEntities
     }
 
     private fun analysisVideoJSONObject(jsonObject: JSONObject, id: Int,
@@ -111,12 +159,13 @@ class VideoDescriptionModel: VideoModel {
     }
 
     suspend fun getNameListByIntent(): ArrayList<NameEntity>{
-        val networkService = NetworkService.createService()
-        val videoDescriptionBarNames = networkService.getVideoDescriptionBarNames()
+        val videoDescriptionBarNames = networkService?.getVideoDescriptionBarNames()
         val nameList = ArrayList<NameEntity>()
-        for(name in videoDescriptionBarNames) {
-            nameList.add(NameEntity(name, false))
+        if(videoDescriptionBarNames != null) {
+            for (name in videoDescriptionBarNames) {
+                nameList.add(NameEntity(name, false))
 
+            }
         }
         return nameList
     }

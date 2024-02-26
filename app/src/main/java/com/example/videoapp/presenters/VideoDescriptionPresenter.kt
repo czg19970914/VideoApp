@@ -77,6 +77,12 @@ class VideoDescriptionPresenter: VideoPresenter {
 //                (mDescriptionModel as VideoDescriptionModel).resetIndex()
 //                videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(
 //                    jsonObject, mBlankVideoImage, false, selectName)
+
+                // 注意这里需要重置model中算法的id!!!!!
+                (mDescriptionModel as VideoDescriptionModel).resetIndex()
+                videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerDataByInternet(
+                    selectName, false, mBlankVideoImage
+                )
             }catch (e: IOException){
                 e.message?.let { Log.e(TAG, it) }
             }catch (e: NullPointerException){
@@ -103,6 +109,10 @@ class VideoDescriptionPresenter: VideoPresenter {
 //                val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject(selectName)
 //                videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(
 //                    jsonObject, mBlankVideoImage, isDown, selectName)
+
+                videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerDataByInternet(
+                    selectName, isDown, mBlankVideoImage
+                )
             }catch (e: IOException){
                 e.message?.let { Log.e(TAG, it) }
             }catch (e: NullPointerException){

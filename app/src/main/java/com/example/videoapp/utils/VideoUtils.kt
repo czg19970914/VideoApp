@@ -3,6 +3,7 @@ package com.example.videoapp.utils
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import com.google.gson.Gson
 import com.google.gson.JsonArray
@@ -11,6 +12,7 @@ import com.ywl5320.wlmedia.WlMediaUtil
 import org.json.JSONObject
 import java.io.*
 import java.nio.charset.StandardCharsets
+import android.util.Base64
 
 class VideoUtils {
     companion object {
@@ -115,6 +117,15 @@ class VideoUtils {
             reader.close()
             writer.close()
             return JSONObject(json)
+        }
+
+        @JvmStatic
+        fun base64ToBitmap(base64Str: String?, blankViewImage: Bitmap): Bitmap {
+            if(base64Str.isNullOrEmpty()) {
+                return blankViewImage
+            }
+            val decodeString = Base64.decode(base64Str, Base64.DEFAULT)
+            return BitmapFactory.decodeByteArray(decodeString, 0, decodeString.size)
         }
     }
 }
