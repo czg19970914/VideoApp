@@ -1,7 +1,6 @@
 package com.example.videoapp.presenters
 
 import android.graphics.Bitmap
-import android.util.Log
 import com.example.videoapp.MainActivity
 import com.example.videoapp.R
 import com.example.videoapp.entities.NameEntity
@@ -10,13 +9,8 @@ import com.example.videoapp.interfaces.VideoModel
 import com.example.videoapp.interfaces.VideoPresenter
 import com.example.videoapp.interfaces.VideoView
 import com.example.videoapp.models.VideoDescriptionModel
-import com.example.videoapp.network.NetworkService
 import com.example.videoapp.utils.VideoUtils
 import com.scwang.smart.refresh.layout.api.RefreshLayout
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.io.IOException
 import java.io.InputStream
 
 class VideoDescriptionPresenter: VideoPresenter {
@@ -56,57 +50,35 @@ class VideoDescriptionPresenter: VideoPresenter {
     }
 
     fun getServerData(selectName: String, isInit: Boolean) {
-//        CoroutineScope(Dispatchers.IO).launch{
-//            var videoEntities = ArrayList<VideoEntity>()
-//            try {
-////                mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(
-////                    R.raw.complete_video_data
-////                )
-////                val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject(selectName)
-////                // 注意这里需要重置model中算法的id!!!!!
-////                (mDescriptionModel as VideoDescriptionModel).resetIndex()
-////                videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(
-////                    jsonObject, mBlankVideoImage, false, selectName)
-//            }catch (e: IOException){
-//                e.message?.let { Log.e(TAG, it) }
-//            }catch (e: NullPointerException){
-//                e.message?.let { Log.e(TAG, it) }
-//            } catch (e: NoSuchElementException) {
-//                e.message?.let { Log.e(TAG, it) }
-//            } finally {
-//                if(isInit)
-//                    (mDescriptionView as MainActivity).showVideoInfoRecyclerView(videoEntities)
-//                else
-//                    (mDescriptionView as MainActivity).switchNameRecyclerView(videoEntities)
-//            }
-//        }
+        // 注意这里需要重置model中算法的id!!!!!
+        (mDescriptionModel as VideoDescriptionModel).resetIndex()
         (mDescriptionModel as VideoDescriptionModel).getSelectVideoDescription(
-            (mDescriptionView as MainActivity).baseContext, selectName
+            (mDescriptionView as MainActivity).baseContext, selectName,
+            false, mBlankVideoImage, isInit
         )
+    }
+
+    suspend fun initVideoInfoRecyclerView(isInit: Boolean, videoEntities: ArrayList<VideoEntity>) {
+        if(isInit)
+                (mDescriptionView as MainActivity).showVideoInfoRecyclerView(videoEntities)
+            else
+                (mDescriptionView as MainActivity).switchNameRecyclerView(videoEntities)
     }
 
     fun updateServerData(selectName: String, isDown: Boolean, refreshLayout: RefreshLayout,
                          refreshOperation: (RefreshLayout) -> Unit) {
-        CoroutineScope(Dispatchers.IO).launch {
-            var videoEntities = ArrayList<VideoEntity>()
-            try {
-//                mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(
-//                    R.raw.complete_video_data
-//                )
-//                val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject(selectName)
-//                videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(
-//                    jsonObject, mBlankVideoImage, isDown, selectName)
-            }catch (e: IOException){
-                e.message?.let { Log.e(TAG, it) }
-            }catch (e: NullPointerException){
-                e.message?.let { Log.e(TAG, it) }
-            } catch (e: NoSuchElementException) {
-                e.message?.let { Log.e(TAG, it) }
-            } finally {
-                (mDescriptionView as MainActivity).updateVideoInfoRecyclerView(videoEntities, isDown,
-                    refreshLayout, refreshOperation)
-            }
-        }
+
+        (mDescriptionModel as VideoDescriptionModel).updateSelectVideoDescription(
+            (mDescriptionView as MainActivity).baseContext, selectName, isDown,
+            mBlankVideoImage, refreshLayout, refreshOperation
+        )
+    }
+
+    suspend fun updateVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>,
+                                            isDown: Boolean, refreshLayout: RefreshLayout,
+                                            refreshOperation: (RefreshLayout) -> Unit) {
+        (mDescriptionView as MainActivity).updateVideoInfoRecyclerView(videoEntities, isDown,
+            refreshLayout, refreshOperation)
     }
 
     fun getDetailData(videoEntity: VideoEntity): ArrayList<VideoEntity> {

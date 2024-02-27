@@ -16,6 +16,7 @@ import com.example.videoapp.models.Cache.VideoEntityCache
 import com.example.videoapp.network.NetworkService
 import com.example.videoapp.presenters.VideoDescriptionPresenter
 import com.example.videoapp.utils.VideoUtils
+import com.scwang.smart.refresh.layout.api.RefreshLayout
 import com.ywl5320.wlmedia.WlMediaUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,77 +44,6 @@ class VideoDescriptionModel: VideoModel {
     }
     override fun setPresenter(presenter: VideoPresenter) {
         mDescriptionPresenter = presenter
-    }
-
-    fun getServerData(jsonObject: JSONObject, blankViewImage: Bitmap,
-                      isDown: Boolean, detailName: String): ArrayList<VideoEntity> {
-        val videEntities = ArrayList<VideoEntity>()
-
-        var selectId = mMinId - 1
-        if(isDown)
-            selectId = mMaxId + 1
-
-        if(selectId < 0 || selectId >= jsonObject.length()) {
-            return videEntities
-        }
-
-        var videoEntity: VideoEntity?
-
-        var cachedKey: String
-        var cachedEntity: VideoEntity?
-
-        mMinId = Math.max(0, selectId - ConfigParams.getDescriptionNum / 2)
-        mMaxId = Math.min(jsonObject.length() - 1, selectId + ConfigParams.getDescriptionNum / 2)
-        for(id in mMinId..mMaxId) {
-            cachedKey = detailName + "_" + id.toString()
-            if(VideoEntityCache.getInstance()?.containsKey(cachedKey) == true){
-                cachedEntity = VideoEntityCache.getInstance()?.get(cachedKey)
-                if (cachedEntity != null) {
-                    videEntities.add(cachedEntity)
-                }
-            }else{
-                videoEntity = analysisVideoJSONObject(jsonObject, id, blankViewImage)
-
-                if(videoEntity != null) {
-                    videEntities.add(videoEntity)
-                    VideoEntityCache.getInstance()?.put(cachedKey, videoEntity)
-                }
-            }
-        }
-
-        return videEntities
-    }
-
-    private fun analysisVideoJSONObject(jsonObject: JSONObject, id: Int,
-                                        blankViewImage: Bitmap): VideoEntity? {
-        try {
-            mWlMediaUtil = WlMediaUtil()
-
-            val videoTitle = "测试文本!!!!"
-            val array = jsonObject.getJSONArray(id.toString())
-            var completeUrl = ConfigParams.baseUrl + array[0].toString()
-            var videoImage = VideoUtils.getVideoImage(completeUrl, mWlMediaUtil!!, blankViewImage)
-            val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
-            videoBitmaps.add(Pair(completeUrl, videoImage))
-            for(index in 1 until array.length()) {
-                mWlMediaUtil = WlMediaUtil()
-                completeUrl = ConfigParams.baseUrl + array[index].toString()
-                videoImage = VideoUtils.getVideoImage(completeUrl, mWlMediaUtil!!, blankViewImage)
-                videoBitmaps.add(Pair(completeUrl, videoImage))
-            }
-            val videoEntity = VideoEntity(id, completeUrl, videoTitle, videoImage)
-            videoEntity.mBitmapArray = videoBitmaps
-
-            return videoEntity
-        }catch (e: NoSuchElementException) {
-            e.message?.let { Log.e(TAG, it) }
-        }catch (e: IndexOutOfBoundsException) {
-            e.message?.let { Log.e(TAG, it) }
-        }catch (e: NullPointerException) {
-            e.message?.let { Log.e(TAG, it) }
-        }
-
-        return null
     }
 
     fun initVideoDescriptionData (context: Context) {
@@ -144,8 +74,10 @@ class VideoDescriptionModel: VideoModel {
     }
 
     fun getSelectVideoDescription(context: Context, selectName: String, isDown: Boolean,
-                                  blankViewImage: Bitmap) {
+                                  blankViewImage: Bitmap, isInit: Boolean) {
         CoroutineScope(Dispatchers.IO).launch {
+            val videEntities = ArrayList<VideoEntity>()
+
             val allVideoDescriptionMap: Map<String, List<VideoDescriptionEntity>> =
                 VideoUtils.getJsonToMap(File(context.filesDir , JSON_PATH))
 
@@ -176,42 +108,101 @@ class VideoDescriptionModel: VideoModel {
             val videoDescriptionEntities =
                 allVideoDescriptionMap.getOrDefault(selectName, null)
             if(videoDescriptionEntities != null) {
-                val videEntities = ArrayList<VideoEntity>()
-
                 var selectId = mMinId - 1
                 if(isDown)
                     selectId = mMaxId + 1
 
-                if(selectId < 0 || selectId >= videoDescriptionEntities.size) {
-                    return@launch
-                }
-
-                var videoEntity: VideoEntity?
-
-                mMinId = Math.max(0, selectId - ConfigParams.getDescriptionNum / 2)
-                mMaxId = Math.min(videoDescriptionEntities.size - 1, selectId + ConfigParams.getDescriptionNum / 2)
-                for(id in mMinId..mMaxId) {
-                    val videoTitle = videoDescriptionEntities[id].title
-                    val subVideoDescriptionEntities = videoDescriptionEntities[id].subVideoDescriptionEntities
-                    if (!subVideoDescriptionEntities.isNullOrEmpty()) {
-                        // TODO 先空之后传输过来
-                        var completeUrl = ""
-                        // TODO 马上完成图片byte[]解码
-                        var videoImage = ""
-                        val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
-                        for(index in subVideoDescriptionEntities.indices) {
-                            completeUrl = ""
-                            videoImage = ""
-//                            videoBitmaps.add(Pair(completeUrl, videoImage))
+                if(selectId >=0 && selectId < videoDescriptionEntities.size) {
+                    mMinId = Math.max(0, selectId - ConfigParams.getDescriptionNum / 2)
+                    mMaxId = Math.min(videoDescriptionEntities.size - 1, selectId + ConfigParams.getDescriptionNum / 2)
+                    for (id in mMinId..mMaxId) {
+                        val videoTitle = videoDescriptionEntities[id].title
+                        val subVideoDescriptionEntities = videoDescriptionEntities[id].subVideoDescriptionEntities
+                        if (!subVideoDescriptionEntities.isNullOrEmpty()) {
+                            // TODO 先空之后传输过来
+                            var completeUrl: String = ""
+                            var videoImage: Bitmap = blankViewImage
+                            val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
+                            val job = async {
+                                for (subVideoDescriptionEnt in subVideoDescriptionEntities) {
+                                    completeUrl = ""
+                                    val imageBytes =
+                                        networkService?.getVideoImageBytes(subVideoDescriptionEnt.subImageName!!)
+                                    if (imageBytes != null) {
+                                        videoImage = VideoUtils.base64StrToBitmap(imageBytes.get("imageBase64Str")!!)
+                                    } else {
+                                        videoImage = blankViewImage
+                                    }
+                                    videoBitmaps.add(Pair(completeUrl, videoImage))
+                                }
+                            }
+                            job.await()
+                            // 子视频最后一个视频截图作为总封面
+                            val videoEntity = VideoEntity(id, completeUrl, videoTitle!!, videoImage)
+                            videoEntity.mBitmapArray = videoBitmaps
+                            videEntities.add(videoEntity)
                         }
-                        // 子视频最后一个视频截图作为总封面
                     }
                 }
-
-//                for(videoDescriptionEntity in videoDescriptionEntities) {
-//
-//                }
             }
+            (mDescriptionPresenter as VideoDescriptionPresenter).initVideoInfoRecyclerView(
+                isInit, videEntities
+            )
+        }
+    }
+
+    fun updateSelectVideoDescription(context: Context, selectName: String, isDown: Boolean,
+                                     blankViewImage: Bitmap, refreshLayout: RefreshLayout,
+                                     refreshOperation: (RefreshLayout) -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val videEntities = ArrayList<VideoEntity>()
+
+            val allVideoDescriptionMap: Map<String, List<VideoDescriptionEntity>> =
+                VideoUtils.getJsonToMap(File(context.filesDir , JSON_PATH))
+
+            val videoDescriptionEntities =
+                allVideoDescriptionMap.getOrDefault(selectName, null)
+            if(videoDescriptionEntities != null) {
+                var selectId = mMinId - 1
+                if(isDown)
+                    selectId = mMaxId + 1
+
+                if(selectId >=0 && selectId < videoDescriptionEntities.size) {
+                    mMinId = Math.max(0, selectId - ConfigParams.getDescriptionNum / 2)
+                    mMaxId = Math.min(videoDescriptionEntities.size - 1, selectId + ConfigParams.getDescriptionNum / 2)
+                    for (id in mMinId..mMaxId) {
+                        val videoTitle = videoDescriptionEntities[id].title
+                        val subVideoDescriptionEntities = videoDescriptionEntities[id].subVideoDescriptionEntities
+                        if (!subVideoDescriptionEntities.isNullOrEmpty()) {
+                            // TODO 先空之后传输过来
+                            var completeUrl: String = ""
+                            var videoImage: Bitmap = blankViewImage
+                            val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
+                            val job = async {
+                                for (subVideoDescriptionEnt in subVideoDescriptionEntities) {
+                                    completeUrl = ""
+                                    val imageBytes =
+                                        networkService?.getVideoImageBytes(subVideoDescriptionEnt.subImageName!!)
+                                    if (imageBytes != null) {
+                                        videoImage = VideoUtils.base64StrToBitmap(imageBytes.get("imageBase64Str")!!)
+                                    } else {
+                                        videoImage = blankViewImage
+                                    }
+                                    videoBitmaps.add(Pair(completeUrl, videoImage))
+                                }
+                            }
+                            job.await()
+                            // 子视频最后一个视频截图作为总封面
+                            val videoEntity = VideoEntity(id, completeUrl, videoTitle!!, videoImage)
+                            videoEntity.mBitmapArray = videoBitmaps
+                            videEntities.add(videoEntity)
+                        }
+                    }
+                }
+            }
+            (mDescriptionPresenter as VideoDescriptionPresenter).updateVideoInfoRecyclerView(
+                videEntities, isDown, refreshLayout, refreshOperation
+            )
         }
     }
 

@@ -11,7 +11,7 @@ interface NetworkService {
     @GET("/videoImageBytes")
     suspend fun getVideoImageBytes(
         @Query(value = "image_file_path") imageFilePath : String
-    ): ByteArray
+    ): Map<String, String>
 
     /**
      * TODO 通过 Retrofit 创建一个 NetworkService 实例

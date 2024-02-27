@@ -93,11 +93,18 @@ class VideoUtils {
             }
         }
 
+        @JvmStatic
         fun getJsonToMap(file: File): Map<String, List<VideoDescriptionEntity>> {
             val json = file.readText()
             val type = object : TypeToken<Map<String, List<VideoDescriptionEntity>>>() {}.type
 //            Log.d("czg", "getJsonToMap: $json")
             return Gson().fromJson(json, type)
+        }
+
+        fun base64StrToBitmap(base64String: String): Bitmap {
+            val dec = Base64.decode(base64String, Base64.DEFAULT)
+            val bitmap = BitmapFactory.decodeByteArray(dec, 0, dec.size)
+            return bitmap
         }
     }
 }
