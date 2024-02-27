@@ -118,14 +118,5 @@ class VideoUtils {
             writer.close()
             return JSONObject(json)
         }
-
-        @JvmStatic
-        fun base64ToBitmap(base64Str: String?, blankViewImage: Bitmap): Bitmap {
-            if(base64Str.isNullOrEmpty()) {
-                return blankViewImage
-            }
-            val decodeString = Base64.decode(base64Str, Base64.DEFAULT)
-            return BitmapFactory.decodeByteArray(decodeString, 0, decodeString.size)
-        }
     }
 }

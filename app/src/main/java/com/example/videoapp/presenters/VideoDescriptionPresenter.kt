@@ -15,7 +15,6 @@ import com.example.videoapp.utils.VideoUtils
 import com.scwang.smart.refresh.layout.api.RefreshLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.io.InputStream
@@ -47,23 +46,27 @@ class VideoDescriptionPresenter: VideoPresenter {
     }
 
     fun getNameList() {
-        CoroutineScope(Dispatchers.IO).launch{
-            var nameList = ArrayList<NameEntity>()
-            try {
-//                mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(
-//                    R.raw.complete_video_data
-//                )
-//                val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!)
-//                nameList = (mDescriptionModel as VideoDescriptionModel).getNameList(jsonObject)
-                nameList = (mDescriptionModel as VideoDescriptionModel).getNameListByIntent()
-            }catch (e: IOException){
-                e.message?.let { Log.e(TAG, it) }
-            } catch (e: NullPointerException){
-                e.message?.let { Log.e(TAG, it) }
-            } finally {
-                (mDescriptionView as MainActivity).showSelectBar(nameList)
-            }
-        }
+//        CoroutineScope(Dispatchers.IO).launch{
+//            var nameList = ArrayList<NameEntity>()
+//            try {
+////                mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(
+////                    R.raw.complete_video_data
+////                )
+////                val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!)
+////                nameList = (mDescriptionModel as VideoDescriptionModel).getNameList(jsonObject)
+//            }catch (e: IOException){
+//                e.message?.let { Log.e(TAG, it) }
+//            } catch (e: NullPointerException){
+//                e.message?.let { Log.e(TAG, it) }
+//            } finally {
+//                (mDescriptionView as MainActivity).showSelectBar(nameList)
+//            }
+//        }
+        (mDescriptionModel as VideoDescriptionModel).initVideoDescriptionData()
+    }
+
+    suspend fun showSelectBar(nameList: ArrayList<NameEntity>) {
+        (mDescriptionView as MainActivity).showSelectBar(nameList)
     }
 
     fun getServerData(selectName: String, isInit: Boolean) {
@@ -78,15 +81,6 @@ class VideoDescriptionPresenter: VideoPresenter {
 //                (mDescriptionModel as VideoDescriptionModel).resetIndex()
 //                videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(
 //                    jsonObject, mBlankVideoImage, false, selectName)
-
-                // 注意这里需要重置model中算法的id!!!!!
-                (mDescriptionModel as VideoDescriptionModel).resetIndex()
-                val asyncs = async(Dispatchers.IO) {
-                    videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerDataByInternet(
-                        selectName, false, mBlankVideoImage
-                    )
-                }
-                asyncs.await()
             }catch (e: IOException){
                 e.message?.let { Log.e(TAG, it) }
             }catch (e: NullPointerException){
@@ -113,10 +107,6 @@ class VideoDescriptionPresenter: VideoPresenter {
 //                val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject(selectName)
 //                videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(
 //                    jsonObject, mBlankVideoImage, isDown, selectName)
-
-                videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerDataByInternet(
-                    selectName, isDown, mBlankVideoImage
-                )
             }catch (e: IOException){
                 e.message?.let { Log.e(TAG, it) }
             }catch (e: NullPointerException){

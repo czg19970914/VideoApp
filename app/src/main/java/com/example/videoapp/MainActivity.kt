@@ -85,6 +85,8 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         ViewCompat.getWindowInsetsController(window.decorView)?.isAppearanceLightStatusBars = true
         window.navigationBarColor = ContextCompat.getColor(this, R.color.main_background)
         initWaitingDialog()
+
+        showWaitingDialog()
         (mDescriptionPresenter as VideoDescriptionPresenter).getNameList()
 
         mLeftMenuCancel.setOnClickListener {
@@ -175,6 +177,7 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
 
     suspend fun showSelectBar(nameList: ArrayList<NameEntity>)
     = withContext(Dispatchers.Main) {
+        closeWaitingDialog()
         initSelectNameBar(nameList)
     }
 
