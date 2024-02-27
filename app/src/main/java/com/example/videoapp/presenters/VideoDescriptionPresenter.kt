@@ -46,23 +46,9 @@ class VideoDescriptionPresenter: VideoPresenter {
     }
 
     fun getNameList() {
-//        CoroutineScope(Dispatchers.IO).launch{
-//            var nameList = ArrayList<NameEntity>()
-//            try {
-////                mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(
-////                    R.raw.complete_video_data
-////                )
-////                val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!)
-////                nameList = (mDescriptionModel as VideoDescriptionModel).getNameList(jsonObject)
-//            }catch (e: IOException){
-//                e.message?.let { Log.e(TAG, it) }
-//            } catch (e: NullPointerException){
-//                e.message?.let { Log.e(TAG, it) }
-//            } finally {
-//                (mDescriptionView as MainActivity).showSelectBar(nameList)
-//            }
-//        }
-        (mDescriptionModel as VideoDescriptionModel).initVideoDescriptionData()
+        (mDescriptionModel as VideoDescriptionModel).initVideoDescriptionData(
+            (mDescriptionView as MainActivity).baseContext
+        )
     }
 
     suspend fun showSelectBar(nameList: ArrayList<NameEntity>) {
@@ -70,30 +56,33 @@ class VideoDescriptionPresenter: VideoPresenter {
     }
 
     fun getServerData(selectName: String, isInit: Boolean) {
-        CoroutineScope(Dispatchers.IO).launch{
-            var videoEntities = ArrayList<VideoEntity>()
-            try {
-//                mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(
-//                    R.raw.complete_video_data
-//                )
-//                val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject(selectName)
-//                // 注意这里需要重置model中算法的id!!!!!
-//                (mDescriptionModel as VideoDescriptionModel).resetIndex()
-//                videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(
-//                    jsonObject, mBlankVideoImage, false, selectName)
-            }catch (e: IOException){
-                e.message?.let { Log.e(TAG, it) }
-            }catch (e: NullPointerException){
-                e.message?.let { Log.e(TAG, it) }
-            } catch (e: NoSuchElementException) {
-                e.message?.let { Log.e(TAG, it) }
-            } finally {
-                if(isInit)
-                    (mDescriptionView as MainActivity).showVideoInfoRecyclerView(videoEntities)
-                else
-                    (mDescriptionView as MainActivity).switchNameRecyclerView(videoEntities)
-            }
-        }
+//        CoroutineScope(Dispatchers.IO).launch{
+//            var videoEntities = ArrayList<VideoEntity>()
+//            try {
+////                mJsonDictStream = (mDescriptionView as MainActivity).resources.openRawResource(
+////                    R.raw.complete_video_data
+////                )
+////                val jsonObject = VideoUtils.parseJSONtoDict(mJsonDictStream!!).getJSONObject(selectName)
+////                // 注意这里需要重置model中算法的id!!!!!
+////                (mDescriptionModel as VideoDescriptionModel).resetIndex()
+////                videoEntities = (mDescriptionModel as VideoDescriptionModel).getServerData(
+////                    jsonObject, mBlankVideoImage, false, selectName)
+//            }catch (e: IOException){
+//                e.message?.let { Log.e(TAG, it) }
+//            }catch (e: NullPointerException){
+//                e.message?.let { Log.e(TAG, it) }
+//            } catch (e: NoSuchElementException) {
+//                e.message?.let { Log.e(TAG, it) }
+//            } finally {
+//                if(isInit)
+//                    (mDescriptionView as MainActivity).showVideoInfoRecyclerView(videoEntities)
+//                else
+//                    (mDescriptionView as MainActivity).switchNameRecyclerView(videoEntities)
+//            }
+//        }
+        (mDescriptionModel as VideoDescriptionModel).getSelectVideoDescription(
+            (mDescriptionView as MainActivity).baseContext, selectName
+        )
     }
 
     fun updateServerData(selectName: String, isDown: Boolean, refreshLayout: RefreshLayout,

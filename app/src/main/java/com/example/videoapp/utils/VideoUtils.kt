@@ -13,6 +13,9 @@ import org.json.JSONObject
 import java.io.*
 import java.nio.charset.StandardCharsets
 import android.util.Base64
+import android.util.Log
+import com.example.videoapp.entities.VideoDescriptionEntity
+import com.google.gson.reflect.TypeToken
 
 class VideoUtils {
     companion object {
@@ -77,46 +80,24 @@ class VideoUtils {
         }
 
         @JvmStatic
-        fun parseJSON(jsonStream: InputStream): JsonArray {
-            val writer: Writer = StringWriter()
-            val buffer: CharArray = CharArray(jsonStream.available())
-            val reader: Reader = BufferedReader(
-                InputStreamReader(jsonStream, StandardCharsets.UTF_8))
-
-            var n = -1
-            while (true) {
-                n = reader.read(buffer)
-                if (n == -1) {
-                    break
-                } else {
-                    writer.write(buffer, 0, n)
-                }
+        fun saveDescriptionToJson(map: Map<String, List<VideoDescriptionEntity>>, file: File) {
+            val jsonStr = Gson().toJson(map)
+//            Log.d("czg", "saveDescriptionToJson: $jsonStr")
+            val outputStream = FileOutputStream(file)
+            try {
+                outputStream.write(jsonStr.toByteArray())
+            } catch (e : IOException) {
+                Log.i("czg", "saveDescriptionToJson:")
+            } finally {
+                outputStream.close()
             }
-            val json = writer.toString()
-            reader.close()
-            writer.close()
-            return Gson().fromJson(json, JsonArray::class.java)
         }
 
-        fun parseJSONtoDict(jsonStream: InputStream): JSONObject {
-            val writer: Writer = StringWriter()
-            val buffer: CharArray = CharArray(jsonStream.available())
-            val reader: Reader = BufferedReader(
-                InputStreamReader(jsonStream, StandardCharsets.UTF_8))
-
-            var n = -1
-            while (true) {
-                n = reader.read(buffer)
-                if (n == -1) {
-                    break
-                } else {
-                    writer.write(buffer, 0, n)
-                }
-            }
-            val json = writer.toString()
-            reader.close()
-            writer.close()
-            return JSONObject(json)
+        fun getJsonToMap(file: File): Map<String, List<VideoDescriptionEntity>> {
+            val json = file.readText()
+            val type = object : TypeToken<Map<String, List<VideoDescriptionEntity>>>() {}.type
+//            Log.d("czg", "getJsonToMap: $json")
+            return Gson().fromJson(json, type)
         }
     }
 }
