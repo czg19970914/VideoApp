@@ -2,10 +2,16 @@ package com.example.videoapp.network
 
 import com.example.videoapp.entities.VideoDescriptionResponse
 import retrofit2.http.GET
+import retrofit2.http.Query
 
 interface NetworkService {
     @GET("/videoDescriptionData")
     suspend fun getVideoDescriptionData() : VideoDescriptionResponse
+
+    @GET("/videoImageBytes")
+    suspend fun getVideoImageBytes(
+        @Query(value = "image_file_path") imageFilePath : String
+    ): ByteArray
 
     /**
      * TODO 通过 Retrofit 创建一个 NetworkService 实例
