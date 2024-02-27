@@ -130,8 +130,32 @@ class VideoDescriptionModel: VideoModel {
             job.await()
 
             // 将videoDescriptionResponse写入json
-            val videoDescriptionContent: Map<String, VideoDescriptionEntity>? =
+            val videoDescriptionContent: Map<String, List<VideoDescriptionEntity>>? =
                 videoDescriptionResponse?.videoDescriptionContent
+            videoDescriptionContent?.forEach {
+                Log.d("czg", "initVideoDescriptionData: videoDescriptionContent key -> " + it.key)
+                val videoDescriptionEntities: List<VideoDescriptionEntity> = it.value
+//                for(videoDescriptionEntity in videoDescriptionEntities) {
+//                    Log.d(
+//                        "czg",
+//                        "initVideoDescriptionData: VideoDescriptionEntity title -> " + videoDescriptionEntity.title
+//                    )
+//                    Log.d(
+//                        "czg",
+//                        "initVideoDescriptionData: VideoDescriptionEntity imageName -> " + videoDescriptionEntity.imageName
+//                    )
+//                    val subVideoDescriptionEntities = videoDescriptionEntity.subVideoDescriptionEntities
+//                    if (subVideoDescriptionEntities != null) {
+//                        for (subVideoDescriptionEntity in subVideoDescriptionEntities) {
+//                            Log.d(
+//                                "czg",
+//                                "initVideoDescriptionData: SubImage -> " + subVideoDescriptionEntity.subImageName
+//                            )
+//                        }
+//                    }
+//                }
+
+            }
 
             // 展示nameList
             val nameList: List<String>? = videoDescriptionResponse?.nameList
