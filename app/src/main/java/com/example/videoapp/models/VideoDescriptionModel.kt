@@ -50,7 +50,11 @@ class VideoDescriptionModel: VideoModel {
         CoroutineScope(Dispatchers.IO).launch {
             var videoDescriptionResponse : VideoDescriptionResponse? = null
             val job = async {
-                videoDescriptionResponse = networkService?.getVideoDescriptionData()
+                try {
+                    videoDescriptionResponse = networkService?.getVideoDescriptionData()
+                } catch (e: Exception) {
+                    Log.i(TAG, "initVideoDescriptionData: 网络获取错误")
+                }
             }
             job.await()
 
@@ -128,10 +132,14 @@ class VideoDescriptionModel: VideoModel {
                                     completeUrl = ""
                                     val imageBytes =
                                         networkService?.getVideoImageBytes(subVideoDescriptionEnt.subImageName!!)
+                                    videoImage = blankViewImage
                                     if (imageBytes != null) {
-                                        videoImage = VideoUtils.base64StrToBitmap(imageBytes.get("imageBase64Str")!!)
-                                    } else {
-                                        videoImage = blankViewImage
+                                        try {
+                                            videoImage =
+                                                VideoUtils.base64StrToBitmap(imageBytes.get("imageBase64Str")!!)
+                                        } catch (e: Exception) {
+                                            Log.i(TAG, "getSelectVideoDescription: 网络获取错误")
+                                        }
                                     }
                                     videoBitmaps.add(Pair(completeUrl, videoImage))
                                 }
