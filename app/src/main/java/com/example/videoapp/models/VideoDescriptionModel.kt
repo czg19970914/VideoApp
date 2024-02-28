@@ -124,12 +124,12 @@ class VideoDescriptionModel: VideoModel {
                         val subVideoDescriptionEntities = videoDescriptionEntities[id].subVideoDescriptionEntities
                         if (!subVideoDescriptionEntities.isNullOrEmpty()) {
                             // TODO 先空之后传输过来
-                            var completeUrl: String = ""
+                            var completeUrl: String = "http://192.168.0.105:8080/videoPlay?file_name=/Bilibili/洛丽塔大哥/1.mp4"
                             var videoImage: Bitmap = blankViewImage
                             val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
                             val job = async {
                                 for (subVideoDescriptionEnt in subVideoDescriptionEntities) {
-                                    completeUrl = ""
+                                    completeUrl = "http://192.168.0.105:8080/videoPlay?file_name=/Bilibili/洛丽塔大哥/1.mp4"
                                     val imageBytes =
                                         networkService?.getVideoImageBytes(subVideoDescriptionEnt.subImageName!!)
                                     videoImage = blankViewImage
@@ -183,12 +183,12 @@ class VideoDescriptionModel: VideoModel {
                         val subVideoDescriptionEntities = videoDescriptionEntities[id].subVideoDescriptionEntities
                         if (!subVideoDescriptionEntities.isNullOrEmpty()) {
                             // TODO 先空之后传输过来
-                            var completeUrl: String = ""
+                            var completeUrl: String = "http://192.168.0.105:8080/videoPlay?file_name=/Bilibili/洛丽塔大哥/1.mp4"
                             var videoImage: Bitmap = blankViewImage
                             val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
                             val job = async {
                                 for (subVideoDescriptionEnt in subVideoDescriptionEntities) {
-                                    completeUrl = ""
+                                    completeUrl = "http://192.168.0.105:8080/videoPlay?file_name=/Bilibili/洛丽塔大哥/1.mp4"
                                     val imageBytes =
                                         networkService?.getVideoImageBytes(subVideoDescriptionEnt.subImageName!!)
                                     if (imageBytes != null) {
