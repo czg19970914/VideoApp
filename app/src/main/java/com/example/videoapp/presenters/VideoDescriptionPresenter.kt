@@ -30,7 +30,6 @@ class VideoDescriptionPresenter: VideoPresenter {
         VideoUtils.vectorDrawableToBitmap(
             mDescriptionView as MainActivity, R.drawable.blank_video_image)
     }
-    private var mJsonDictStream: InputStream? = null
     override fun setModel(model: VideoModel) {
         mDescriptionModel = model
     }

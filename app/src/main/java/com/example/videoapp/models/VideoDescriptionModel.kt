@@ -4,25 +4,20 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import com.example.videoapp.ConfigParams
-import com.example.videoapp.MainActivity
 import com.example.videoapp.entities.NameEntity
-import com.example.videoapp.entities.SubVideoDescriptionEntity
 import com.example.videoapp.entities.VideoDescriptionEntity
 import com.example.videoapp.entities.VideoDescriptionResponse
 import com.example.videoapp.entities.VideoEntity
 import com.example.videoapp.interfaces.VideoModel
 import com.example.videoapp.interfaces.VideoPresenter
-import com.example.videoapp.models.Cache.VideoEntityCache
 import com.example.videoapp.network.NetworkService
 import com.example.videoapp.presenters.VideoDescriptionPresenter
 import com.example.videoapp.utils.VideoUtils
 import com.scwang.smart.refresh.layout.api.RefreshLayout
-import com.ywl5320.wlmedia.WlMediaUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import java.io.File
 
 class VideoDescriptionModel: VideoModel {
@@ -33,7 +28,6 @@ class VideoDescriptionModel: VideoModel {
 
     private var mDescriptionPresenter: VideoPresenter? = null
 
-    private var mWlMediaUtil: WlMediaUtil? = null
     private var mMinId = 1
     private var mMaxId = 23
 
@@ -85,30 +79,6 @@ class VideoDescriptionModel: VideoModel {
             val allVideoDescriptionMap: Map<String, List<VideoDescriptionEntity>> =
                 VideoUtils.getJsonToMap(File(context.filesDir , JSON_PATH))
 
-//            allVideoDescriptionMap.forEach {
-//                Log.d("czg", "initVideoDescriptionData: videoDescriptionContent key -> " + it.key)
-//                val videoDescriptionEntities: List<VideoDescriptionEntity> = it.value
-//                for(videoDescriptionEntity in videoDescriptionEntities) {
-//                    Log.d(
-//                        "czg",
-//                        "initVideoDescriptionData: VideoDescriptionEntity title -> " + videoDescriptionEntity.title
-//                    )
-//                    Log.d(
-//                        "czg",
-//                        "initVideoDescriptionData: VideoDescriptionEntity imageName -> " + videoDescriptionEntity.imageName
-//                    )
-//                    val subVideoDescriptionEntities = videoDescriptionEntity.subVideoDescriptionEntities
-//                    if (subVideoDescriptionEntities != null) {
-//                        for (subVideoDescriptionEntity in subVideoDescriptionEntities) {
-//                            Log.d(
-//                                "czg",
-//                                "initVideoDescriptionData: SubImage -> " + subVideoDescriptionEntity.subImageName
-//                            )
-//                        }
-//                    }
-//                }
-//            }
-
             val videoDescriptionEntities =
                 allVideoDescriptionMap.getOrDefault(selectName, null)
             if(videoDescriptionEntities != null) {
@@ -123,13 +93,12 @@ class VideoDescriptionModel: VideoModel {
                         val videoTitle = videoDescriptionEntities[id].title
                         val subVideoDescriptionEntities = videoDescriptionEntities[id].subVideoDescriptionEntities
                         if (!subVideoDescriptionEntities.isNullOrEmpty()) {
-                            // TODO 先空之后传输过来
-                            var completeUrl: String = "http://192.168.0.105:8080/videoPlay?file_name=/Bilibili/洛丽塔大哥/1.mp4"
+                            var completeUrl: String = ""
                             var videoImage: Bitmap = blankViewImage
                             val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
                             val job = async {
                                 for (subVideoDescriptionEnt in subVideoDescriptionEntities) {
-                                    completeUrl = "http://192.168.0.105:8080/videoPlay?file_name=/Bilibili/洛丽塔大哥/1.mp4"
+                                    completeUrl = ConfigParams.baseUrl + "videoPlay?file_name=" + subVideoDescriptionEnt.subVideoPath
                                     val imageBytes =
                                         networkService?.getVideoImageBytes(subVideoDescriptionEnt.subImageName!!)
                                     videoImage = blankViewImage
@@ -182,13 +151,12 @@ class VideoDescriptionModel: VideoModel {
                         val videoTitle = videoDescriptionEntities[id].title
                         val subVideoDescriptionEntities = videoDescriptionEntities[id].subVideoDescriptionEntities
                         if (!subVideoDescriptionEntities.isNullOrEmpty()) {
-                            // TODO 先空之后传输过来
-                            var completeUrl: String = "http://192.168.0.105:8080/videoPlay?file_name=/Bilibili/洛丽塔大哥/1.mp4"
+                            var completeUrl: String = ""
                             var videoImage: Bitmap = blankViewImage
                             val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
                             val job = async {
                                 for (subVideoDescriptionEnt in subVideoDescriptionEntities) {
-                                    completeUrl = "http://192.168.0.105:8080/videoPlay?file_name=/Bilibili/洛丽塔大哥/1.mp4"
+                                    completeUrl = ConfigParams.baseUrl + "videoPlay?file_name=" + subVideoDescriptionEnt.subVideoPath
                                     val imageBytes =
                                         networkService?.getVideoImageBytes(subVideoDescriptionEnt.subImageName!!)
                                     if (imageBytes != null) {
