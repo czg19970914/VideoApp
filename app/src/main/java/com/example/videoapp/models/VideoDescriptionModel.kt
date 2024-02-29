@@ -14,10 +14,7 @@ import com.example.videoapp.network.NetworkService
 import com.example.videoapp.presenters.VideoDescriptionPresenter
 import com.example.videoapp.utils.VideoUtils
 import com.scwang.smart.refresh.layout.api.RefreshLayout
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.io.File
 
 class VideoDescriptionModel: VideoModel {
@@ -43,14 +40,12 @@ class VideoDescriptionModel: VideoModel {
     fun initVideoDescriptionData (context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
             var videoDescriptionResponse : VideoDescriptionResponse? = null
-            val job = async {
-                try {
-                    videoDescriptionResponse = networkService?.getVideoDescriptionData()
-                } catch (e: Exception) {
-                    Log.i(TAG, "initVideoDescriptionData: 网络获取错误")
-                }
+
+            try {
+                videoDescriptionResponse = networkService?.getVideoDescriptionData()
+            } catch (e: Exception) {
+                Log.i(TAG, "initVideoDescriptionData: 网络获取错误")
             }
-            job.await()
 
             // 将videoDescriptionResponse写入json
             val videoDescriptionContent: Map<String, List<VideoDescriptionEntity>>? =
@@ -93,19 +88,19 @@ class VideoDescriptionModel: VideoModel {
                         val videoTitle = videoDescriptionEntities[id].title
                         val subVideoDescriptionEntities = videoDescriptionEntities[id].subVideoDescriptionEntities
                         if (!subVideoDescriptionEntities.isNullOrEmpty()) {
-                            var completeUrl: String = ""
-                            var videoImage: Bitmap = blankViewImage
                             val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
-                            val job = async {
-                                for (subVideoDescriptionEnt in subVideoDescriptionEntities) {
-                                    completeUrl = ConfigParams.baseUrl + "videoPlay?file_name=" + subVideoDescriptionEnt.subVideoPath
+
+                            // 多协程并行优化
+                            val deferredList = subVideoDescriptionEntities.indices.map {
+                                it -> async {
+                                    val completeUrl =
+                                        ConfigParams.baseUrl + "videoPlay?file_name=" + subVideoDescriptionEntities[it].subVideoPath
                                     val imageBytes =
-                                        networkService?.getVideoImageBytes(subVideoDescriptionEnt.subImageName!!)
-                                    videoImage = blankViewImage
+                                        networkService?.getVideoImageBytes(subVideoDescriptionEntities[it].subImageName!!)
+                                    var videoImage = blankViewImage
                                     if (imageBytes != null) {
                                         try {
-                                            videoImage =
-                                                VideoUtils.base64StrToBitmap(imageBytes.get("imageBase64Str")!!)
+                                            videoImage = VideoUtils.base64StrToBitmap(imageBytes.get("imageBase64Str")!!)
                                         } catch (e: Exception) {
                                             Log.i(TAG, "getSelectVideoDescription: 网络获取错误")
                                         }
@@ -113,11 +108,15 @@ class VideoDescriptionModel: VideoModel {
                                     videoBitmaps.add(Pair(completeUrl, videoImage))
                                 }
                             }
-                            job.await()
-                            // 子视频最后一个视频截图作为总封面
-                            val videoEntity = VideoEntity(id, completeUrl, videoTitle!!, videoImage)
-                            videoEntity.mBitmapArray = videoBitmaps
-                            videEntities.add(videoEntity)
+                            deferredList.awaitAll()
+
+                            // 子视频第一个视频截图作为总封面
+                            if(videoBitmaps.size > 0) {
+                                val videoEntity = VideoEntity(
+                                    id, videoBitmaps[0].first, videoTitle!!, videoBitmaps[0].second)
+                                videoEntity.mBitmapArray = videoBitmaps
+                                videEntities.add(videoEntity)
+                            }
                         }
                     }
                 }
@@ -151,27 +150,35 @@ class VideoDescriptionModel: VideoModel {
                         val videoTitle = videoDescriptionEntities[id].title
                         val subVideoDescriptionEntities = videoDescriptionEntities[id].subVideoDescriptionEntities
                         if (!subVideoDescriptionEntities.isNullOrEmpty()) {
-                            var completeUrl: String = ""
-                            var videoImage: Bitmap = blankViewImage
                             val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
-                            val job = async {
-                                for (subVideoDescriptionEnt in subVideoDescriptionEntities) {
-                                    completeUrl = ConfigParams.baseUrl + "videoPlay?file_name=" + subVideoDescriptionEnt.subVideoPath
+
+                            // 多协程并行优化
+                            val deferredList = subVideoDescriptionEntities.indices.map {
+                                it -> async {
+                                    val completeUrl =
+                                        ConfigParams.baseUrl + "videoPlay?file_name=" + subVideoDescriptionEntities[it].subVideoPath
                                     val imageBytes =
-                                        networkService?.getVideoImageBytes(subVideoDescriptionEnt.subImageName!!)
+                                        networkService?.getVideoImageBytes(subVideoDescriptionEntities[it].subImageName!!)
+                                    var videoImage = blankViewImage
                                     if (imageBytes != null) {
-                                        videoImage = VideoUtils.base64StrToBitmap(imageBytes.get("imageBase64Str")!!)
-                                    } else {
-                                        videoImage = blankViewImage
+                                        try {
+                                            videoImage = VideoUtils.base64StrToBitmap(imageBytes.get("imageBase64Str")!!)
+                                        } catch (e: Exception) {
+                                            Log.i(TAG, "getSelectVideoDescription: 网络获取错误")
+                                        }
                                     }
                                     videoBitmaps.add(Pair(completeUrl, videoImage))
                                 }
                             }
-                            job.await()
-                            // 子视频最后一个视频截图作为总封面
-                            val videoEntity = VideoEntity(id, completeUrl, videoTitle!!, videoImage)
-                            videoEntity.mBitmapArray = videoBitmaps
-                            videEntities.add(videoEntity)
+                            deferredList.awaitAll()
+
+                            // 子视频第一个视频截图作为总封面
+                            if(videoBitmaps.size > 0) {
+                                val videoEntity = VideoEntity(
+                                    id, videoBitmaps[0].first, videoTitle!!, videoBitmaps[0].second)
+                                videoEntity.mBitmapArray = videoBitmaps
+                                videEntities.add(videoEntity)
+                            }
                         }
                     }
                 }
