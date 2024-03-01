@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.util.Log
 import com.example.videoapp.ConfigParams
 import com.example.videoapp.entities.NameEntity
+import com.example.videoapp.entities.SubVideoDescriptionEntity
 import com.example.videoapp.entities.VideoDescriptionEntity
 import com.example.videoapp.entities.VideoDescriptionResponse
 import com.example.videoapp.entities.VideoEntity
@@ -21,6 +22,12 @@ class VideoDescriptionModel: VideoModel {
     companion object{
         const val TAG = "VideoDescriptionModel"
         const val JSON_PATH = "all_video_description.json"
+
+        // 只有子视频中超过阈值才并发优化
+        const val MULTI_COROUTINES_THRESHOLD = 8
+
+        // 多协程优化的协程数
+        const val COROUTINES_NUM = 4
     }
 
     private var mDescriptionPresenter: VideoPresenter? = null
@@ -82,33 +89,32 @@ class VideoDescriptionModel: VideoModel {
                     selectId = mMaxId + 1
 
                 if(selectId >=0 && selectId < videoDescriptionEntities.size) {
-                    mMinId = Math.max(0, selectId - ConfigParams.getDescriptionNum / 2)
-                    mMaxId = Math.min(videoDescriptionEntities.size - 1, selectId + ConfigParams.getDescriptionNum / 2)
+                    mMinId = 0.coerceAtLeast(selectId - ConfigParams.getDescriptionNum / 2)
+                    mMaxId =
+                        (videoDescriptionEntities.size - 1).coerceAtMost(selectId + ConfigParams.getDescriptionNum / 2)
                     for (id in mMinId..mMaxId) {
                         val videoTitle = videoDescriptionEntities[id].title
                         val subVideoDescriptionEntities = videoDescriptionEntities[id].subVideoDescriptionEntities
                         if (!subVideoDescriptionEntities.isNullOrEmpty()) {
                             val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
 
-                            // 多协程并行优化
-                            val deferredList = subVideoDescriptionEntities.indices.map {
-                                it -> async {
-                                    val completeUrl =
-                                        ConfigParams.baseUrl + "videoPlay?file_name=" + subVideoDescriptionEntities[it].subVideoPath
-                                    val imageBytes =
-                                        networkService?.getVideoImageBytes(subVideoDescriptionEntities[it].subImageName!!)
-                                    var videoImage = blankViewImage
-                                    if (imageBytes != null) {
-                                        try {
-                                            videoImage = VideoUtils.base64StrToBitmap(imageBytes.get("imageBase64Str")!!)
-                                        } catch (e: Exception) {
-                                            Log.i(TAG, "getSelectVideoDescription: 网络获取错误")
-                                        }
+                            // 固定协程数的多协程并行优化
+                            if (subVideoDescriptionEntities.size < MULTI_COROUTINES_THRESHOLD) {
+                                getSubVideoDescriptionTask(subVideoDescriptionEntities, videoBitmaps,
+                                    blankViewImage, 0, subVideoDescriptionEntities.size,
+                                    subVideoDescriptionEntities.size)
+                            } else {
+                                val taskLen = (subVideoDescriptionEntities.size / COROUTINES_NUM) + 1
+                                val deferredList = (0 until COROUTINES_NUM).map {
+                                    it -> async {
+                                        getSubVideoDescriptionTask(subVideoDescriptionEntities,
+                                            videoBitmaps, blankViewImage,
+                                            it*taskLen, (it+1)*taskLen,
+                                            subVideoDescriptionEntities.size)
                                     }
-                                    videoBitmaps.add(Pair(completeUrl, videoImage))
                                 }
+                                deferredList.awaitAll()
                             }
-                            deferredList.awaitAll()
 
                             // 子视频第一个视频截图作为总封面
                             if(videoBitmaps.size > 0) {
@@ -144,33 +150,32 @@ class VideoDescriptionModel: VideoModel {
                     selectId = mMaxId + 1
 
                 if(selectId >=0 && selectId < videoDescriptionEntities.size) {
-                    mMinId = Math.max(0, selectId - ConfigParams.getDescriptionNum / 2)
-                    mMaxId = Math.min(videoDescriptionEntities.size - 1, selectId + ConfigParams.getDescriptionNum / 2)
+                    mMinId = 0.coerceAtLeast(selectId - ConfigParams.getDescriptionNum / 2)
+                    mMaxId =
+                        (videoDescriptionEntities.size - 1).coerceAtMost(selectId + ConfigParams.getDescriptionNum / 2)
                     for (id in mMinId..mMaxId) {
                         val videoTitle = videoDescriptionEntities[id].title
                         val subVideoDescriptionEntities = videoDescriptionEntities[id].subVideoDescriptionEntities
                         if (!subVideoDescriptionEntities.isNullOrEmpty()) {
                             val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
 
-                            // 多协程并行优化
-                            val deferredList = subVideoDescriptionEntities.indices.map {
-                                it -> async {
-                                    val completeUrl =
-                                        ConfigParams.baseUrl + "videoPlay?file_name=" + subVideoDescriptionEntities[it].subVideoPath
-                                    val imageBytes =
-                                        networkService?.getVideoImageBytes(subVideoDescriptionEntities[it].subImageName!!)
-                                    var videoImage = blankViewImage
-                                    if (imageBytes != null) {
-                                        try {
-                                            videoImage = VideoUtils.base64StrToBitmap(imageBytes.get("imageBase64Str")!!)
-                                        } catch (e: Exception) {
-                                            Log.i(TAG, "getSelectVideoDescription: 网络获取错误")
-                                        }
+                            // 固定协程数的多协程并行优化
+                            if (subVideoDescriptionEntities.size < MULTI_COROUTINES_THRESHOLD) {
+                                getSubVideoDescriptionTask(subVideoDescriptionEntities, videoBitmaps,
+                                    blankViewImage, 0, subVideoDescriptionEntities.size,
+                                    subVideoDescriptionEntities.size)
+                            } else {
+                                val taskLen = (subVideoDescriptionEntities.size / COROUTINES_NUM) + 1
+                                val deferredList = (0 until COROUTINES_NUM).map {
+                                    it -> async {
+                                        getSubVideoDescriptionTask(subVideoDescriptionEntities,
+                                            videoBitmaps, blankViewImage,
+                                            it*taskLen, (it+1)*taskLen,
+                                            subVideoDescriptionEntities.size)
                                     }
-                                    videoBitmaps.add(Pair(completeUrl, videoImage))
                                 }
+                                deferredList.awaitAll()
                             }
-                            deferredList.awaitAll()
 
                             // 子视频第一个视频截图作为总封面
                             if(videoBitmaps.size > 0) {
@@ -186,6 +191,30 @@ class VideoDescriptionModel: VideoModel {
             (mDescriptionPresenter as VideoDescriptionPresenter).updateVideoInfoRecyclerView(
                 videEntities, isDown, refreshLayout, refreshOperation
             )
+        }
+    }
+
+    // 将获取subVideoDescription分成几段完成并行优化的执行
+    private suspend fun getSubVideoDescriptionTask(
+        subVideoDescriptionEntities: List<SubVideoDescriptionEntity>,
+        videoBitmaps: ArrayList<Pair<String, Bitmap>>, blankViewImage: Bitmap,
+        start: Int, end: Int, maxLen: Int) {
+        val startIndex = 0.coerceAtLeast(start)
+        val endIndex = maxLen.coerceAtMost(end)
+        for(index in startIndex until endIndex) {
+            val completeUrl =
+                ConfigParams.baseUrl + "videoPlay?file_name=" + subVideoDescriptionEntities[index].subVideoPath
+            val imageBytes =
+                networkService?.getVideoImageBytes(subVideoDescriptionEntities[index].subImageName!!)
+            var videoImage = blankViewImage
+            if (imageBytes != null) {
+                try {
+                    videoImage = VideoUtils.base64StrToBitmap(imageBytes["imageBase64Str"]!!)
+                } catch (e: Exception) {
+                    Log.i(TAG, "getSelectVideoDescription: 网络获取错误")
+                }
+            }
+            videoBitmaps.add(Pair(completeUrl, videoImage))
         }
     }
 
