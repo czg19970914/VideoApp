@@ -11,6 +11,7 @@ import com.example.videoapp.entities.VideoDescriptionResponse
 import com.example.videoapp.entities.VideoEntity
 import com.example.videoapp.interfaces.VideoModel
 import com.example.videoapp.interfaces.VideoPresenter
+import com.example.videoapp.models.Cache.LRUCache
 import com.example.videoapp.network.NetworkService
 import com.example.videoapp.presenters.VideoDescriptionPresenter
 import com.example.videoapp.utils.VideoUtils
@@ -24,10 +25,13 @@ class VideoDescriptionModel: VideoModel {
         const val JSON_PATH = "all_video_description.json"
 
         // 只有子视频中超过阈值才并发优化
-        const val MULTI_COROUTINES_THRESHOLD = 8
+        const val MULTI_COROUTINES_THRESHOLD = 5
 
         // 多协程优化的协程数
-        const val COROUTINES_NUM = 4
+        const val COROUTINES_NUM = 3
+
+        // 缓存图片cache的大小
+        const val BITMAP_CACHE_SIZE = 300
     }
 
     private var mDescriptionPresenter: VideoPresenter? = null
@@ -35,10 +39,13 @@ class VideoDescriptionModel: VideoModel {
     private var mMinId = 1
     private var mMaxId = 23
 
-    private var networkService: NetworkService? = null
+    private var networkService: NetworkService
+
+    private val mBitmapCache: LRUCache
 
     init {
         networkService = NetworkService.createService()
+        mBitmapCache = LRUCache(BITMAP_CACHE_SIZE)
     }
     override fun setPresenter(presenter: VideoPresenter) {
         mDescriptionPresenter = presenter
@@ -205,16 +212,23 @@ class VideoDescriptionModel: VideoModel {
             val completeUrl =
                 ConfigParams.baseUrl + "videoPlay?file_name=" + subVideoDescriptionEntities[index].subVideoPath
             val imageBytes =
-                networkService?.getVideoImageBytes(subVideoDescriptionEntities[index].subImageName!!)
-            var videoImage = blankViewImage
-            if (imageBytes != null) {
+                networkService.getVideoImageBytes(subVideoDescriptionEntities[index].subImageName!!)
+            var videoImage: Bitmap? = null
+            synchronized(this) {
+                videoImage = mBitmapCache.get(completeUrl)
+            }
+            if(videoImage == null) {
+                videoImage = blankViewImage
                 try {
                     videoImage = VideoUtils.base64StrToBitmap(imageBytes["imageBase64Str"]!!)
                 } catch (e: Exception) {
                     Log.i(TAG, "getSelectVideoDescription: 网络获取错误")
                 }
+                synchronized(this) {
+                    mBitmapCache.set(completeUrl, videoImage!!)
+                }
             }
-            videoBitmaps.add(Pair(completeUrl, videoImage))
+            videoBitmaps.add(Pair(completeUrl, videoImage!!))
         }
     }
 
