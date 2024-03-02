@@ -25,7 +25,7 @@ class VideoDescriptionModel: VideoModel {
         const val JSON_PATH = "all_video_description.json"
 
         // 只有子视频中超过阈值才并发优化
-        const val MULTI_COROUTINES_THRESHOLD = 5
+        const val MULTI_COROUTINES_THRESHOLD = 6
 
         // 多协程优化的协程数
         const val COROUTINES_NUM = 3
@@ -106,18 +106,53 @@ class VideoDescriptionModel: VideoModel {
                             val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
 
                             // 固定协程数的多协程并行优化
-                            if (subVideoDescriptionEntities.size < MULTI_COROUTINES_THRESHOLD) {
-                                getSubVideoDescriptionTask(subVideoDescriptionEntities, videoBitmaps,
-                                    blankViewImage, 0, subVideoDescriptionEntities.size,
-                                    subVideoDescriptionEntities.size)
+//                            if (subVideoDescriptionEntities.size < MULTI_COROUTINES_THRESHOLD) {
+//                                getSubVideoDescriptionTask(subVideoDescriptionEntities, videoBitmaps,
+//                                    blankViewImage, 0, subVideoDescriptionEntities.size,
+//                                    subVideoDescriptionEntities.size)
+//                            } else {
+//                                val taskLen = (subVideoDescriptionEntities.size / COROUTINES_NUM) + 1
+//                                val deferredList = (0 until COROUTINES_NUM).map {
+//                                    it -> async {
+//                                        getSubVideoDescriptionTask(subVideoDescriptionEntities,
+//                                            videoBitmaps, blankViewImage,
+//                                            it*taskLen, (it+1)*taskLen,
+//                                            subVideoDescriptionEntities.size)
+//                                    }
+//                                }
+//                                deferredList.awaitAll()
+//                            }
+
+                            // 二次并行优化
+                            // 暂存需要网络请求的实体
+                            val networkSubVideoDescriptionEntities = mutableListOf<SubVideoDescriptionEntity>()
+                            for (index in subVideoDescriptionEntities.indices) {
+                                val key = subVideoDescriptionEntities[index].subVideoPath
+                                if(key.isNullOrEmpty()) {
+                                    continue
+                                }
+                                val completeUrl =
+                                    ConfigParams.baseUrl + "videoPlay?file_name=" + subVideoDescriptionEntities[index].subVideoPath
+                                val cacheImage = mBitmapCache.get(key)
+                                if(cacheImage != null) {
+                                    videoBitmaps.add(Pair(completeUrl, cacheImage))
+                                } else {
+                                    networkSubVideoDescriptionEntities.add(subVideoDescriptionEntities[index])
+                                }
+                            }
+                            val networkSubVideoDescriptionList = networkSubVideoDescriptionEntities.toList()
+                            if (networkSubVideoDescriptionList.size < MULTI_COROUTINES_THRESHOLD) {
+                                getSubVideoDescriptionTask(networkSubVideoDescriptionList, videoBitmaps,
+                                    blankViewImage, 0, networkSubVideoDescriptionList.size,
+                                    networkSubVideoDescriptionList.size)
                             } else {
-                                val taskLen = (subVideoDescriptionEntities.size / COROUTINES_NUM) + 1
+                                val taskLen = (networkSubVideoDescriptionList.size / COROUTINES_NUM) + 1
                                 val deferredList = (0 until COROUTINES_NUM).map {
                                     it -> async {
-                                        getSubVideoDescriptionTask(subVideoDescriptionEntities,
+                                        getSubVideoDescriptionTask(networkSubVideoDescriptionList,
                                             videoBitmaps, blankViewImage,
                                             it*taskLen, (it+1)*taskLen,
-                                            subVideoDescriptionEntities.size)
+                                            networkSubVideoDescriptionList.size)
                                     }
                                 }
                                 deferredList.awaitAll()
@@ -167,18 +202,53 @@ class VideoDescriptionModel: VideoModel {
                             val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
 
                             // 固定协程数的多协程并行优化
-                            if (subVideoDescriptionEntities.size < MULTI_COROUTINES_THRESHOLD) {
-                                getSubVideoDescriptionTask(subVideoDescriptionEntities, videoBitmaps,
-                                    blankViewImage, 0, subVideoDescriptionEntities.size,
-                                    subVideoDescriptionEntities.size)
+//                            if (subVideoDescriptionEntities.size < MULTI_COROUTINES_THRESHOLD) {
+//                                getSubVideoDescriptionTask(subVideoDescriptionEntities, videoBitmaps,
+//                                    blankViewImage, 0, subVideoDescriptionEntities.size,
+//                                    subVideoDescriptionEntities.size)
+//                            } else {
+//                                val taskLen = (subVideoDescriptionEntities.size / COROUTINES_NUM) + 1
+//                                val deferredList = (0 until COROUTINES_NUM).map {
+//                                    it -> async {
+//                                        getSubVideoDescriptionTask(subVideoDescriptionEntities,
+//                                            videoBitmaps, blankViewImage,
+//                                            it*taskLen, (it+1)*taskLen,
+//                                            subVideoDescriptionEntities.size)
+//                                    }
+//                                }
+//                                deferredList.awaitAll()
+//                            }
+
+                            // 二次并行优化
+                            // 暂存需要网络请求的实体
+                            val networkSubVideoDescriptionEntities = mutableListOf<SubVideoDescriptionEntity>()
+                            for (index in subVideoDescriptionEntities.indices) {
+                                val key = subVideoDescriptionEntities[index].subVideoPath
+                                if(key.isNullOrEmpty()) {
+                                    continue
+                                }
+                                val completeUrl =
+                                    ConfigParams.baseUrl + "videoPlay?file_name=" + subVideoDescriptionEntities[index].subVideoPath
+                                val cacheImage = mBitmapCache.get(key)
+                                if(cacheImage != null) {
+                                    videoBitmaps.add(Pair(completeUrl, cacheImage))
+                                } else {
+                                    networkSubVideoDescriptionEntities.add(subVideoDescriptionEntities[index])
+                                }
+                            }
+                            val networkSubVideoDescriptionList = networkSubVideoDescriptionEntities.toList()
+                            if (networkSubVideoDescriptionList.size < MULTI_COROUTINES_THRESHOLD) {
+                                getSubVideoDescriptionTask(networkSubVideoDescriptionList, videoBitmaps,
+                                    blankViewImage, 0, networkSubVideoDescriptionList.size,
+                                    networkSubVideoDescriptionList.size)
                             } else {
-                                val taskLen = (subVideoDescriptionEntities.size / COROUTINES_NUM) + 1
+                                val taskLen = (networkSubVideoDescriptionList.size / COROUTINES_NUM) + 1
                                 val deferredList = (0 until COROUTINES_NUM).map {
                                     it -> async {
-                                        getSubVideoDescriptionTask(subVideoDescriptionEntities,
+                                        getSubVideoDescriptionTask(networkSubVideoDescriptionList,
                                             videoBitmaps, blankViewImage,
                                             it*taskLen, (it+1)*taskLen,
-                                            subVideoDescriptionEntities.size)
+                                            networkSubVideoDescriptionList.size)
                                     }
                                 }
                                 deferredList.awaitAll()
@@ -209,28 +279,32 @@ class VideoDescriptionModel: VideoModel {
         val startIndex = 0.coerceAtLeast(start)
         val endIndex = maxLen.coerceAtMost(end)
         for(index in startIndex until endIndex) {
+            if(subVideoDescriptionEntities[index].subVideoPath.isNullOrEmpty() ||
+                subVideoDescriptionEntities[index].subImageName.isNullOrEmpty()) {
+                continue
+            }
             val completeUrl =
                 ConfigParams.baseUrl + "videoPlay?file_name=" + subVideoDescriptionEntities[index].subVideoPath
             val imageBytes =
                 networkService.getVideoImageBytes(subVideoDescriptionEntities[index].subImageName!!)
-            var videoImage: Bitmap? = null
+            var videoImage: Bitmap = blankViewImage
+            try {
+                videoImage = VideoUtils.base64StrToBitmap(imageBytes["imageBase64Str"]!!)
+            } catch (e: Exception) {
+                Log.i(TAG, "getSelectVideoDescription: 网络获取错误")
+            }
             synchronized(this) {
-                videoImage = mBitmapCache.get(completeUrl)
+                mBitmapCache.set(subVideoDescriptionEntities[index].subVideoPath!!, videoImage)
             }
-            if(videoImage == null) {
-                videoImage = blankViewImage
-                try {
-                    videoImage = VideoUtils.base64StrToBitmap(imageBytes["imageBase64Str"]!!)
-                } catch (e: Exception) {
-                    Log.i(TAG, "getSelectVideoDescription: 网络获取错误")
-                }
-                synchronized(this) {
-                    mBitmapCache.set(completeUrl, videoImage!!)
-                }
-            }
-            videoBitmaps.add(Pair(completeUrl, videoImage!!))
+            videoBitmaps.add(Pair(completeUrl, videoImage))
         }
     }
+
+//    private fun getSubVideoDescriptionEntity(completeUrl): SubVideoDescriptionEntity {
+//
+//    }
+
+    // 再进行一波优化加载性能，不使用synchronized关键字
 
     fun resetIndex(){
         mMinId = 1
