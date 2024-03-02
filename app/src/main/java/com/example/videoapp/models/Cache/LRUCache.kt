@@ -1,7 +1,6 @@
 package com.example.videoapp.models.Cache
 
 import android.graphics.Bitmap
-import android.util.Log
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -15,7 +14,7 @@ class LRUCache(private val size: Int){
     private val tailNode: DLinkNode
 
     init {
-        cache = HashMap<String, DLinkNode>()
+        cache = HashMap()
 
         count = AtomicInteger(0)
 
@@ -76,7 +75,6 @@ class LRUCache(private val size: Int){
     }
 
     fun set(key: String, value: Bitmap) {
-        Log.i("czg", "set: " + count.get())
         val node = cache[key]
         if(node == null) {
             val newNode = DLinkNode()

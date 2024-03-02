@@ -31,7 +31,7 @@ class VideoDescriptionModel: VideoModel {
         const val COROUTINES_NUM = 3
 
         // 缓存图片cache的大小
-        const val BITMAP_CACHE_SIZE = 300
+        const val BITMAP_CACHE_SIZE = 400
     }
 
     private var mDescriptionPresenter: VideoPresenter? = null
@@ -105,25 +105,7 @@ class VideoDescriptionModel: VideoModel {
                         if (!subVideoDescriptionEntities.isNullOrEmpty()) {
                             val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
 
-                            // 固定协程数的多协程并行优化
-//                            if (subVideoDescriptionEntities.size < MULTI_COROUTINES_THRESHOLD) {
-//                                getSubVideoDescriptionTask(subVideoDescriptionEntities, videoBitmaps,
-//                                    blankViewImage, 0, subVideoDescriptionEntities.size,
-//                                    subVideoDescriptionEntities.size)
-//                            } else {
-//                                val taskLen = (subVideoDescriptionEntities.size / COROUTINES_NUM) + 1
-//                                val deferredList = (0 until COROUTINES_NUM).map {
-//                                    it -> async {
-//                                        getSubVideoDescriptionTask(subVideoDescriptionEntities,
-//                                            videoBitmaps, blankViewImage,
-//                                            it*taskLen, (it+1)*taskLen,
-//                                            subVideoDescriptionEntities.size)
-//                                    }
-//                                }
-//                                deferredList.awaitAll()
-//                            }
-
-                            // 二次并行优化
+                            // 并行优化
                             // 暂存需要网络请求的实体
                             val networkSubVideoDescriptionEntities = mutableListOf<SubVideoDescriptionEntity>()
                             for (index in subVideoDescriptionEntities.indices) {
@@ -201,25 +183,7 @@ class VideoDescriptionModel: VideoModel {
                         if (!subVideoDescriptionEntities.isNullOrEmpty()) {
                             val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
 
-                            // 固定协程数的多协程并行优化
-//                            if (subVideoDescriptionEntities.size < MULTI_COROUTINES_THRESHOLD) {
-//                                getSubVideoDescriptionTask(subVideoDescriptionEntities, videoBitmaps,
-//                                    blankViewImage, 0, subVideoDescriptionEntities.size,
-//                                    subVideoDescriptionEntities.size)
-//                            } else {
-//                                val taskLen = (subVideoDescriptionEntities.size / COROUTINES_NUM) + 1
-//                                val deferredList = (0 until COROUTINES_NUM).map {
-//                                    it -> async {
-//                                        getSubVideoDescriptionTask(subVideoDescriptionEntities,
-//                                            videoBitmaps, blankViewImage,
-//                                            it*taskLen, (it+1)*taskLen,
-//                                            subVideoDescriptionEntities.size)
-//                                    }
-//                                }
-//                                deferredList.awaitAll()
-//                            }
-
-                            // 二次并行优化
+                            // 并行优化
                             // 暂存需要网络请求的实体
                             val networkSubVideoDescriptionEntities = mutableListOf<SubVideoDescriptionEntity>()
                             for (index in subVideoDescriptionEntities.indices) {
@@ -299,12 +263,6 @@ class VideoDescriptionModel: VideoModel {
             videoBitmaps.add(Pair(completeUrl, videoImage))
         }
     }
-
-//    private fun getSubVideoDescriptionEntity(completeUrl): SubVideoDescriptionEntity {
-//
-//    }
-
-    // 再进行一波优化加载性能，不使用synchronized关键字
 
     fun resetIndex(){
         mMinId = 1
