@@ -39,14 +39,10 @@ class VideoDescriptionModel: VideoModel {
     private var mMinId = 1
     private var mMaxId = 23
 
-    private var networkService: NetworkService
+    private val networkService: NetworkService = NetworkService.createService()
 
-    private val mBitmapCache: LRUCache
+    private val mBitmapCache: LRUCache = LRUCache(BITMAP_CACHE_SIZE)
 
-    init {
-        networkService = NetworkService.createService()
-        mBitmapCache = LRUCache(BITMAP_CACHE_SIZE)
-    }
     override fun setPresenter(presenter: VideoPresenter) {
         mDescriptionPresenter = presenter
     }
@@ -56,7 +52,7 @@ class VideoDescriptionModel: VideoModel {
             var videoDescriptionResponse : VideoDescriptionResponse? = null
 
             try {
-                videoDescriptionResponse = networkService?.getVideoDescriptionData()
+                videoDescriptionResponse = networkService.getVideoDescriptionData()
             } catch (e: Exception) {
                 Log.i(TAG, "initVideoDescriptionData: 网络获取错误")
             }
@@ -66,6 +62,8 @@ class VideoDescriptionModel: VideoModel {
                 videoDescriptionResponse?.videoDescriptionContent
             if(videoDescriptionContent != null) {
                 VideoUtils.saveDescriptionToJson(videoDescriptionContent, File(context.filesDir , JSON_PATH))
+            } else {
+                Log.i(TAG, "initVideoDescriptionData: 获取的json数据为空")
             }
 
             // 展示nameList
@@ -75,6 +73,8 @@ class VideoDescriptionModel: VideoModel {
                 for(name in nameList) {
                     nameEntityList.add(NameEntity(name, false))
                 }
+            } else {
+                Log.i(TAG, "initVideoDescriptionData: 展示的nameList为空")
             }
             (mDescriptionPresenter as VideoDescriptionPresenter).showSelectBar(nameEntityList)
         }
@@ -130,7 +130,7 @@ class VideoDescriptionModel: VideoModel {
                             } else {
                                 val taskLen = (networkSubVideoDescriptionList.size / COROUTINES_NUM) + 1
                                 val deferredList = (0 until COROUTINES_NUM).map {
-                                    it -> async {
+                                    async {
                                         getSubVideoDescriptionTask(networkSubVideoDescriptionList,
                                             videoBitmaps, blankViewImage,
                                             it*taskLen, (it+1)*taskLen,
@@ -208,7 +208,7 @@ class VideoDescriptionModel: VideoModel {
                             } else {
                                 val taskLen = (networkSubVideoDescriptionList.size / COROUTINES_NUM) + 1
                                 val deferredList = (0 until COROUTINES_NUM).map {
-                                    it -> async {
+                                    async {
                                         getSubVideoDescriptionTask(networkSubVideoDescriptionList,
                                             videoBitmaps, blankViewImage,
                                             it*taskLen, (it+1)*taskLen,

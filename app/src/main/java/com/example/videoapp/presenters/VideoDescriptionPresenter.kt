@@ -11,12 +11,11 @@ import com.example.videoapp.interfaces.VideoView
 import com.example.videoapp.models.VideoDescriptionModel
 import com.example.videoapp.utils.VideoUtils
 import com.scwang.smart.refresh.layout.api.RefreshLayout
-import java.io.InputStream
 
 class VideoDescriptionPresenter: VideoPresenter {
-    companion object{
-        const val TAG = "VideoDescriptionPresenter"
-    }
+//    companion object{
+//        const val TAG = "VideoDescriptionPresenter"
+//    }
 
     private var mDescriptionModel: VideoModel? = null
     private var mDescriptionView: VideoView? = null

@@ -159,7 +159,7 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         mRefreshLayout.setRefreshFooter(ClassicsFooter(this))
         //设置头部刷新时间监听
         mRefreshLayout.setOnRefreshListener(null)
-        mRefreshLayout.setOnRefreshListener { it ->
+        mRefreshLayout.setOnRefreshListener {
             mIsInUpdate = true
             (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(
                 selectName, false, it
@@ -177,8 +177,8 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
 
     suspend fun showSelectBar(nameList: ArrayList<NameEntity>)
     = withContext(Dispatchers.Main) {
-        closeWaitingDialog()
         initSelectNameBar(nameList)
+        closeWaitingDialog()
     }
 
     suspend fun showVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>)
@@ -191,9 +191,7 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
                                             refreshLayout: RefreshLayout,
                                             refreshOperation: (RefreshLayout) -> Unit)
     = withContext(Dispatchers.Main) {
-        if(videoEntities.size == 0){
-
-        }else{
+        if(videoEntities.size > 0){
             mVideoListAdapter?.updateVideoDescription(videoEntities)
             if(isDown)
                 mVideoListLayoutManager?.scrollToPosition(0)
@@ -256,10 +254,8 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
             }
         )
 
-        leftAnimatorSet.setDuration(500)
+        leftAnimatorSet.duration = 500
         leftAnimatorSet.start()
-
-        // TODO 不知道后面加高斯模糊好不好加
     }
     @SuppressLint("Recycle")
     private fun closeLeftMenu(){
@@ -290,7 +286,7 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
             }
         )
 
-        leftAnimatorSet.setDuration(500)
+        leftAnimatorSet.duration = 500
         leftAnimatorSet.start()
     }
 
@@ -314,7 +310,6 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         return if(!mIsInUpdate) {
             true
         }else {
-            // TODO 提示框样式可以好看点
             Toast.makeText(this, "当前正在刷新数据", Toast.LENGTH_SHORT).show()
             false
         }
