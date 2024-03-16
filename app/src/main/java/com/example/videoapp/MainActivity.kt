@@ -177,8 +177,8 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
 
     suspend fun showSelectBar(nameList: ArrayList<NameEntity>)
     = withContext(Dispatchers.Main) {
-        initSelectNameBar(nameList)
         closeWaitingDialog()
+        initSelectNameBar(nameList)
     }
 
     suspend fun showVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>)
