@@ -96,7 +96,7 @@ class VideoDescriptionModel: VideoModel {
                     selectId = mMaxId + 1
 
                 if(selectId >=0 && selectId < videoDescriptionEntities.size) {
-                    mMinId = 0.coerceAtLeast(selectId - ConfigParams.getDescriptionNum / 2)
+                    mMinId = 0.coerceAtLeast(selectId - ConfigParams.getDescriptionNum / 2 + 1)
                     mMaxId =
                         (videoDescriptionEntities.size - 1).coerceAtMost(selectId + ConfigParams.getDescriptionNum / 2)
                     for (id in mMinId..mMaxId) {
@@ -174,7 +174,7 @@ class VideoDescriptionModel: VideoModel {
                     selectId = mMaxId + 1
 
                 if(selectId >=0 && selectId < videoDescriptionEntities.size) {
-                    mMinId = 0.coerceAtLeast(selectId - ConfigParams.getDescriptionNum / 2)
+                    mMinId = 0.coerceAtLeast(selectId - ConfigParams.getDescriptionNum / 2 + 1)
                     mMaxId =
                         (videoDescriptionEntities.size - 1).coerceAtMost(selectId + ConfigParams.getDescriptionNum / 2)
                     for (id in mMinId..mMaxId) {

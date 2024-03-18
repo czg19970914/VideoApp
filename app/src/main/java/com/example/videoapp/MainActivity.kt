@@ -193,12 +193,19 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
     = withContext(Dispatchers.Main) {
         if(videoEntities.size > 0){
             mVideoListAdapter?.updateVideoDescription(videoEntities)
+//            if(isDown)
+//                mVideoListLayoutManager?.scrollToPosition(0)
+//            else
+//                mVideoListLayoutManager?.scrollToPosition(
+//                    mVideoListAdapter!!.itemCount.coerceAtMost(
+//                        ConfigParams.getDescriptionNum - 1)
+//                )
             if(isDown)
-                mVideoListLayoutManager?.scrollToPosition(0)
+                mVideoListLayoutManager?.scrollToPositionWithOffset(0, 0)
             else
-                mVideoListLayoutManager?.scrollToPosition(
+                mVideoListLayoutManager?.scrollToPositionWithOffset(
                     mVideoListAdapter!!.itemCount.coerceAtMost(
-                        ConfigParams.getDescriptionNum - 1)
+                        ConfigParams.getDescriptionNum / 2), 0
                 )
         }
         refreshOperation(refreshLayout)
