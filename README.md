@@ -18,5 +18,5 @@
 
 ## 2023-3-19
 更新
-- 将视频转移到springboot的服务器上（https://github.com/czg19970914/VideoServer/tree/master）
+- 将视频转移到springboot的服务器上：https://github.com/czg19970914/VideoServer/tree/master
 - 使用Retrofit访问资源
