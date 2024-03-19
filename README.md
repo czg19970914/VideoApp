@@ -16,7 +16,7 @@
 - 添加头部的bar来给分类，并且更改json文件的格式
 - 增加二级recycler view 使首页的视频描述可以有一个分类的效果
 
-## 2023-3-19
+## 2024-3-19
 更新
 - 将视频转移到springboot的服务器上：https://github.com/czg19970914/VideoServer/tree/master
 - 使用Retrofit访问资源
