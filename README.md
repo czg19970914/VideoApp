@@ -18,6 +18,6 @@
 
 ## 2024-3-19
 更新（新增master-web分支）
-- 将资源转移到springboot的服务器上：https://github.com/czg19970914/VideoServer/tree/master
+- 将资源使用springboot服务器管理：https://github.com/czg19970914/VideoServer/tree/master
 - 使用Retrofit访问资源
 - 使用LRU算法来缓存数据
