@@ -21,3 +21,4 @@
 - 将资源使用springboot服务器管理：https://github.com/czg19970914/VideoServer/tree/master
 - 使用Retrofit访问资源
 - 使用LRU算法来缓存数据
+- 不需要手动更新json，由服务器解析并返回android客户端
