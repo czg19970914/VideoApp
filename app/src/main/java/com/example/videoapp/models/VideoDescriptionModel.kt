@@ -174,9 +174,15 @@ class VideoDescriptionModel: VideoModel {
                     selectId = mMaxId + 1
 
                 if(selectId >=0 && selectId < videoDescriptionEntities.size) {
-                    mMinId = 0.coerceAtLeast(selectId - ConfigParams.getDescriptionNum / 2 + 1)
-                    mMaxId =
-                        (videoDescriptionEntities.size - 1).coerceAtMost(selectId + ConfigParams.getDescriptionNum / 2)
+                    if(selectId % 2 == 0) {
+                        mMinId = 0.coerceAtLeast(selectId - ConfigParams.getDescriptionNum / 2 + 1)
+                        mMaxId =
+                            (videoDescriptionEntities.size - 1).coerceAtMost(selectId + ConfigParams.getDescriptionNum / 2)
+                    } else {
+                        mMinId = 0.coerceAtLeast(selectId - ConfigParams.getDescriptionNum / 2)
+                        mMaxId =
+                            (videoDescriptionEntities.size - 1).coerceAtMost(selectId + ConfigParams.getDescriptionNum / 2 - 1)
+                    }
                     for (id in mMinId..mMaxId) {
                         val videoTitle = videoDescriptionEntities[id].title
                         val subVideoDescriptionEntities = videoDescriptionEntities[id].subVideoDescriptionEntities
