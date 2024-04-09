@@ -18,9 +18,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
-import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import com.example.videoapp.ConfigParams
 import com.example.videoapp.R
 import com.example.videoapp.interfaces.VideoPresenter
 import com.example.videoapp.interfaces.VideoView
@@ -69,9 +66,15 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_video_player)
-        window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-        ViewCompat.getWindowInsetsController(window.decorView)?.isAppearanceLightStatusBars = false
-        window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
+
+        // 全屏显示，隐藏状态栏和导航栏，拉出状态栏和导航栏显示一会儿后消失。
+        window.decorView.setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            or View.SYSTEM_UI_FLAG_FULLSCREEN
+            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
 
         (mVideoPlayerPresenter as VideoPlayerPresenter).initMediaPlayer()
         mVideoTextureView.surfaceTextureListener = object: SurfaceTextureListener {
@@ -81,7 +84,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
                     intent.getStringExtra("video_url")!!,
                     mVideoTextureView, mVideoSeekBar,
                     resources.displayMetrics.widthPixels,
-                    resources.displayMetrics.heightPixels-ConfigParams.viewHeightOffset
+                    resources.displayMetrics.heightPixels
                 )
 
                 mVideoTextureView.setOnTouchListener(
@@ -192,14 +195,14 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
             (mVideoPlayerPresenter as VideoPlayerPresenter).screenOrientationChanged(
                 false, mVideoTextureView,
                 resources.displayMetrics.widthPixels,
-                resources.displayMetrics.heightPixels-ConfigParams.viewHeightOffset
+                resources.displayMetrics.heightPixels
             )
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             //变成竖屏了
             (mVideoPlayerPresenter as VideoPlayerPresenter).screenOrientationChanged(
                 true, mVideoTextureView,
                 resources.displayMetrics.widthPixels,
-                resources.displayMetrics.heightPixels-ConfigParams.viewHeightOffset
+                resources.displayMetrics.heightPixels
             )
         }
     }
