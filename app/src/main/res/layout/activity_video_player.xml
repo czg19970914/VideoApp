@@ -43,12 +43,11 @@
                 android:visibility="gone"
                 android:contentDescription="vertical_screen_button"/>
         <TextView
-                android:id="@+id/video_start_time"
+                android:id="@+id/video_end_time"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:textColor="@color/white"
-                android:textStyle="bold"
-                android:layout_marginStart="10dp"/>
+                android:textStyle="bold"/>
         <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
@@ -69,11 +68,12 @@
                     android:visibility="gone"
                     android:contentDescription="video_paused_image"/>
             <TextView
-                    android:id="@+id/video_end_time"
+                    android:id="@+id/video_start_time"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:textColor="@color/white"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold"
+                    android:layout_marginStart="10dp"/>
             <SeekBar
                     android:id="@+id/video_seek_bar"
                     android:layout_width="match_parent"
