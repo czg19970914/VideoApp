@@ -45,6 +45,6 @@ class OnDoubleClickListener(doubleClickCallback: DoubleClickCallback) : View.OnT
                 }
             }
         }
-        return true
+        return false
     }
 }

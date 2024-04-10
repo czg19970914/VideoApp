@@ -10,7 +10,7 @@
         tools:context=".views.activities.VideoPlayerActivity"
         android:orientation="vertical">
 
-    <TextureView
+    <com.example.videoapp.views.customviews.VideoPlayerView
             android:id="@+id/video_texture_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

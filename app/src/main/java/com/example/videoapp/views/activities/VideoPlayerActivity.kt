@@ -11,7 +11,6 @@ import android.content.res.Configuration
 import android.graphics.SurfaceTexture
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
 import android.view.View
 import android.widget.ImageView
@@ -24,12 +23,13 @@ import com.example.videoapp.interfaces.VideoView
 import com.example.videoapp.presenters.VideoPlayerPresenter
 import com.example.videoapp.views.customviews.OnDoubleClickListener
 import com.example.videoapp.utils.VideoUtils
+import com.example.videoapp.views.customviews.VideoPlayerView
 
 class VideoPlayerActivity : AppCompatActivity(), VideoView {
     /**
      * 这边工具条的出现、消失动画，在快速点击时有点bug，后续改吧
      */
-    private val mVideoTextureView: TextureView by lazy {
+    private val mVideoTextureView: VideoPlayerView by lazy {
         findViewById(R.id.video_texture_view)
     }
     private val mToolBarGroup: LinearLayout by lazy {
