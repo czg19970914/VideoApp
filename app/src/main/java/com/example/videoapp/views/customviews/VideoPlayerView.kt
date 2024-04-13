@@ -5,13 +5,13 @@ import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
-import android.view.TextureView
+import androidx.constraintlayout.widget.ConstraintLayout
 import kotlin.math.abs
 
 /**
  * Based on TextureView, we add some hand gestures operation to operate videos
  * */
-class VideoPlayerView : TextureView {
+class VideoPlayerView : ConstraintLayout {
     companion object {
         // 长按超过多少毫秒才触发调整视频的音量和亮度的阈值
         const val LONG_PRESSED_THRESHOLD = 1500L
@@ -36,6 +36,9 @@ class VideoPlayerView : TextureView {
 
     // 设置一个flag，只在Move中触发一次LongPress事件
     private var mCanLongPress: Boolean = true
+
+    // 判断当前横竖屏状态，默认竖屏
+    private var mIsVertical = true
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
