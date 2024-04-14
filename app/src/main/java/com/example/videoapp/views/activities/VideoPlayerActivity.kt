@@ -24,11 +24,15 @@ import com.example.videoapp.interfaces.VideoView
 import com.example.videoapp.presenters.VideoPlayerPresenter
 import com.example.videoapp.views.customviews.OnDoubleClickListener
 import com.example.videoapp.utils.VideoUtils
+import com.example.videoapp.views.customviews.VideoPlayerView
 
 class VideoPlayerActivity : AppCompatActivity(), VideoView {
     /**
      * 这边工具条的出现、消失动画，在快速点击时有点bug，后续改吧
      */
+    private val mVideoPlayerView: VideoPlayerView by lazy {
+        findViewById(R.id.video_player_view)
+    }
     private val mVideoTextureView: TextureView by lazy {
         findViewById(R.id.video_texture_view)
     }
@@ -56,6 +60,9 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
     private val mVideoPausedImage: ImageView by lazy {
         findViewById(R.id.video_paused_image)
     }
+    private val mFunctionBar: LinearLayout by lazy {
+        findViewById(R.id.function_bar)
+    }
 
     private var mVideoPlayerPresenter: VideoPresenter = VideoPlayerPresenter()
 
@@ -75,6 +82,29 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
             or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
             or View.SYSTEM_UI_FLAG_FULLSCREEN
             or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+
+        mVideoPlayerView.setVideoGestureListener(
+            object: VideoPlayerView.VideoGestureListener {
+                override fun leftLongPress() {
+                    mFunctionBar.visibility = View.VISIBLE
+                }
+
+                override fun rightLongPress() {
+                    mFunctionBar.visibility = View.VISIBLE
+                }
+
+                override fun leftMove() {
+                }
+
+                override fun rightMove() {
+                }
+
+                override fun gestureUp() {
+                    mFunctionBar.visibility = View.GONE
+                }
+
+            }
+        )
 
         (mVideoPlayerPresenter as VideoPlayerPresenter).initMediaPlayer()
         mVideoTextureView.surfaceTextureListener = object: SurfaceTextureListener {
@@ -273,6 +303,14 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
             mVerticalScreenButton.visibility = View.VISIBLE
             mHorizontalScreenButton.visibility = View.GONE
         }
+    }
+
+    fun showFunctionBar(isVolume: Boolean) {
+
+    }
+
+    fun closeFunctionBar() {
+
     }
 
     override fun setPresenter(presenter: VideoPresenter) {

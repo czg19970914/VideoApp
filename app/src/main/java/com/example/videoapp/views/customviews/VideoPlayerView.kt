@@ -14,7 +14,7 @@ import kotlin.math.abs
 class VideoPlayerView : ConstraintLayout {
     companion object {
         // 长按超过多少毫秒才触发调整视频的音量和亮度的阈值
-        const val LONG_PRESSED_THRESHOLD = 1500L
+        const val LONG_PRESSED_THRESHOLD = 500L
 
         // 真机上MOVE触发敏感，扩大触发范围阈值
         const val IS_MOVE_THRESHOLD = 5
