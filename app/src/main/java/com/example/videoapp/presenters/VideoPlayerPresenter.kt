@@ -1,5 +1,6 @@
 package com.example.videoapp.presenters
 
+import android.annotation.SuppressLint
 import android.media.MediaPlayer
 import android.net.Uri
 import android.view.Surface
@@ -40,6 +41,7 @@ class VideoPlayerPresenter: VideoPresenter {
         mMediaPlayer = null
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     fun startMediaPlayer(url: String, videoTextureView: TextureView, videoSeekBar: SeekBar,
                          widthPixels: Int, heightPixels: Int) {
         mMediaPlayer?.setSurface(Surface(videoTextureView.surfaceTexture))
@@ -56,6 +58,10 @@ class VideoPlayerPresenter: VideoPresenter {
         mMediaPlayer?.setOnPreparedListener {
             it.start()
             (mVideoPlayerView as VideoPlayerActivity).initVideoSeekBar()
+
+            videoTextureView.setOnTouchListener(
+                (mVideoPlayerView as VideoPlayerActivity).mOnDoubleClickListener
+            )
 
             // 启动timer
             mSeekBarTimer?.schedule(object :TimerTask(){

@@ -66,6 +66,75 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
 
     private var mVideoPlayerPresenter: VideoPresenter = VideoPlayerPresenter()
 
+    val mOnDoubleClickListener = OnDoubleClickListener(object : OnDoubleClickListener.DoubleClickCallback{
+        override fun onDoubleClick() {
+            (mVideoPlayerPresenter as VideoPlayerPresenter).pauseStateChanged()
+        }
+
+        @SuppressLint("Recycle")
+        override fun onClick() {
+            if(mToolBarGroup.visibility == View.VISIBLE){
+                val alphaAnimator =
+                    ObjectAnimator.ofFloat(mToolBarGroup, "alpha", 1f, 0f)
+                val translationYAnimator =
+                    ObjectAnimator.ofFloat(mToolBarGroup, "translationY", 0f, 100f)
+                val toolBarAnimatorSet = AnimatorSet()
+                toolBarAnimatorSet.play(alphaAnimator).with(translationYAnimator)
+                toolBarAnimatorSet.addListener(
+                    object : Animator.AnimatorListener{
+                        override fun onAnimationStart(p0: Animator) {
+
+                        }
+
+                        override fun onAnimationEnd(p0: Animator) {
+                            mToolBarGroup.visibility = View.GONE
+                        }
+
+                        override fun onAnimationCancel(p0: Animator) {
+                            mToolBarGroup.visibility = View.GONE
+                        }
+
+                        override fun onAnimationRepeat(p0: Animator) {
+
+                        }
+
+                    }
+                )
+                toolBarAnimatorSet.setDuration(500)
+                toolBarAnimatorSet.start()
+            }else {
+                val alphaAnimator =
+                    ObjectAnimator.ofFloat(mToolBarGroup, "alpha", 0f, 1f)
+                val translationYAnimator =
+                    ObjectAnimator.ofFloat(mToolBarGroup, "translationY", 100f, 0f)
+                val toolBarAnimatorSet = AnimatorSet()
+                toolBarAnimatorSet.play(alphaAnimator).with(translationYAnimator)
+                toolBarAnimatorSet.addListener(
+                    object : Animator.AnimatorListener{
+                        override fun onAnimationStart(p0: Animator) {
+                            mToolBarGroup.visibility = View.VISIBLE
+                        }
+
+                        override fun onAnimationEnd(p0: Animator) {
+                            mToolBarGroup.visibility = View.VISIBLE
+                        }
+
+                        override fun onAnimationCancel(p0: Animator) {
+                            mToolBarGroup.visibility = View.VISIBLE
+                        }
+
+                        override fun onAnimationRepeat(p0: Animator) {
+
+                        }
+
+                    }
+                )
+                toolBarAnimatorSet.setDuration(500)
+                toolBarAnimatorSet.start()
+            }
+        }
+    })
+
     init {
         mVideoPlayerPresenter.setView(this)
     }
@@ -83,28 +152,28 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
             or View.SYSTEM_UI_FLAG_FULLSCREEN
             or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
 
-        mVideoPlayerView.setVideoGestureListener(
-            object: VideoPlayerView.VideoGestureListener {
-                override fun leftLongPress() {
-                    mFunctionBar.visibility = View.VISIBLE
-                }
-
-                override fun rightLongPress() {
-                    mFunctionBar.visibility = View.VISIBLE
-                }
-
-                override fun leftMove() {
-                }
-
-                override fun rightMove() {
-                }
-
-                override fun gestureUp() {
-                    mFunctionBar.visibility = View.GONE
-                }
-
-            }
-        )
+//        mVideoPlayerView.setVideoGestureListener(
+//            object: VideoPlayerView.VideoGestureListener {
+//                override fun leftLongPress() {
+//                    mFunctionBar.visibility = View.VISIBLE
+//                }
+//
+//                override fun rightLongPress() {
+//                    mFunctionBar.visibility = View.VISIBLE
+//                }
+//
+//                override fun leftMove() {
+//                }
+//
+//                override fun rightMove() {
+//                }
+//
+//                override fun gestureUp() {
+//                    mFunctionBar.visibility = View.GONE
+//                }
+//
+//            }
+//        )
 
         (mVideoPlayerPresenter as VideoPlayerPresenter).initMediaPlayer()
         mVideoTextureView.surfaceTextureListener = object: SurfaceTextureListener {
@@ -115,78 +184,6 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
                     mVideoTextureView, mVideoSeekBar,
                     resources.displayMetrics.widthPixels,
                     resources.displayMetrics.heightPixels
-                )
-
-                mVideoTextureView.setOnTouchListener(
-                    OnDoubleClickListener(object : OnDoubleClickListener.DoubleClickCallback{
-                        override fun onDoubleClick() {
-                            (mVideoPlayerPresenter as VideoPlayerPresenter).pauseStateChanged()
-                        }
-
-                        @SuppressLint("Recycle")
-                        override fun onClick() {
-                            if(mToolBarGroup.visibility == View.VISIBLE){
-                                val alphaAnimator =
-                                    ObjectAnimator.ofFloat(mToolBarGroup, "alpha", 1f, 0f)
-                                val translationYAnimator =
-                                    ObjectAnimator.ofFloat(mToolBarGroup, "translationY", 0f, 100f)
-                                val toolBarAnimatorSet = AnimatorSet()
-                                toolBarAnimatorSet.play(alphaAnimator).with(translationYAnimator)
-                                toolBarAnimatorSet.addListener(
-                                    object : Animator.AnimatorListener{
-                                        override fun onAnimationStart(p0: Animator) {
-
-                                        }
-
-                                        override fun onAnimationEnd(p0: Animator) {
-                                            mToolBarGroup.visibility = View.GONE
-                                        }
-
-                                        override fun onAnimationCancel(p0: Animator) {
-                                            mToolBarGroup.visibility = View.GONE
-                                        }
-
-                                        override fun onAnimationRepeat(p0: Animator) {
-
-                                        }
-
-                                    }
-                                )
-                                toolBarAnimatorSet.setDuration(500)
-                                toolBarAnimatorSet.start()
-                            }else {
-                                val alphaAnimator =
-                                    ObjectAnimator.ofFloat(mToolBarGroup, "alpha", 0f, 1f)
-                                val translationYAnimator =
-                                    ObjectAnimator.ofFloat(mToolBarGroup, "translationY", 100f, 0f)
-                                val toolBarAnimatorSet = AnimatorSet()
-                                toolBarAnimatorSet.play(alphaAnimator).with(translationYAnimator)
-                                toolBarAnimatorSet.addListener(
-                                    object : Animator.AnimatorListener{
-                                        override fun onAnimationStart(p0: Animator) {
-                                            mToolBarGroup.visibility = View.VISIBLE
-                                        }
-
-                                        override fun onAnimationEnd(p0: Animator) {
-                                            mToolBarGroup.visibility = View.VISIBLE
-                                        }
-
-                                        override fun onAnimationCancel(p0: Animator) {
-                                            mToolBarGroup.visibility = View.VISIBLE
-                                        }
-
-                                        override fun onAnimationRepeat(p0: Animator) {
-
-                                        }
-
-                                    }
-                                )
-                                toolBarAnimatorSet.setDuration(500)
-                                toolBarAnimatorSet.start()
-                            }
-                        }
-
-                    })
                 )
 
                 mHorizontalScreenButton.setOnClickListener {

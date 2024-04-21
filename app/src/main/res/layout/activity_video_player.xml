@@ -50,6 +50,7 @@
             android:layout_marginBottom="15dp"
             android:gravity="center_horizontal"
             android:layoutDirection="rtl"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent">
         <ImageView
                 android:id="@+id/horizontal_screen_button"
