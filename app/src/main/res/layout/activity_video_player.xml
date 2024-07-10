@@ -24,6 +24,7 @@
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
+            android:background="@color/function_bar_bg"
             android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -34,7 +35,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/volume_icon"
-                android:layout_gravity="center"/>
+                android:layout_gravity="center"
+                android:visibility="gone"/>
+        <ImageView
+                android:id="@+id/light_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/light_icon"
+                android:layout_gravity="center"
+                android:visibility="gone"/>
         <SeekBar
                 android:id="@+id/function_seek_bar"
                 android:layout_width="match_parent"

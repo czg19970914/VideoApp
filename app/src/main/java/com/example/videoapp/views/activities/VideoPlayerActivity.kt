@@ -63,6 +63,12 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
     private val mFunctionBar: LinearLayout by lazy {
         findViewById(R.id.function_bar)
     }
+    private val mVolumeIcon: ImageView by lazy {
+        findViewById(R.id.volume_icon)
+    }
+    private val mLightIcon: ImageView by lazy {
+        findViewById(R.id.light_icon)
+    }
 
     private var mVideoPlayerPresenter: VideoPresenter = VideoPlayerPresenter()
 
@@ -155,11 +161,11 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
 //        mVideoPlayerView.setVideoGestureListener(
 //            object: VideoPlayerView.VideoGestureListener {
 //                override fun leftLongPress() {
-//                    mFunctionBar.visibility = View.VISIBLE
+//                    showFunctionBar(false)
 //                }
 //
 //                override fun rightLongPress() {
-//                    mFunctionBar.visibility = View.VISIBLE
+//                    showFunctionBar(true)
 //                }
 //
 //                override fun leftMove() {
@@ -169,7 +175,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
 //                }
 //
 //                override fun gestureUp() {
-//                    mFunctionBar.visibility = View.GONE
+//                    closeFunctionBar()
 //                }
 //
 //            }
@@ -303,11 +309,20 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
     }
 
     fun showFunctionBar(isVolume: Boolean) {
-
+        if(isVolume) {
+            mVolumeIcon.visibility = View.VISIBLE
+            mLightIcon.visibility = View.GONE
+        } else {
+            mVolumeIcon.visibility = View.GONE
+            mLightIcon.visibility = View.VISIBLE
+        }
+        mFunctionBar.visibility = View.VISIBLE
     }
 
     fun closeFunctionBar() {
-
+        mVolumeIcon.visibility = View.GONE
+        mLightIcon.visibility = View.GONE
+        mFunctionBar.visibility = View.GONE
     }
 
     override fun setPresenter(presenter: VideoPresenter) {

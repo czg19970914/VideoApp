@@ -16,4 +16,5 @@
     <color name="name_select_bar">#FFFFFFFF</color>
     <color name="name_select_item">#FFFFFFFF</color>
     <color name="name_select_item_text">#FF000000</color>
+    <color name="function_bar_bg">#7F000000</color>
 </resources>

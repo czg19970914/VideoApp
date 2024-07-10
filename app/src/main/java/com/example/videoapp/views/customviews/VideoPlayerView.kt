@@ -24,7 +24,7 @@ class VideoPlayerView : ConstraintLayout {
     constructor(context: Context, attrs: AttributeSet): super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int): super(context, attrs, defStyleAttr)
 
-    private val mScreenWidth = resources.displayMetrics.widthPixels
+    private var mScreenWidth = resources.displayMetrics.widthPixels
     private var mFirstTouchTime: Long? = null
     private var mFirstTouchX: Float? = null
     private var mFirstTouchY: Float? = null
@@ -47,6 +47,7 @@ class VideoPlayerView : ConstraintLayout {
                 mFirstTouchTime = System.currentTimeMillis()
                 mFirstTouchX = event.x
                 mFirstTouchY = event.y
+                mScreenWidth = resources.displayMetrics.widthPixels
 //                Log.d("czg", "onTouchEvent: Down -> ($mFirstTouchX , $mFirstTouchY)")
             }
             MotionEvent.ACTION_MOVE -> {
