@@ -216,11 +216,6 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-        (mVideoPlayerPresenter as VideoPlayerPresenter).destroyMediaPlayer()
-    }
-
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -238,6 +233,11 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
                 resources.displayMetrics.heightPixels
             )
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        (mVideoPlayerPresenter as VideoPlayerPresenter).destroyMediaPlayer()
     }
 
     companion object {
