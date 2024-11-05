@@ -10,14 +10,28 @@ import kotlin.math.abs
 
 /**
  * Based on TextureView, we add some hand gestures operation to operate videos
+ *
+ * 手势：左边上移\下移 -> 调亮度
+ *      右边上移\下移 -> 调音量
+ *      左右移 -> 前后视频时间调节
+ *      长按 -> 快进
  * */
 class VideoPlayerView : ConstraintLayout {
     companion object {
-        // 长按超过多少毫秒才触发调整视频的音量和亮度的阈值
+        // 长按超过多少毫秒才触发手势的阈值
         const val LONG_PRESSED_THRESHOLD = 500L
+        // 长按后再经过一段时间间隔来判断用户的意图
+        const val GET_TYPE_TIME = LONG_PRESSED_THRESHOLD + 500L
 
         // 真机上MOVE触发敏感，扩大触发范围阈值
         const val IS_MOVE_THRESHOLD = 5
+
+        // 触发手势的几种类型
+        const val GESTURE_TYPE_ERROR = 0
+        const val ADJUST_LIGHT = 1
+        const val ADJUST_VOLUME  = 2
+        const val ADJUST_VIDEO_TIME = 3
+        const val VIDEO_FAST_FORWARD = 4
     }
 
     constructor(context: Context): super(context)
@@ -31,11 +45,11 @@ class VideoPlayerView : ConstraintLayout {
 
     private var mVideoGestureListener : VideoGestureListener? = null
 
-    // 设置一个flag，是否能够调音量和亮度
-    private var mCanChangeVolumeOrLight: Boolean = true
+    // 设置一个flag，是否可以使用手势
+    private var mCanUseGesture: Boolean = false
 
-    // 设置一个flag，只在Move中触发一次LongPress事件
-    private var mCanLongPress: Boolean = true
+    // 设置一个flag，只在手势操作开始时做一些操作
+    private var mStartGesture: Boolean = true
 
     // 判断当前横竖屏状态，默认竖屏
     private var mIsVertical = true
@@ -48,51 +62,36 @@ class VideoPlayerView : ConstraintLayout {
                 mFirstTouchX = event.x
                 mFirstTouchY = event.y
                 mScreenWidth = resources.displayMetrics.widthPixels
-//                Log.d("czg", "onTouchEvent: Down -> ($mFirstTouchX , $mFirstTouchY)")
             }
             MotionEvent.ACTION_MOVE -> {
-//                Log.d("czg", "onTouchEvent: Move -> (" + event.x + " , " + event.y +")")
-//                Log.d("czg", "onTouchEvent: Move time -> " + (System.currentTimeMillis() - mFirstTouchTime!!))
                 if(isMove(event.x, event.y)) {
-                    if (mFirstTouchTime != null &&
-                        System.currentTimeMillis() - mFirstTouchTime!! > LONG_PRESSED_THRESHOLD &&
-                        mCanChangeVolumeOrLight
+                    if (
+                        mFirstTouchTime != null &&
+                        System.currentTimeMillis() - mFirstTouchTime!! > LONG_PRESSED_THRESHOLD
                     ) {
-                        if (mFirstTouchX != null && mFirstTouchX!! < mScreenWidth / 2) {
-                            // 左屏的操作
-                            if(mCanLongPress) {
-                                mVideoGestureListener?.leftLongPress()
-                                mCanLongPress = false
-                            }
-                            mVideoGestureListener?.leftMove()
-                            Log.d("czg", "onTouchEvent: operate light!!!")
-                        } else if (mFirstTouchX != null && mFirstTouchX!! > mScreenWidth / 2) {
-                            // 右屏的操作
-                            if(mCanLongPress) {
-                                mVideoGestureListener?.rightLongPress()
-                                mCanLongPress = false
-                            }
-                            mVideoGestureListener?.rightMove()
-                            Log.d("czg", "onTouchEvent: operate volume!!!")
-                        }
-                    } else {
-                        mCanChangeVolumeOrLight = false
+                        mCanUseGesture = true
+                    }
+                }
+                if (mCanUseGesture && mFirstTouchTime != null
+                    && System.currentTimeMillis() - mFirstTouchTime!! > GET_TYPE_TIME) {
+
+                    if (mStartGesture) {
+
+                        mStartGesture = false
                     }
                 }
             }
             MotionEvent.ACTION_UP -> {
-//                Log.d("czg", "onTouchEvent: Up")
-                mCanChangeVolumeOrLight = true
-                mCanLongPress = true
+                mCanUseGesture = false
+                mStartGesture = true
 
-                mVideoGestureListener?.gestureUp()
+                mVideoGestureListener?.gestureFinish()
             }
             MotionEvent.ACTION_CANCEL -> {
-//                Log.d("czg", "onTouchEvent: Cancel")
-                mCanChangeVolumeOrLight = true
-                mCanLongPress = true
+                mCanUseGesture = false
+                mStartGesture = true
 
-                mVideoGestureListener?.gestureUp()
+                mVideoGestureListener?.gestureFinish()
             }
         }
         return true
@@ -110,6 +109,23 @@ class VideoPlayerView : ConstraintLayout {
         return true
     }
 
+    private fun getGestureYpe() : Int {
+        if(mFirstTouchX == null || mFirstTouchY == null) {
+            return GESTURE_TYPE_ERROR
+        }
+        val offsetX = abs(x - mFirstTouchX!!)
+        val offsetY = abs(y - mFirstTouchY!!)
+
+        if(offsetX <= IS_MOVE_THRESHOLD && offsetY <= IS_MOVE_THRESHOLD) {
+            return VIDEO_FAST_FORWARD
+        }
+
+        if (offsetX > offsetY) {
+            return ADJUST_VIDEO_TIME
+        }
+        return GESTURE_TYPE_ERROR
+    }
+
     fun setVideoGestureListener(videoGestureListener: VideoGestureListener) {
         mVideoGestureListener = videoGestureListener
     }
@@ -124,7 +140,7 @@ class VideoPlayerView : ConstraintLayout {
 
         fun rightMove()
 
-        fun gestureUp()
+        fun gestureFinish()
     }
 }
 
