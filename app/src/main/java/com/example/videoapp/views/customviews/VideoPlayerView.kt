@@ -18,6 +18,8 @@ import kotlin.math.abs
  * */
 class VideoPlayerView : ConstraintLayout {
     companion object {
+        const val TAG = "VideoPlayerView"
+        
         // 长按超过多少毫秒才触发手势的阈值
         const val LONG_PRESSED_THRESHOLD = 500L
         // 长按后再经过一段时间间隔来判断用户的意图
@@ -45,11 +47,17 @@ class VideoPlayerView : ConstraintLayout {
 
     private var mVideoGestureListener : VideoGestureListener? = null
 
+    // 设置一个flag，看是否一开始没到触发时间阈值，从而取消对应的动作
+    private var mCancelGesture: Boolean = false
+
     // 设置一个flag，是否可以使用手势
     private var mCanUseGesture: Boolean = false
 
     // 设置一个flag，只在手势操作开始时做一些操作
     private var mStartGesture: Boolean = true
+
+    // 当前手势类型，默认是error
+    private var mCurrentGestureType: Int = GESTURE_TYPE_ERROR
 
     // 判断当前横竖屏状态，默认竖屏
     private var mIsVertical = true
@@ -62,32 +70,66 @@ class VideoPlayerView : ConstraintLayout {
                 mFirstTouchX = event.x
                 mFirstTouchY = event.y
                 mScreenWidth = resources.displayMetrics.widthPixels
+
+                mCancelGesture = false
+                mCanUseGesture = false
+                mStartGesture = true
+                mCurrentGestureType = GESTURE_TYPE_ERROR
             }
             MotionEvent.ACTION_MOVE -> {
-                if(isMove(event.x, event.y)) {
+                if (mCanUseGesture) {
                     if (
-                        mFirstTouchTime != null &&
-                        System.currentTimeMillis() - mFirstTouchTime!! > LONG_PRESSED_THRESHOLD
+                        mFirstTouchTime != null
+                        && System.currentTimeMillis() - mFirstTouchTime!! > GET_TYPE_TIME
                     ) {
-                        mCanUseGesture = true
+                        if (mStartGesture) {
+                            mCurrentGestureType = getGestureYpe(event.x, event.y)
+                            mStartGesture = false
+                        }
+                        Log.d(TAG, "onTouchEvent: mCurrentGestureType -> $mCurrentGestureType")
+                        when (mCurrentGestureType) {
+                            ADJUST_LIGHT -> {
+                                if (mVideoGestureListener != null && mFirstTouchY != null) {
+                                    mVideoGestureListener!!.adjustLight(mFirstTouchY!!, event.y)
+                                }
+                            }
+                            ADJUST_VOLUME -> {
+                                if (mVideoGestureListener != null && mFirstTouchY != null) {
+                                    mVideoGestureListener!!.adjustVolume(mFirstTouchY!!, event.y)
+                                }
+                            }
+                            ADJUST_VIDEO_TIME -> {
+                                if (mVideoGestureListener != null && mFirstTouchX != null) {
+                                    mVideoGestureListener!!.adjustVideoTime(mFirstTouchX!!, event.x)
+                                }
+                            }
+                        }
                     }
-                }
-                if (mCanUseGesture && mFirstTouchTime != null
-                    && System.currentTimeMillis() - mFirstTouchTime!! > GET_TYPE_TIME) {
-
-                    if (mStartGesture) {
-
-                        mStartGesture = false
+                } else if (!mCancelGesture) {
+                    if(isMove(event.x, event.y)) {
+                        if (
+                            mFirstTouchTime != null &&
+                            System.currentTimeMillis() - mFirstTouchTime!! > LONG_PRESSED_THRESHOLD
+                        ) {
+                            mCanUseGesture = true
+                        } else {
+                            Log.d(TAG, "onTouchEvent: cancel gesture!")
+                            mCancelGesture = true
+                            mCanUseGesture = false
+                            mStartGesture = false
+                        }
                     }
                 }
             }
             MotionEvent.ACTION_UP -> {
+                mCancelGesture = false
                 mCanUseGesture = false
                 mStartGesture = true
 
                 mVideoGestureListener?.gestureFinish()
             }
             MotionEvent.ACTION_CANCEL -> {
+                mCancelGesture = false
                 mCanUseGesture = false
                 mStartGesture = true
 
@@ -109,7 +151,7 @@ class VideoPlayerView : ConstraintLayout {
         return true
     }
 
-    private fun getGestureYpe() : Int {
+    private fun getGestureYpe(x: Float, y: Float) : Int {
         if(mFirstTouchX == null || mFirstTouchY == null) {
             return GESTURE_TYPE_ERROR
         }
@@ -122,6 +164,12 @@ class VideoPlayerView : ConstraintLayout {
 
         if (offsetX > offsetY) {
             return ADJUST_VIDEO_TIME
+        } else if (mFirstTouchX != null) {
+            return if (mFirstTouchX!! < mScreenWidth / 2) {
+                ADJUST_LIGHT
+            } else {
+                ADJUST_VOLUME
+            }
         }
         return GESTURE_TYPE_ERROR
     }
@@ -132,13 +180,11 @@ class VideoPlayerView : ConstraintLayout {
 
     // 回调接口，用来窗口播放界面以及视频
     interface VideoGestureListener {
-        fun leftLongPress()
+        fun adjustLight(startY: Float, currentY: Float)
 
-        fun rightLongPress()
+        fun adjustVolume(startY: Float, currentY: Float)
 
-        fun leftMove()
-
-        fun rightMove()
+        fun adjustVideoTime(startX: Float, currentX: Float)
 
         fun gestureFinish()
     }
