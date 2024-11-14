@@ -1,19 +1,24 @@
 package com.example.videoapp.utils
 
 import android.annotation.SuppressLint
+import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import com.google.gson.Gson
-import java.io.*
+import android.provider.Settings
 import android.util.Base64
 import android.util.Log
 import com.example.videoapp.entities.VideoDescriptionEntity
+import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.io.*
+
 
 class VideoUtils {
     companion object {
+        const val TAG = "VideoUtils"
+
         @JvmStatic
         fun calculateTime(time: Int): String {
             var minute = 0
@@ -67,7 +72,7 @@ class VideoUtils {
             try {
                 outputStream.write(jsonStr.toByteArray())
             } catch (e : IOException) {
-                Log.i("czg", "saveDescriptionToJson:")
+                Log.i(TAG, "saveDescriptionToJson: error -> " + e.printStackTrace())
             } finally {
                 outputStream.close()
             }
@@ -84,6 +89,18 @@ class VideoUtils {
             val dec = Base64.decode(base64String, Base64.DEFAULT)
             val bitmap = BitmapFactory.decodeByteArray(dec, 0, dec.size)
             return bitmap
+        }
+
+        @JvmStatic
+        fun getScreenBrightness(context: Context): Int {
+            var currentBrightness = -1
+            val resolver: ContentResolver = context.contentResolver
+            try {
+                currentBrightness = Settings.System.getInt(resolver, Settings.System.SCREEN_BRIGHTNESS)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            return currentBrightness
         }
     }
 }

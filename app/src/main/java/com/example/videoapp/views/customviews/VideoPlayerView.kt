@@ -84,6 +84,7 @@ class VideoPlayerView : ConstraintLayout {
                     ) {
                         if (mStartGesture) {
                             mCurrentGestureType = getGestureYpe(event.x, event.y)
+                            mVideoGestureListener?.gestureStart(mCurrentGestureType)
                             mStartGesture = false
                         }
                         Log.d(TAG, "onTouchEvent: mCurrentGestureType -> $mCurrentGestureType")
@@ -180,6 +181,8 @@ class VideoPlayerView : ConstraintLayout {
 
     // 回调接口，用来窗口播放界面以及视频
     interface VideoGestureListener {
+        fun gestureStart(gestureType: Int)
+
         fun adjustLight(startY: Float, currentY: Float)
 
         fun adjustVolume(startY: Float, currentY: Float)

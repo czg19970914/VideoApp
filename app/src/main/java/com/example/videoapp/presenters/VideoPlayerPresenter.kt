@@ -11,6 +11,7 @@ import com.example.videoapp.interfaces.VideoModel
 import com.example.videoapp.interfaces.VideoPresenter
 import com.example.videoapp.interfaces.VideoView
 import com.example.videoapp.views.activities.VideoPlayerActivity
+import com.example.videoapp.views.customviews.VideoPlayerView
 import java.util.*
 import kotlin.math.abs
 
@@ -20,6 +21,13 @@ class VideoPlayerPresenter: VideoPresenter {
     private var mMediaPlayer: MediaPlayer? = null
     private var mSeekBarTimer: Timer? = null
     private var mIsSeekbarChanging = false // 互斥变量，防止进度条和定时器冲突
+
+    // 视频音量值以及设备最大音量值
+    var mVolumeValue: Float? = 0f
+    var mMaxVolumeValue: Float? = 0f
+    // 屏幕亮度值
+    var mLightValue: Float? = 1f
+
     override fun setModel(model: VideoModel) {
         // 播放器的控制器不需要model层
     }
@@ -136,5 +144,26 @@ class VideoPlayerPresenter: VideoPresenter {
 
     fun videoSeekTo(seekPosition: Int) {
         mMediaPlayer?.seekTo(seekPosition)
+    }
+
+    fun updateFunctionValue(gestureType: Int, startValue: Float, currentValue: Float) {
+        when (gestureType) {
+            VideoPlayerView.ADJUST_VOLUME -> {
+                val height: Float = (mVideoPlayerView as VideoPlayerActivity).getVideoViewHeight().toFloat()
+                if (mMaxVolumeValue != null && mMaxVolumeValue!! > 0 && mVolumeValue != null && mVolumeValue!! >= 0) {
+                    val adjustValue = -(currentValue - startValue) * 2f / height * mMaxVolumeValue!!
+                    val currentVolumeValue = 0f.coerceAtLeast(mVolumeValue!! + adjustValue).coerceAtMost(mMaxVolumeValue!!)
+                    (mVideoPlayerView as VideoPlayerActivity).updateFunctionSeekBar(gestureType, currentVolumeValue)
+                }
+            }
+            VideoPlayerView.ADJUST_LIGHT -> {
+                val height: Float = (mVideoPlayerView as VideoPlayerActivity).getVideoViewHeight().toFloat()
+                val adjustValue = -(currentValue - startValue) * 2f / height
+                if (mLightValue != null && mLightValue!! >= 0) {
+                    val currentLightValue = 0f.coerceAtLeast(mLightValue!! + adjustValue).coerceAtMost(1f)
+                    (mVideoPlayerView as VideoPlayerActivity).updateFunctionSeekBar(gestureType, currentLightValue)
+                }
+            }
+        }
     }
 }

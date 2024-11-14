@@ -9,11 +9,14 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.SurfaceTexture
+import android.media.AudioManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
 import android.view.View
+import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SeekBar
@@ -69,6 +72,18 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
     private val mLightIcon: ImageView by lazy {
         findViewById(R.id.light_icon)
     }
+    private val mFunctionSeekBar: SeekBar by lazy {
+        findViewById(R.id.function_seek_bar)
+    }
+
+    // 记录一下当前手势操作的类型，现在主要用作校验作用，没什么其它作用
+    private var mCurrentGestureType: Int = VideoPlayerView.GESTURE_TYPE_ERROR
+
+    // 调节音量
+    private var mAudioManager: AudioManager? = null
+
+    // 调节窗口屏幕亮度
+    private var mLayoutParams: WindowManager.LayoutParams? = null
 
     private var mVideoPlayerPresenter: VideoPresenter = VideoPlayerPresenter()
 
@@ -158,29 +173,6 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
             or View.SYSTEM_UI_FLAG_FULLSCREEN
             or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
 
-//        mVideoPlayerView.setVideoGestureListener(
-//            object: VideoPlayerView.VideoGestureListener {
-//                override fun leftLongPress() {
-//                    showFunctionBar(false)
-//                }
-//
-//                override fun rightLongPress() {
-//                    showFunctionBar(true)
-//                }
-//
-//                override fun leftMove() {
-//                }
-//
-//                override fun rightMove() {
-//                }
-//
-//                override fun gestureUp() {
-//                    closeFunctionBar()
-//                }
-//
-//            }
-//        )
-
         (mVideoPlayerPresenter as VideoPlayerPresenter).initMediaPlayer()
         mVideoTextureView.surfaceTextureListener = object: SurfaceTextureListener {
             @SuppressLint("ClickableViewAccessibility")
@@ -214,6 +206,48 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
             }
 
         }
+
+        mAudioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager?
+        (mVideoPlayerPresenter as VideoPlayerPresenter).mMaxVolumeValue =
+            mAudioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC)?.toFloat()
+        mLayoutParams = window.attributes
+
+        mVideoPlayerView.setVideoGestureListener(
+            object: VideoPlayerView.VideoGestureListener {
+                override fun gestureStart(gestureType: Int) {
+                    showFunctionBar(gestureType)
+                }
+
+                override fun adjustLight(startY: Float, currentY: Float) {
+                    if (mCurrentGestureType == VideoPlayerView.ADJUST_LIGHT) {
+                        updateFunctionBar(VideoPlayerView.ADJUST_LIGHT, startY, currentY)
+                    } else {
+                        Log.i(TAG,
+                            "adjustLight: current gesture is $mCurrentGestureType and is not match ADJUST_LIGHT !"
+                        )
+                    }
+                }
+
+                override fun adjustVolume(startY: Float, currentY: Float) {
+                    if (mCurrentGestureType == VideoPlayerView.ADJUST_VOLUME) {
+                        updateFunctionBar(VideoPlayerView.ADJUST_VOLUME, startY, currentY)
+                    } else {
+                        Log.i(TAG,
+                            "adjustVolume: current gesture is $mCurrentGestureType and is not match ADJUST_VOLUME !"
+                        )
+                    }
+                }
+
+                override fun adjustVideoTime(startX: Float, currentX: Float) {
+
+                }
+
+                override fun gestureFinish() {
+                    closeFunctionBar()
+                }
+
+            }
+        )
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -238,9 +272,14 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
     override fun onDestroy() {
         super.onDestroy()
         (mVideoPlayerPresenter as VideoPlayerPresenter).destroyMediaPlayer()
+
+        mLayoutParams = null
+        mAudioManager = null
     }
 
     companion object {
+        const val TAG = "VideoPlayerActivity"
+
         @JvmStatic
         fun startVideoPlayerActivity(context: Context, url: String) {
             val intent = Intent(context, VideoPlayerActivity::class.java)
@@ -308,21 +347,81 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
         }
     }
 
-    fun showFunctionBar(isVolume: Boolean) {
-        if(isVolume) {
-            mVolumeIcon.visibility = View.VISIBLE
-            mLightIcon.visibility = View.GONE
-        } else {
-            mVolumeIcon.visibility = View.GONE
-            mLightIcon.visibility = View.VISIBLE
+    private fun initFunctionSeekBar(gestureType: Int) {
+        when (gestureType) {
+            VideoPlayerView.ADJUST_VOLUME -> {
+                if ((mVideoPlayerPresenter as VideoPlayerPresenter).mMaxVolumeValue?.toInt() != null) {
+                    mFunctionSeekBar.max = (mVideoPlayerPresenter as VideoPlayerPresenter).mMaxVolumeValue?.toInt()!!
+                    val currentVolume = mAudioManager?.getStreamVolume(AudioManager.STREAM_MUSIC)
+                    if (currentVolume != null) {
+                        (mVideoPlayerPresenter as VideoPlayerPresenter).mVolumeValue = currentVolume.toFloat()
+                        mFunctionSeekBar.progress = currentVolume
+                    }
+                }
+            }
+            VideoPlayerView.ADJUST_LIGHT -> {
+                mFunctionSeekBar.max = 100
+                var currentLight = mLayoutParams?.screenBrightness
+                if (currentLight == -1f) {
+                    currentLight = VideoUtils.getScreenBrightness(baseContext) / 255f
+                }
+                if (currentLight != null && currentLight >= 0) {
+                    (mVideoPlayerPresenter as VideoPlayerPresenter).mLightValue = currentLight
+                    mFunctionSeekBar.progress = (currentLight * 100).toInt()
+                }
+            }
         }
-        mFunctionBar.visibility = View.VISIBLE
+    }
+
+    fun updateFunctionSeekBar(gestureType: Int, progress: Float) {
+        when (gestureType) {
+            VideoPlayerView.ADJUST_VOLUME -> {
+                mFunctionSeekBar.progress = progress.toInt()
+                mAudioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, progress.toInt(), AudioManager.FLAG_PLAY_SOUND)
+            }
+            VideoPlayerView.ADJUST_LIGHT -> {
+                mFunctionSeekBar.progress = (progress * 100).toInt()
+                if (mLayoutParams != null) {
+                    mLayoutParams?.screenBrightness = progress
+                    window.attributes = mLayoutParams
+                }
+            }
+        }
+    }
+
+    fun showFunctionBar(gestureType: Int) {
+        mCurrentGestureType = gestureType
+        when (gestureType) {
+            VideoPlayerView.ADJUST_VOLUME -> {
+                mVolumeIcon.visibility = View.VISIBLE
+                mLightIcon.visibility = View.GONE
+                mFunctionBar.visibility = View.VISIBLE
+
+                initFunctionSeekBar(gestureType)
+            }
+            VideoPlayerView.ADJUST_LIGHT -> {
+                mVolumeIcon.visibility = View.GONE
+                mLightIcon.visibility = View.VISIBLE
+                mFunctionBar.visibility = View.VISIBLE
+
+                initFunctionSeekBar(gestureType)
+            }
+        }
+    }
+
+    fun updateFunctionBar(gestureType: Int, startValue: Float, currentValue: Float) {
+        (mVideoPlayerPresenter as VideoPlayerPresenter).updateFunctionValue(gestureType, startValue, currentValue)
     }
 
     fun closeFunctionBar() {
+        mCurrentGestureType = VideoPlayerView.GESTURE_TYPE_ERROR
         mVolumeIcon.visibility = View.GONE
         mLightIcon.visibility = View.GONE
         mFunctionBar.visibility = View.GONE
+    }
+
+    fun getVideoViewHeight() : Int {
+        return mVideoPlayerView.height
     }
 
     override fun setPresenter(presenter: VideoPresenter) {
