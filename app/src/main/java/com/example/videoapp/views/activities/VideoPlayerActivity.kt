@@ -377,7 +377,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
         when (gestureType) {
             VideoPlayerView.ADJUST_VOLUME -> {
                 mFunctionSeekBar.progress = progress.toInt()
-                mAudioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, progress.toInt(), AudioManager.FLAG_PLAY_SOUND)
+                mAudioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, progress.toInt(), AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE)
             }
             VideoPlayerView.ADJUST_LIGHT -> {
                 mFunctionSeekBar.progress = (progress * 100).toInt()

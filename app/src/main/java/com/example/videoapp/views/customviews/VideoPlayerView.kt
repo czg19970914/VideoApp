@@ -21,9 +21,9 @@ class VideoPlayerView : ConstraintLayout {
         const val TAG = "VideoPlayerView"
         
         // 长按超过多少毫秒才触发手势的阈值
-        const val LONG_PRESSED_THRESHOLD = 500L
+        const val LONG_PRESSED_THRESHOLD = 300L
         // 长按后再经过一段时间间隔来判断用户的意图
-        const val GET_TYPE_TIME = LONG_PRESSED_THRESHOLD + 500L
+        const val GET_TYPE_TIME = LONG_PRESSED_THRESHOLD + 300L
 
         // 真机上MOVE触发敏感，扩大触发范围阈值
         const val IS_MOVE_THRESHOLD = 5
