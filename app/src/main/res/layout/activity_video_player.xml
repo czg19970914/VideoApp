@@ -52,6 +52,27 @@
     </LinearLayout>
 
     <LinearLayout
+            android:id="@+id/video_function_bar"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:background="@color/function_bar_bg"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+        <TextView
+                android:id="@+id/show_seek_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00:00/00:00"
+                android:textColor="@color/white"/>
+
+    </LinearLayout>
+
+    <LinearLayout
             android:id="@+id/tool_bar_group"
             android:orientation="horizontal"
             android:layout_width="match_parent"

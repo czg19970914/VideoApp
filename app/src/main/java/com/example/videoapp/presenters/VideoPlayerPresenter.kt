@@ -27,6 +27,8 @@ class VideoPlayerPresenter: VideoPresenter {
     var mMaxVolumeValue: Float? = 0f
     // 屏幕亮度值
     var mLightValue: Float? = 1f
+    // 手势操作视频时间跳转
+    private var mSeekTime: Int? = null
 
     override fun setModel(model: VideoModel) {
         // 播放器的控制器不需要model层
@@ -163,6 +165,25 @@ class VideoPlayerPresenter: VideoPresenter {
                     val currentLightValue = 0f.coerceAtLeast(mLightValue!! + adjustValue).coerceAtMost(1f)
                     (mVideoPlayerView as VideoPlayerActivity).updateFunctionSeekBar(gestureType, currentLightValue)
                 }
+            }
+            VideoPlayerView.ADJUST_VIDEO_TIME -> {
+                val adjustValue = (currentValue - startValue) * 60 * 5
+                val allVideoTime = getAllVideoTime()
+                val currentTime = getCurrentVideoTime()
+                if (allVideoTime != null && currentTime != null) {
+                    val adjustTime = 0f.coerceAtLeast(currentTime + adjustValue).coerceAtMost(allVideoTime.toFloat())
+                    mSeekTime = adjustTime.toInt()
+                    (mVideoPlayerView as VideoPlayerActivity).updateFunctionSeekBar(gestureType, adjustTime)
+                }
+            }
+        }
+    }
+
+    fun seekToGestureTime() {
+        mSeekTime?.let {
+            val allVideoTime = getAllVideoTime()
+            if (allVideoTime != null && it >= 0 && it <= allVideoTime) {
+                videoSeekTo(it)
             }
         }
     }

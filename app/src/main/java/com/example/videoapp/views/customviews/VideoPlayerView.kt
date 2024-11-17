@@ -127,14 +127,14 @@ class VideoPlayerView : ConstraintLayout {
                 mCanUseGesture = false
                 mStartGesture = true
 
-                mVideoGestureListener?.gestureFinish()
+                mVideoGestureListener?.gestureFinish(mCurrentGestureType)
             }
             MotionEvent.ACTION_CANCEL -> {
                 mCancelGesture = false
                 mCanUseGesture = false
                 mStartGesture = true
 
-                mVideoGestureListener?.gestureFinish()
+                mVideoGestureListener?.gestureFinish(mCurrentGestureType)
             }
         }
         return true
@@ -189,7 +189,7 @@ class VideoPlayerView : ConstraintLayout {
 
         fun adjustVideoTime(startX: Float, currentX: Float)
 
-        fun gestureFinish()
+        fun gestureFinish(gestureType: Int)
     }
 }
 

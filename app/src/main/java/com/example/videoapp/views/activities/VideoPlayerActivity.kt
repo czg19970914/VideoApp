@@ -75,6 +75,12 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
     private val mFunctionSeekBar: SeekBar by lazy {
         findViewById(R.id.function_seek_bar)
     }
+    private val mVideoFunctionBar: LinearLayout by lazy {
+        findViewById(R.id.video_function_bar)
+    }
+    private val mShowSeekTimeTextView : TextView by lazy {
+        findViewById(R.id.show_seek_time)
+    }
 
     // 记录一下当前手势操作的类型，现在主要用作校验作用，没什么其它作用
     private var mCurrentGestureType: Int = VideoPlayerView.GESTURE_TYPE_ERROR
@@ -239,10 +245,23 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
                 }
 
                 override fun adjustVideoTime(startX: Float, currentX: Float) {
-
+                    if (mCurrentGestureType == VideoPlayerView.ADJUST_VIDEO_TIME) {
+                        updateFunctionBar(VideoPlayerView.ADJUST_VIDEO_TIME, startX, currentX)
+                    } else {
+                        Log.i(TAG,
+                            "adjustVolume: current gesture is $mCurrentGestureType and is not match ADJUST_VIDEO_TIME !"
+                        )
+                    }
                 }
 
-                override fun gestureFinish() {
+                override fun gestureFinish(gestureType: Int) {
+                    if (mCurrentGestureType == gestureType) {
+                        when (gestureType) {
+                            VideoPlayerView.ADJUST_VIDEO_TIME -> {
+                                (mVideoPlayerPresenter as VideoPlayerPresenter).seekToGestureTime()
+                            }
+                        }
+                    }
                     closeFunctionBar()
                 }
 
@@ -319,12 +338,18 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
         )
     }
 
-    fun videoTimeChanged(startTime: Int?, endTime: Int?) {
+    private fun videoTimeChanged(startTime: Int?, endTime: Int?) {
         if(startTime == null || endTime == null) {
             return
         }
         mVideoStartTime.text = VideoUtils.calculateTime(startTime / 1000) //开始时间
         mVideoEndTime.text = VideoUtils.calculateTime(endTime / 1000) //总时长
+    }
+
+    private fun adjustVideoTimeText(currentTime: Int, endTime: Int): String {
+        val currentTimeText = VideoUtils.calculateTime(currentTime / 1000)
+        val endTimeText = VideoUtils.calculateTime(endTime / 1000)
+        return "$currentTimeText/$endTimeText"
     }
 
     fun showPauseView(isPaused: Boolean) {
@@ -386,6 +411,12 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
                     window.attributes = mLayoutParams
                 }
             }
+            VideoPlayerView.ADJUST_VIDEO_TIME -> {
+                val maxTime = mVideoSeekBar.max
+                val currentTime = progress.toInt().coerceAtMost(maxTime)
+                val adjustTimeText = adjustVideoTimeText(currentTime, maxTime)
+                mShowSeekTimeTextView.text = adjustTimeText
+            }
         }
     }
 
@@ -396,6 +427,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
                 mVolumeIcon.visibility = View.VISIBLE
                 mLightIcon.visibility = View.GONE
                 mFunctionBar.visibility = View.VISIBLE
+                mVideoFunctionBar.visibility = View.GONE
 
                 initFunctionSeekBar(gestureType)
             }
@@ -403,11 +435,20 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
                 mVolumeIcon.visibility = View.GONE
                 mLightIcon.visibility = View.VISIBLE
                 mFunctionBar.visibility = View.VISIBLE
+                mVideoFunctionBar.visibility = View.GONE
 
                 initFunctionSeekBar(gestureType)
             }
+            VideoPlayerView.ADJUST_VIDEO_TIME -> {
+                mVolumeIcon.visibility = View.GONE
+                mLightIcon.visibility = View.GONE
+                mFunctionBar.visibility = View.GONE
+                mVideoFunctionBar.visibility = View.VISIBLE
+            }
         }
     }
+
+
 
     fun updateFunctionBar(gestureType: Int, startValue: Float, currentValue: Float) {
         (mVideoPlayerPresenter as VideoPlayerPresenter).updateFunctionValue(gestureType, startValue, currentValue)
@@ -418,6 +459,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
         mVolumeIcon.visibility = View.GONE
         mLightIcon.visibility = View.GONE
         mFunctionBar.visibility = View.GONE
+        mVideoFunctionBar.visibility = View.GONE
     }
 
     fun getVideoViewHeight() : Int {
