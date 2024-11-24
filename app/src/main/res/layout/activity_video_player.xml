@@ -21,15 +21,17 @@
 
     <LinearLayout
             android:id="@+id/function_bar"
-            android:layout_width="200dp"
+            android:layout_width="@dimen/function_bar_width"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:background="@color/function_bar_bg"
+            android:background="@drawable/function_bar_bg"
             android:visibility="gone"
+            android:padding="@dimen/function_bar_around_padding"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
+
         <ImageView
                 android:id="@+id/volume_icon"
                 android:layout_width="wrap_content"
@@ -37,6 +39,7 @@
                 android:src="@drawable/volume_icon"
                 android:layout_gravity="center"
                 android:visibility="gone"/>
+
         <ImageView
                 android:id="@+id/light_icon"
                 android:layout_width="wrap_content"
@@ -44,20 +47,23 @@
                 android:src="@drawable/light_icon"
                 android:layout_gravity="center"
                 android:visibility="gone"/>
+
         <SeekBar
                 android:id="@+id/function_seek_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"/>
+
     </LinearLayout>
 
     <LinearLayout
             android:id="@+id/video_function_bar"
-            android:layout_width="200dp"
+            android:layout_width="@dimen/function_bar_width"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:background="@color/function_bar_bg"
+            android:background="@drawable/function_bar_bg"
             android:visibility="gone"
+            android:padding="@dimen/function_bar_around_padding"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -74,66 +80,95 @@
 
     <LinearLayout
             android:id="@+id/tool_bar_group"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="15dp"
+            android:layout_marginBottom="@dimen/tool_bar_margin_bottom"
             android:gravity="center_horizontal"
-            android:layoutDirection="rtl"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent">
-        <ImageView
-                android:id="@+id/horizontal_screen_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:src="@drawable/horizontal_screen"
-                android:contentDescription="horizontal_screen_button"/>
-        <ImageView
-                android:id="@+id/vertical_screen_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:src="@drawable/vertical_screen"
-                android:visibility="gone"
-                android:contentDescription="vertical_screen_button"/>
-        <TextView
-                android:id="@+id/video_end_time"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textColor="@color/white"
-                android:textStyle="bold"/>
-        <LinearLayout
-                android:orientation="horizontal"
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/top_tool_bar_group"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:layoutDirection="ltr">
-            <ImageView
-                    android:id="@+id/video_played_image"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/video_paused"
-                    android:contentDescription="video_played_image"/>
-            <ImageView
-                    android:id="@+id/video_paused_image"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/video_played"
-                    android:visibility="gone"
-                    android:contentDescription="video_paused_image"/>
+                android:layout_height="wrap_content">
+
             <TextView
                     android:id="@+id/video_start_time"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:textColor="@color/white"
                     android:textStyle="bold"
-                    android:layout_marginStart="10dp"/>
-            <SeekBar
-                    android:id="@+id/video_seek_bar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-        </LinearLayout>
+                    android:layout_marginStart="@dimen/tool_bar_item_margin_start"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <TextView
+                    android:id="@+id/video_end_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="@dimen/tool_bar_item_margin_end"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <SeekBar
+                android:id="@+id/video_seek_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/bottom_tool_bar_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <ImageView
+                    android:id="@+id/video_played_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/video_paused"
+                    android:layout_marginStart="@dimen/tool_bar_item_margin_start"
+                    android:contentDescription="video_played_image"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <ImageView
+                    android:id="@+id/video_paused_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/video_played"
+                    android:visibility="gone"
+                    android:layout_marginStart="@dimen/tool_bar_item_margin_start"
+                    android:contentDescription="video_paused_image"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <ImageView
+                    android:id="@+id/horizontal_screen_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/horizontal_screen"
+                    android:layout_marginEnd="@dimen/tool_bar_item_margin_end"
+                    android:contentDescription="horizontal_screen_button"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <ImageView
+                    android:id="@+id/vertical_screen_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/vertical_screen"
+                    android:visibility="gone"
+                    android:layout_marginEnd="@dimen/tool_bar_item_margin_end"
+                    android:contentDescription="vertical_screen_button"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </LinearLayout>
 
 </com.example.videoapp.views.customviews.VideoPlayerView>

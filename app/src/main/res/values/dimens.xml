@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="video_item_radius">5dp</dimen>
+
+    <dimen name="select_name_bar_height">40dp</dimen>
+
+    <dimen name="function_bar_width">200dp</dimen>
+    <dimen name="function_bar_around_padding">10dp</dimen>
+    <dimen name="function_bar_bg_corner_radius">10dp</dimen>
+
+    <dimen name="tool_bar_margin_bottom">15dp</dimen>
+    <dimen name="tool_bar_item_margin_start">10dp</dimen>
+    <dimen name="tool_bar_item_margin_end">10dp</dimen>
 </resources>

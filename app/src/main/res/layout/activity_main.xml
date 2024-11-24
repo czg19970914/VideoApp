@@ -15,7 +15,7 @@
         <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/select_name_bar"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="@dimen/select_name_bar_height"
                 android:background="@color/name_select_bar"/>
 
         <com.scwang.smart.refresh.layout.SmartRefreshLayout
@@ -61,7 +61,7 @@
                     android:id="@+id/left_menu_recycler_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
-            </LinearLayout>
+        </LinearLayout>
 
     </RelativeLayout>
 
