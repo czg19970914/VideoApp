@@ -73,6 +73,8 @@ class VideoPlayerPresenter: VideoPresenter {
                 (mVideoPlayerView as VideoPlayerActivity).mOnDoubleClickListener
             )
 
+            (mVideoPlayerView as VideoPlayerActivity).setVideoGesture()
+
             // 启动timer
             mSeekBarTimer?.schedule(object :TimerTask(){
                 override fun run() {

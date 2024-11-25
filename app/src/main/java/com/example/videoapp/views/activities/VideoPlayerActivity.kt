@@ -212,61 +212,6 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
             }
 
         }
-
-        mAudioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-        (mVideoPlayerPresenter as VideoPlayerPresenter).mMaxVolumeValue =
-            mAudioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC)?.toFloat()
-        mLayoutParams = window.attributes
-
-        mVideoPlayerView.setVideoGestureListener(
-            object: VideoPlayerView.VideoGestureListener {
-                override fun gestureStart(gestureType: Int) {
-                    showFunctionBar(gestureType)
-                }
-
-                override fun adjustLight(startY: Float, currentY: Float) {
-                    if (mCurrentGestureType == VideoPlayerView.ADJUST_LIGHT) {
-                        updateFunctionBar(VideoPlayerView.ADJUST_LIGHT, startY, currentY)
-                    } else {
-                        Log.i(TAG,
-                            "adjustLight: current gesture is $mCurrentGestureType and is not match ADJUST_LIGHT !"
-                        )
-                    }
-                }
-
-                override fun adjustVolume(startY: Float, currentY: Float) {
-                    if (mCurrentGestureType == VideoPlayerView.ADJUST_VOLUME) {
-                        updateFunctionBar(VideoPlayerView.ADJUST_VOLUME, startY, currentY)
-                    } else {
-                        Log.i(TAG,
-                            "adjustVolume: current gesture is $mCurrentGestureType and is not match ADJUST_VOLUME !"
-                        )
-                    }
-                }
-
-                override fun adjustVideoTime(startX: Float, currentX: Float) {
-                    if (mCurrentGestureType == VideoPlayerView.ADJUST_VIDEO_TIME) {
-                        updateFunctionBar(VideoPlayerView.ADJUST_VIDEO_TIME, startX, currentX)
-                    } else {
-                        Log.i(TAG,
-                            "adjustVolume: current gesture is $mCurrentGestureType and is not match ADJUST_VIDEO_TIME !"
-                        )
-                    }
-                }
-
-                override fun gestureFinish(gestureType: Int) {
-                    if (mCurrentGestureType == gestureType) {
-                        when (gestureType) {
-                            VideoPlayerView.ADJUST_VIDEO_TIME -> {
-                                (mVideoPlayerPresenter as VideoPlayerPresenter).seekToGestureTime()
-                            }
-                        }
-                    }
-                    closeFunctionBar()
-                }
-
-            }
-        )
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -332,6 +277,63 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
                         startTime = (mVideoPlayerPresenter as VideoPlayerPresenter).getCurrentVideoTime()
                         videoTimeChanged(startTime, endTime)
                     }
+                }
+
+            }
+        )
+    }
+
+    fun setVideoGesture() {
+        mAudioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager?
+        (mVideoPlayerPresenter as VideoPlayerPresenter).mMaxVolumeValue =
+            mAudioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC)?.toFloat()
+        mLayoutParams = window.attributes
+
+        mVideoPlayerView.setVideoGestureListener(
+            object: VideoPlayerView.VideoGestureListener {
+                override fun gestureStart(gestureType: Int) {
+                    showFunctionBar(gestureType)
+                }
+
+                override fun adjustLight(startY: Float, currentY: Float) {
+                    if (mCurrentGestureType == VideoPlayerView.ADJUST_LIGHT) {
+                        updateFunctionBar(VideoPlayerView.ADJUST_LIGHT, startY, currentY)
+                    } else {
+                        Log.i(TAG,
+                            "adjustLight: current gesture is $mCurrentGestureType and is not match ADJUST_LIGHT !"
+                        )
+                    }
+                }
+
+                override fun adjustVolume(startY: Float, currentY: Float) {
+                    if (mCurrentGestureType == VideoPlayerView.ADJUST_VOLUME) {
+                        updateFunctionBar(VideoPlayerView.ADJUST_VOLUME, startY, currentY)
+                    } else {
+                        Log.i(TAG,
+                            "adjustVolume: current gesture is $mCurrentGestureType and is not match ADJUST_VOLUME !"
+                        )
+                    }
+                }
+
+                override fun adjustVideoTime(startX: Float, currentX: Float) {
+                    if (mCurrentGestureType == VideoPlayerView.ADJUST_VIDEO_TIME) {
+                        updateFunctionBar(VideoPlayerView.ADJUST_VIDEO_TIME, startX, currentX)
+                    } else {
+                        Log.i(TAG,
+                            "adjustVolume: current gesture is $mCurrentGestureType and is not match ADJUST_VIDEO_TIME !"
+                        )
+                    }
+                }
+
+                override fun gestureFinish(gestureType: Int) {
+                    if (mCurrentGestureType == gestureType) {
+                        when (gestureType) {
+                            VideoPlayerView.ADJUST_VIDEO_TIME -> {
+                                (mVideoPlayerPresenter as VideoPlayerPresenter).seekToGestureTime()
+                            }
+                        }
+                    }
+                    closeFunctionBar()
                 }
 
             }
