@@ -7,7 +7,6 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
-import android.view.animation.RotateAnimation
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -90,10 +89,10 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         (mDescriptionPresenter as VideoDescriptionPresenter).getNameList()
 
         mLeftMenuCancel.setOnClickListener {
-            val rotateAnimator = RotateAnimation(0f, 180f,
-                it.width / 2.toFloat(), it.height / 2.toFloat())
-            rotateAnimator.duration = 500
-            it.startAnimation(rotateAnimator)
+//            val rotateAnimator = RotateAnimation(0f, 180f,
+//                it.width / 2.toFloat(), it.height / 2.toFloat())
+//            rotateAnimator.duration = 500
+//            it.startAnimation(rotateAnimator)
 
             closeLeftMenu()
         }
@@ -193,13 +192,6 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
     = withContext(Dispatchers.Main) {
         if(videoEntities.size > 0){
             mVideoListAdapter?.updateVideoDescription(videoEntities)
-//            if(isDown)
-//                mVideoListLayoutManager?.scrollToPosition(0)
-//            else
-//                mVideoListLayoutManager?.scrollToPosition(
-//                    mVideoListAdapter!!.itemCount.coerceAtMost(
-//                        ConfigParams.getDescriptionNum - 1)
-//                )
             if(isDown)
                 mVideoListLayoutManager?.scrollToPositionWithOffset(0, 0)
             else
@@ -249,10 +241,14 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
 
                 override fun onAnimationEnd(p0: Animator) {
                     mLeftMenu.visibility = View.VISIBLE
+
+                    leftAnimatorSet.cancel()
                 }
 
                 override fun onAnimationCancel(p0: Animator) {
                     mLeftMenu.visibility = View.VISIBLE
+
+                    leftAnimatorSet.cancel()
                 }
 
                 override fun onAnimationRepeat(p0: Animator) {
@@ -280,10 +276,14 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
 
                 override fun onAnimationEnd(p0: Animator) {
                     mLeftMenu.visibility = View.GONE
+
+                    leftAnimatorSet.cancel()
                 }
 
                 override fun onAnimationCancel(p0: Animator) {
                     mLeftMenu.visibility = View.GONE
+
+                    leftAnimatorSet.cancel()
                 }
 
                 override fun onAnimationRepeat(p0: Animator) {
@@ -307,6 +307,12 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         initRefreshLayout(selectName)
         showWaitingDialog()
         (mDescriptionPresenter as VideoDescriptionPresenter).getServerData(selectName, false)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        mLeftMenuContent.animation?.cancel()
     }
 
     override fun onSelectBarClick(selectName: String) {

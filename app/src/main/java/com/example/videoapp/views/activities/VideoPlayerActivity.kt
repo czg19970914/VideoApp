@@ -144,10 +144,14 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
 
                         override fun onAnimationEnd(p0: Animator) {
                             mToolBarGroup.visibility = View.VISIBLE
+
+                            toolBarAnimatorSet.cancel()
                         }
 
                         override fun onAnimationCancel(p0: Animator) {
                             mToolBarGroup.visibility = View.VISIBLE
+
+                            toolBarAnimatorSet.cancel()
                         }
 
                         override fun onAnimationRepeat(p0: Animator) {
@@ -239,6 +243,8 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
 
         mLayoutParams = null
         mAudioManager = null
+
+        mToolBarGroup.animation?.cancel()
     }
 
     companion object {

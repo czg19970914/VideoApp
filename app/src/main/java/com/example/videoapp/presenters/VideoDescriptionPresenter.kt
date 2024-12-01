@@ -52,23 +52,26 @@ class VideoDescriptionPresenter: VideoPresenter {
         (mDescriptionModel as VideoDescriptionModel).resetIndex()
         (mDescriptionModel as VideoDescriptionModel).getSelectVideoDescription(
             (mDescriptionView as MainActivity).baseContext, selectName,
-            false, mBlankVideoImage, isInit
+            false, mBlankVideoImage,
+            false, isInit, null, null
         )
     }
 
     suspend fun initVideoInfoRecyclerView(isInit: Boolean, videoEntities: ArrayList<VideoEntity>) {
-        if(isInit)
-                (mDescriptionView as MainActivity).showVideoInfoRecyclerView(videoEntities)
-            else
-                (mDescriptionView as MainActivity).switchNameRecyclerView(videoEntities)
+        if(isInit) {
+            (mDescriptionView as MainActivity).showVideoInfoRecyclerView(videoEntities)
+        } else {
+            (mDescriptionView as MainActivity).switchNameRecyclerView(videoEntities)
+        }
     }
 
     fun updateServerData(selectName: String, isDown: Boolean, refreshLayout: RefreshLayout,
                          refreshOperation: (RefreshLayout) -> Unit) {
 
-        (mDescriptionModel as VideoDescriptionModel).updateSelectVideoDescription(
-            (mDescriptionView as MainActivity).baseContext, selectName, isDown,
-            mBlankVideoImage, refreshLayout, refreshOperation
+        (mDescriptionModel as VideoDescriptionModel).getSelectVideoDescription(
+            (mDescriptionView as MainActivity).baseContext, selectName,
+            isDown, mBlankVideoImage,
+            true, false, refreshLayout, refreshOperation
         )
     }
 
