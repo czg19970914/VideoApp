@@ -28,12 +28,20 @@ class VideoPlayerView : ConstraintLayout {
         // 真机上MOVE触发敏感，扩大触发范围阈值
         const val IS_MOVE_THRESHOLD = 5
 
+        // 单击事件中最晚抬起事件
+        const val SINGLE_CLICK_DURATION = 100L
+        // 双击事件中点击最长事件间隔
+        const val DOUBLE_CLICK_INTERVAL = 250L
+
         // 触发手势的几种类型
         const val GESTURE_TYPE_ERROR = 0
         const val ADJUST_LIGHT = 1
         const val ADJUST_VOLUME  = 2
         const val ADJUST_VIDEO_TIME = 3
         const val VIDEO_FAST_FORWARD = 4
+        // 新增单击以及双击事件
+        const val VIDEO_SINGLE_CLICK = 5
+        const val VIDEO_DOUBLE_CLICK = 6
     }
 
     constructor(context: Context): super(context)
@@ -44,6 +52,10 @@ class VideoPlayerView : ConstraintLayout {
     private var mFirstTouchTime: Long? = null
     private var mFirstTouchX: Float? = null
     private var mFirstTouchY: Float? = null
+
+    // 双击事件适配属性
+    private var mLastTouchTime: Long? = null
+    private var mClickCount: Int = 0
 
     private var mVideoGestureListener : VideoGestureListener? = null
 
@@ -123,18 +135,54 @@ class VideoPlayerView : ConstraintLayout {
                 }
             }
             MotionEvent.ACTION_UP -> {
+                if (!mCanUseGesture && mCurrentGestureType == GESTURE_TYPE_ERROR
+                    && System.currentTimeMillis() - mFirstTouchTime!! < SINGLE_CLICK_DURATION) {
+                    mClickCount++
+                    mCurrentGestureType = VIDEO_SINGLE_CLICK
+                    mVideoGestureListener?.videoSingleClick()
+                    if (mClickCount == 2) {
+                        if ((mLastTouchTime != null) && mFirstTouchTime!! - mLastTouchTime!! < DOUBLE_CLICK_INTERVAL) {
+                            mCurrentGestureType = VIDEO_DOUBLE_CLICK
+                            mVideoGestureListener?.videoDoodleClick()
+                            mClickCount = 0
+                        } else {
+                            mClickCount = 1
+                        }
+                    }
+                } else {
+                    mClickCount = 0
+                }
                 mCancelGesture = false
                 mCanUseGesture = false
                 mStartGesture = true
 
                 mVideoGestureListener?.gestureFinish(mCurrentGestureType)
+                mLastTouchTime = mFirstTouchTime
             }
             MotionEvent.ACTION_CANCEL -> {
+                if (!mCanUseGesture && mCurrentGestureType == GESTURE_TYPE_ERROR
+                    && System.currentTimeMillis() - mFirstTouchTime!! < SINGLE_CLICK_DURATION) {
+                    mClickCount++
+                    mCurrentGestureType = VIDEO_SINGLE_CLICK
+                    mVideoGestureListener?.videoSingleClick()
+                    if (mClickCount == 2) {
+                        if ((mLastTouchTime != null) && mFirstTouchTime!! - mLastTouchTime!! < DOUBLE_CLICK_INTERVAL) {
+                            mCurrentGestureType = VIDEO_DOUBLE_CLICK
+                            mVideoGestureListener?.videoDoodleClick()
+                            mClickCount = 0
+                        } else {
+                            mClickCount = 1
+                        }
+                    }
+                } else {
+                    mClickCount = 0
+                }
                 mCancelGesture = false
                 mCanUseGesture = false
                 mStartGesture = true
 
                 mVideoGestureListener?.gestureFinish(mCurrentGestureType)
+                mLastTouchTime = mFirstTouchTime
             }
         }
         return true
@@ -181,6 +229,8 @@ class VideoPlayerView : ConstraintLayout {
 
     // 回调接口，用来窗口播放界面以及视频
     interface VideoGestureListener {
+        fun videoSingleClick()
+        fun videoDoodleClick()
         fun gestureStart(gestureType: Int)
 
         fun adjustLight(startY: Float, currentY: Float)

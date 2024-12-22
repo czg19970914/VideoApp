@@ -69,10 +69,6 @@ class VideoPlayerPresenter: VideoPresenter {
             it.start()
             (mVideoPlayerView as VideoPlayerActivity).initVideoSeekBar()
 
-            videoTextureView.setOnTouchListener(
-                (mVideoPlayerView as VideoPlayerActivity).mOnDoubleClickListener
-            )
-
             (mVideoPlayerView as VideoPlayerActivity).setVideoGesture()
 
             // 启动timer
