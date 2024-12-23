@@ -171,6 +171,8 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
         mAudioManager = null
 
         mToolBarGroup.animation?.cancel()
+
+        mVideoPlayerView.onDestroy()
     }
 
     companion object {
@@ -215,14 +217,9 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
         )
     }
 
-    fun setVideoGesture() {
-        mAudioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-        (mVideoPlayerPresenter as VideoPlayerPresenter).mMaxVolumeValue =
-            mAudioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC)?.toFloat()
-        mLayoutParams = window.attributes
-
-        mVideoPlayerView.setVideoGestureListener(
-            object: VideoPlayerView.VideoGestureListener {
+    fun setVideoClick() {
+        mVideoPlayerView.setVideoClickListener(
+            object: VideoPlayerView.VideoClickListener {
                 override fun videoSingleClick() {
                     if(mToolBarGroup.visibility == View.VISIBLE){
                         showOrHideToolbar(false)
@@ -235,6 +232,22 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
                     (mVideoPlayerPresenter as VideoPlayerPresenter).pauseStateChanged()
                 }
 
+                override fun videoLongClick() {
+
+                }
+
+            }
+        )
+    }
+
+    fun setVideoGesture() {
+        mAudioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager?
+        (mVideoPlayerPresenter as VideoPlayerPresenter).mMaxVolumeValue =
+            mAudioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC)?.toFloat()
+        mLayoutParams = window.attributes
+
+        mVideoPlayerView.setVideoGestureListener(
+            object: VideoPlayerView.VideoGestureListener {
                 override fun gestureStart(gestureType: Int) {
                     showFunctionBar(gestureType)
                 }

@@ -69,6 +69,7 @@ class VideoPlayerPresenter: VideoPresenter {
             it.start()
             (mVideoPlayerView as VideoPlayerActivity).initVideoSeekBar()
 
+            (mVideoPlayerView as VideoPlayerActivity).setVideoClick()
             (mVideoPlayerView as VideoPlayerActivity).setVideoGesture()
 
             // 启动timer

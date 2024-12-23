@@ -2,10 +2,14 @@ package com.example.videoapp.views.customviews
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import androidx.constraintlayout.widget.ConstraintLayout
+import java.lang.ref.WeakReference
 import kotlin.math.abs
 
 /**
@@ -39,9 +43,6 @@ class VideoPlayerView : ConstraintLayout {
         const val ADJUST_VOLUME  = 2
         const val ADJUST_VIDEO_TIME = 3
         const val VIDEO_FAST_FORWARD = 4
-        // 新增单击以及双击事件
-        const val VIDEO_SINGLE_CLICK = 5
-        const val VIDEO_DOUBLE_CLICK = 6
     }
 
     constructor(context: Context): super(context)
@@ -56,6 +57,8 @@ class VideoPlayerView : ConstraintLayout {
     // 双击事件适配属性
     private var mLastTouchTime: Long? = null
     private var mClickCount: Int = 0
+
+    private var mVideoClickListener: VideoClickListener? = null
 
     private var mVideoGestureListener : VideoGestureListener? = null
 
@@ -74,6 +77,11 @@ class VideoPlayerView : ConstraintLayout {
     // 判断当前横竖屏状态，默认竖屏
     private var mIsVertical = true
 
+    // 表示当前是长按事件，如果触发长按事件则一直是长按事件直到手指松开
+    private var mInLongClick = false
+
+    private val mClickEventHandler: ClickEventHandler = ClickEventHandler(this)
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         when(event?.action) {
@@ -87,8 +95,13 @@ class VideoPlayerView : ConstraintLayout {
                 mCanUseGesture = false
                 mStartGesture = true
                 mCurrentGestureType = GESTURE_TYPE_ERROR
+
+                // TODO 这里发送延时长按消息
             }
             MotionEvent.ACTION_MOVE -> {
+                if (mInLongClick) {
+                    return true
+                }
                 if (mCanUseGesture) {
                     if (
                         mFirstTouchTime != null
@@ -120,6 +133,7 @@ class VideoPlayerView : ConstraintLayout {
                     }
                 } else if (!mCancelGesture) {
                     if(isMove(event.x, event.y)) {
+                        // TODO 清空handler消息队列
                         if (
                             mFirstTouchTime != null &&
                             System.currentTimeMillis() - mFirstTouchTime!! > LONG_PRESSED_THRESHOLD
@@ -138,12 +152,13 @@ class VideoPlayerView : ConstraintLayout {
                 if (!mCanUseGesture && mCurrentGestureType == GESTURE_TYPE_ERROR
                     && System.currentTimeMillis() - mFirstTouchTime!! < SINGLE_CLICK_DURATION) {
                     mClickCount++
-                    mCurrentGestureType = VIDEO_SINGLE_CLICK
-                    mVideoGestureListener?.videoSingleClick()
+                    // TODO 清空handler消息队列
+                    // TODO 这里发送延时单击消息
+                    mVideoClickListener?.videoSingleClick()
                     if (mClickCount == 2) {
                         if ((mLastTouchTime != null) && mFirstTouchTime!! - mLastTouchTime!! < DOUBLE_CLICK_INTERVAL) {
-                            mCurrentGestureType = VIDEO_DOUBLE_CLICK
-                            mVideoGestureListener?.videoDoodleClick()
+                            // TODO 清空handler消息队列
+                            mVideoClickListener?.videoDoodleClick()
                             mClickCount = 0
                         } else {
                             mClickCount = 1
@@ -158,17 +173,20 @@ class VideoPlayerView : ConstraintLayout {
 
                 mVideoGestureListener?.gestureFinish(mCurrentGestureType)
                 mLastTouchTime = mFirstTouchTime
+
+                // TODO 需要结束长按事件
             }
             MotionEvent.ACTION_CANCEL -> {
                 if (!mCanUseGesture && mCurrentGestureType == GESTURE_TYPE_ERROR
                     && System.currentTimeMillis() - mFirstTouchTime!! < SINGLE_CLICK_DURATION) {
                     mClickCount++
-                    mCurrentGestureType = VIDEO_SINGLE_CLICK
-                    mVideoGestureListener?.videoSingleClick()
+                    // TODO 清空handler消息队列
+                    // TODO 这里发送延时单击消息
+                    mVideoClickListener?.videoSingleClick()
                     if (mClickCount == 2) {
                         if ((mLastTouchTime != null) && mFirstTouchTime!! - mLastTouchTime!! < DOUBLE_CLICK_INTERVAL) {
-                            mCurrentGestureType = VIDEO_DOUBLE_CLICK
-                            mVideoGestureListener?.videoDoodleClick()
+                            // TODO 清空handler消息队列
+                            mVideoClickListener?.videoDoodleClick()
                             mClickCount = 0
                         } else {
                             mClickCount = 1
@@ -183,6 +201,8 @@ class VideoPlayerView : ConstraintLayout {
 
                 mVideoGestureListener?.gestureFinish(mCurrentGestureType)
                 mLastTouchTime = mFirstTouchTime
+
+                // TODO 需要结束长按事件
             }
         }
         return true
@@ -223,14 +243,23 @@ class VideoPlayerView : ConstraintLayout {
         return GESTURE_TYPE_ERROR
     }
 
+    fun onDestroy() {
+        mClickEventHandler.removeCallbacksAndMessages(null)
+
+        mVideoClickListener = null
+        mVideoGestureListener = null
+    }
+
     fun setVideoGestureListener(videoGestureListener: VideoGestureListener) {
         mVideoGestureListener = videoGestureListener
     }
 
-    // 回调接口，用来窗口播放界面以及视频
+    fun setVideoClickListener(videoClickListener: VideoClickListener) {
+        mVideoClickListener = videoClickListener
+    }
+
+    // 回调接口，用来窗口播放界面以及视频的手势
     interface VideoGestureListener {
-        fun videoSingleClick()
-        fun videoDoodleClick()
         fun gestureStart(gestureType: Int)
 
         fun adjustLight(startY: Float, currentY: Float)
@@ -240,6 +269,29 @@ class VideoPlayerView : ConstraintLayout {
         fun adjustVideoTime(startX: Float, currentX: Float)
 
         fun gestureFinish(gestureType: Int)
+    }
+
+    // 回调接口，原来执行点击事件
+    interface VideoClickListener {
+        fun videoSingleClick()
+        fun videoDoodleClick()
+        fun videoLongClick()
+    }
+
+    class ClickEventHandler(videoPlayerView: VideoPlayerView): Handler(Looper.getMainLooper()) {
+        private final var mVideoPlayerView: WeakReference<VideoPlayerView>?  = null
+        init {
+            mVideoPlayerView = WeakReference<VideoPlayerView>(videoPlayerView)
+        }
+
+        override fun handleMessage(msg: Message) {
+            super.handleMessage(msg)
+
+            val videoPlayerView: VideoPlayerView? = mVideoPlayerView?.get()
+            when (msg.what) {
+
+            }
+        }
     }
 }
 
