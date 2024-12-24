@@ -29,9 +29,6 @@ import com.example.videoapp.utils.VideoUtils
 import com.example.videoapp.views.customviews.VideoPlayerView
 
 class VideoPlayerActivity : AppCompatActivity(), VideoView {
-    /**
-     * 这边工具条的出现、消失动画，在快速点击时有点bug，后续改吧
-     */
     private val mVideoPlayerView: VideoPlayerView by lazy {
         findViewById(R.id.video_player_view)
     }
@@ -79,6 +76,9 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
     }
     private val mShowSeekTimeTextView : TextView by lazy {
         findViewById(R.id.show_seek_time)
+    }
+    private val mMultiSpeedPlayBar: LinearLayout by lazy {
+        findViewById(R.id.multi_speed_play_bar)
     }
 
     // 记录一下当前手势操作的类型，现在主要用作校验作用，没什么其它作用
@@ -233,7 +233,13 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
                 }
 
                 override fun videoLongClick() {
+                    showOrHideMultiSpeedBar(true)
+//                    (mVideoPlayerPresenter as VideoPlayerPresenter).changePlayerSpeed(2.0f)
+                }
 
+                override fun videoLongClickEnd() {
+                    showOrHideMultiSpeedBar(false)
+//                    (mVideoPlayerPresenter as VideoPlayerPresenter).resetPlayerSpeed()
                 }
 
             }
@@ -295,6 +301,14 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
 
             }
         )
+    }
+
+    private fun showOrHideMultiSpeedBar(isShow: Boolean) {
+        if (isShow) {
+            mMultiSpeedPlayBar.visibility = View.VISIBLE
+        } else {
+            mMultiSpeedPlayBar.visibility = View.GONE
+        }
     }
 
     private fun showOrHideToolbar(isShow: Boolean) {

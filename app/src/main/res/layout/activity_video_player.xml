@@ -20,6 +20,27 @@
             app:layout_constraintStart_toStartOf="parent"/>
 
     <LinearLayout
+            android:id="@+id/multi_speed_play_bar"
+            android:layout_width="@dimen/function_bar_width"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:background="@drawable/function_bar_bg"
+            android:padding="@dimen/function_bar_around_padding"
+            android:layout_marginTop="@dimen/multi_speed_play_bar_margin_top"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:text="@string/multi_speed_play_bar_text"/>
+
+    </LinearLayout>
+
+    <LinearLayout
             android:id="@+id/function_bar"
             android:layout_width="@dimen/function_bar_width"
             android:layout_height="wrap_content"
@@ -73,7 +94,7 @@
                 android:id="@+id/show_seek_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="00:00/00:00"
+                android:text="@string/show_seek_time_default_time"
                 android:textColor="@color/white"/>
 
     </LinearLayout>
@@ -131,7 +152,7 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/video_paused"
                     android:layout_marginStart="@dimen/tool_bar_item_margin_start"
-                    android:contentDescription="video_played_image"
+                    android:contentDescription="@string/video_played_image_desc"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"/>
 
@@ -142,7 +163,7 @@
                     android:src="@drawable/video_played"
                     android:visibility="gone"
                     android:layout_marginStart="@dimen/tool_bar_item_margin_start"
-                    android:contentDescription="video_paused_image"
+                    android:contentDescription="@string/video_paused_image_desc"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"/>
 
@@ -152,7 +173,7 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/horizontal_screen"
                     android:layout_marginEnd="@dimen/tool_bar_item_margin_end"
-                    android:contentDescription="horizontal_screen_button"
+                    android:contentDescription="@string/horizontal_screen_button_desc"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"/>
 
@@ -163,7 +184,7 @@
                     android:src="@drawable/vertical_screen"
                     android:visibility="gone"
                     android:layout_marginEnd="@dimen/tool_bar_item_margin_end"
-                    android:contentDescription="vertical_screen_button"
+                    android:contentDescription="@string/vertical_screen_button_desc"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"/>
 

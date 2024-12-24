@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">VideoApp</string>
+    <string name="multi_speed_play_bar_text">两倍速播放中…</string>
+    <string name="show_seek_time_default_time">00:00/00:00</string>
+
+    <string name="video_played_image_desc">video_played_image</string>
+    <string name="video_paused_image_desc">video_played_image</string>
+    <string name="horizontal_screen_button_desc">horizontal_screen_button</string>
+    <string name="vertical_screen_button_desc">vertical_screen_button</string>
 </resources>

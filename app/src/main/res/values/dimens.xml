@@ -11,4 +11,6 @@
     <dimen name="tool_bar_margin_bottom">15dp</dimen>
     <dimen name="tool_bar_item_margin_start">10dp</dimen>
     <dimen name="tool_bar_item_margin_end">10dp</dimen>
+
+    <dimen name="multi_speed_play_bar_margin_top">50dp</dimen>
 </resources>

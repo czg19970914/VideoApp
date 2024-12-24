@@ -18,7 +18,9 @@ import kotlin.math.abs
  * 手势：左边上移\下移 -> 调亮度
  *      右边上移\下移 -> 调音量
  *      左右移 -> 前后视频时间调节
- *      长按 -> 快进
+ * 点击：轻点 -> 调出视频的工具条
+ *      双击 -> 视频的暂停、播放
+ *      长按 -> 倍速播放视频
  * */
 class VideoPlayerView : ConstraintLayout {
     companion object {
@@ -38,6 +40,8 @@ class VideoPlayerView : ConstraintLayout {
         const val DOUBLE_CLICK_INTERVAL = 150L
         // 单击事件延时触发，需要比双击事件判定时间长
         const val SINGLE_CLICK_DELAY = DOUBLE_CLICK_INTERVAL + DOUBLE_CLICK_INTERVAL + 50L
+        // 长按事件触发的所需要的事件阈值
+        const val LONG_CLICK_TIME_THRESHOLD = 1500L
 
         // 触发手势的几种类型
         const val GESTURE_TYPE_ERROR = 0
@@ -50,8 +54,6 @@ class VideoPlayerView : ConstraintLayout {
         const val SINGLE_CLICK_MSG = 1
         // 发送长按开始消息标签
         const val LONG_CLICK_START_MSG = 2
-        // 发送长按结束消息标签
-        const val LONG_CLICK_END_MSG = 3
     }
 
     constructor(context: Context): super(context)
@@ -104,6 +106,8 @@ class VideoPlayerView : ConstraintLayout {
 
                 resetFlags()
                 mCurrentGestureType = GESTURE_TYPE_ERROR
+
+                mClickEventHandler?.sendMessageDelayed(LONG_CLICK_START_MSG, LONG_CLICK_TIME_THRESHOLD)
             }
             MotionEvent.ACTION_MOVE -> {
                 if (mInLongClick) {
@@ -140,6 +144,8 @@ class VideoPlayerView : ConstraintLayout {
                     }
                 } else if (!mCancelGesture) {
                     if(isMove(event.x, event.y)) {
+                        mClickEventHandler?.removeMessages(LONG_CLICK_START_MSG)
+
                         if (
                             mFirstTouchTime != null &&
                             System.currentTimeMillis() - mFirstTouchTime!! > LONG_PRESSED_THRESHOLD
@@ -155,11 +161,14 @@ class VideoPlayerView : ConstraintLayout {
                 }
             }
             MotionEvent.ACTION_UP -> {
+                mClickEventHandler?.removeMessages(LONG_CLICK_START_MSG)
+
                 if (isClickEvent(mFirstTouchTime!!, System.currentTimeMillis())) {
                     mClickCount++
                     mClickEventHandler?.sendMessageDelayed(SINGLE_CLICK_MSG, SINGLE_CLICK_DELAY)
                     if (mClickCount == 2) {
-                        if ((mLastTouchTime != null) && mFirstTouchTime!! - mLastTouchTime!! < DOUBLE_CLICK_INTERVAL) {
+                        if (mLastTouchTime != null
+                            && mFirstTouchTime!! - mLastTouchTime!! < DOUBLE_CLICK_INTERVAL) {
                             mClickEventHandler?.removeMessages(SINGLE_CLICK_MSG)
                             videoDoubleClick()
                             mClickCount = 0
@@ -170,13 +179,20 @@ class VideoPlayerView : ConstraintLayout {
                 } else {
                     mClickCount = 0
                 }
+                if (mInLongClick) {
+                    videoLongClickEnd()
+                }
                 resetFlags()
 
                 mVideoGestureListener?.gestureFinish(mCurrentGestureType)
                 mLastTouchTime = mFirstTouchTime
             }
             MotionEvent.ACTION_CANCEL -> {
+                mClickEventHandler?.removeMessages(LONG_CLICK_START_MSG)
                 mClickCount = 0
+                if (mInLongClick) {
+                    videoLongClickEnd()
+                }
                 resetFlags()
 
                 mVideoGestureListener?.gestureFinish(mCurrentGestureType)
@@ -228,7 +244,7 @@ class VideoPlayerView : ConstraintLayout {
         val timeInterval = endTime - clickTime
         return !mCanUseGesture
                 && mCurrentGestureType == GESTURE_TYPE_ERROR
-                && !mCancelGesture
+                && !mCancelGesture && !mInLongClick
                 && timeInterval < SINGLE_CLICK_DURATION
     }
 
@@ -244,6 +260,16 @@ class VideoPlayerView : ConstraintLayout {
 
     private fun videoDoubleClick() {
         mVideoClickListener?.videoDoubleClick()
+    }
+
+    fun videoLongClick() {
+        mInLongClick = true
+        mVideoClickListener?.videoLongClick()
+    }
+
+    private fun videoLongClickEnd() {
+        mInLongClick = false
+        mVideoClickListener?.videoLongClickEnd()
     }
 
     fun onDestroy() {
@@ -280,6 +306,7 @@ class VideoPlayerView : ConstraintLayout {
         fun videoSingleClick()
         fun videoDoubleClick()
         fun videoLongClick()
+        fun videoLongClickEnd()
     }
 
     class ClickEventHandler(videoPlayerView: VideoPlayerView): Handler(Looper.getMainLooper()) {
@@ -297,10 +324,7 @@ class VideoPlayerView : ConstraintLayout {
                     videoPlayerView?.videoSingleClick()
                 }
                 LONG_CLICK_START_MSG -> {
-
-                }
-                LONG_CLICK_END_MSG -> {
-
+                    videoPlayerView?.videoLongClick()
                 }
             }
         }

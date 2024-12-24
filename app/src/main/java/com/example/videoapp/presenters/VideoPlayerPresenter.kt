@@ -186,4 +186,22 @@ class VideoPlayerPresenter: VideoPresenter {
             }
         }
     }
+
+    fun changePlayerSpeed(speed: Float): Boolean {
+        val playbackParams = mMediaPlayer?.playbackParams?.setSpeed(speed)
+        if (playbackParams != null) {
+            mMediaPlayer?.playbackParams = playbackParams
+            return true
+        } else {
+            return false
+        }
+    }
+
+    fun resetPlayerSpeed() {
+        val playbackParams = mMediaPlayer?.playbackParams
+        if (playbackParams != null && playbackParams.speed != 1.0f) {
+            playbackParams.setSpeed(1.0f)
+            mMediaPlayer?.playbackParams = playbackParams
+        }
+    }
 }
