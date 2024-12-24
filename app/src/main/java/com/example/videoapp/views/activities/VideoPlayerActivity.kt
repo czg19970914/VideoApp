@@ -228,7 +228,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
                     }
                 }
 
-                override fun videoDoodleClick() {
+                override fun videoDoubleClick() {
                     (mVideoPlayerPresenter as VideoPlayerPresenter).pauseStateChanged()
                 }
 

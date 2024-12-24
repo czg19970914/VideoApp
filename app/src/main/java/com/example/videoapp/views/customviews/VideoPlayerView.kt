@@ -33,9 +33,11 @@ class VideoPlayerView : ConstraintLayout {
         const val IS_MOVE_THRESHOLD = 5
 
         // 单击事件中最晚抬起事件
-        const val SINGLE_CLICK_DURATION = 100L
+        const val SINGLE_CLICK_DURATION = 150L
         // 双击事件中点击最长事件间隔
-        const val DOUBLE_CLICK_INTERVAL = 250L
+        const val DOUBLE_CLICK_INTERVAL = 150L
+        // 单击事件延时触发，需要比双击事件判定时间长
+        const val SINGLE_CLICK_DELAY = DOUBLE_CLICK_INTERVAL + DOUBLE_CLICK_INTERVAL + 50L
 
         // 触发手势的几种类型
         const val GESTURE_TYPE_ERROR = 0
@@ -43,6 +45,13 @@ class VideoPlayerView : ConstraintLayout {
         const val ADJUST_VOLUME  = 2
         const val ADJUST_VIDEO_TIME = 3
         const val VIDEO_FAST_FORWARD = 4
+
+        // 发送单击消息标签
+        const val SINGLE_CLICK_MSG = 1
+        // 发送长按开始消息标签
+        const val LONG_CLICK_START_MSG = 2
+        // 发送长按结束消息标签
+        const val LONG_CLICK_END_MSG = 3
     }
 
     constructor(context: Context): super(context)
@@ -80,23 +89,21 @@ class VideoPlayerView : ConstraintLayout {
     // 表示当前是长按事件，如果触发长按事件则一直是长按事件直到手指松开
     private var mInLongClick = false
 
-    private val mClickEventHandler: ClickEventHandler = ClickEventHandler(this)
+    private var mClickEventHandler: ClickEventHandler? = ClickEventHandler(this)
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         when(event?.action) {
             MotionEvent.ACTION_DOWN -> {
+                mClickEventHandler?.removeCallbacksAndMessages(null)
+
                 mFirstTouchTime = System.currentTimeMillis()
                 mFirstTouchX = event.x
                 mFirstTouchY = event.y
                 mScreenWidth = resources.displayMetrics.widthPixels
 
-                mCancelGesture = false
-                mCanUseGesture = false
-                mStartGesture = true
+                resetFlags()
                 mCurrentGestureType = GESTURE_TYPE_ERROR
-
-                // TODO 这里发送延时长按消息
             }
             MotionEvent.ACTION_MOVE -> {
                 if (mInLongClick) {
@@ -133,7 +140,6 @@ class VideoPlayerView : ConstraintLayout {
                     }
                 } else if (!mCancelGesture) {
                     if(isMove(event.x, event.y)) {
-                        // TODO 清空handler消息队列
                         if (
                             mFirstTouchTime != null &&
                             System.currentTimeMillis() - mFirstTouchTime!! > LONG_PRESSED_THRESHOLD
@@ -149,16 +155,13 @@ class VideoPlayerView : ConstraintLayout {
                 }
             }
             MotionEvent.ACTION_UP -> {
-                if (!mCanUseGesture && mCurrentGestureType == GESTURE_TYPE_ERROR
-                    && System.currentTimeMillis() - mFirstTouchTime!! < SINGLE_CLICK_DURATION) {
+                if (isClickEvent(mFirstTouchTime!!, System.currentTimeMillis())) {
                     mClickCount++
-                    // TODO 清空handler消息队列
-                    // TODO 这里发送延时单击消息
-                    mVideoClickListener?.videoSingleClick()
+                    mClickEventHandler?.sendMessageDelayed(SINGLE_CLICK_MSG, SINGLE_CLICK_DELAY)
                     if (mClickCount == 2) {
                         if ((mLastTouchTime != null) && mFirstTouchTime!! - mLastTouchTime!! < DOUBLE_CLICK_INTERVAL) {
-                            // TODO 清空handler消息队列
-                            mVideoClickListener?.videoDoodleClick()
+                            mClickEventHandler?.removeMessages(SINGLE_CLICK_MSG)
+                            videoDoubleClick()
                             mClickCount = 0
                         } else {
                             mClickCount = 1
@@ -167,42 +170,17 @@ class VideoPlayerView : ConstraintLayout {
                 } else {
                     mClickCount = 0
                 }
-                mCancelGesture = false
-                mCanUseGesture = false
-                mStartGesture = true
+                resetFlags()
 
                 mVideoGestureListener?.gestureFinish(mCurrentGestureType)
                 mLastTouchTime = mFirstTouchTime
-
-                // TODO 需要结束长按事件
             }
             MotionEvent.ACTION_CANCEL -> {
-                if (!mCanUseGesture && mCurrentGestureType == GESTURE_TYPE_ERROR
-                    && System.currentTimeMillis() - mFirstTouchTime!! < SINGLE_CLICK_DURATION) {
-                    mClickCount++
-                    // TODO 清空handler消息队列
-                    // TODO 这里发送延时单击消息
-                    mVideoClickListener?.videoSingleClick()
-                    if (mClickCount == 2) {
-                        if ((mLastTouchTime != null) && mFirstTouchTime!! - mLastTouchTime!! < DOUBLE_CLICK_INTERVAL) {
-                            // TODO 清空handler消息队列
-                            mVideoClickListener?.videoDoodleClick()
-                            mClickCount = 0
-                        } else {
-                            mClickCount = 1
-                        }
-                    }
-                } else {
-                    mClickCount = 0
-                }
-                mCancelGesture = false
-                mCanUseGesture = false
-                mStartGesture = true
+                mClickCount = 0
+                resetFlags()
 
                 mVideoGestureListener?.gestureFinish(mCurrentGestureType)
                 mLastTouchTime = mFirstTouchTime
-
-                // TODO 需要结束长按事件
             }
         }
         return true
@@ -243,8 +221,34 @@ class VideoPlayerView : ConstraintLayout {
         return GESTURE_TYPE_ERROR
     }
 
+    /**
+     * 判断手抬起时，该事件是否是应该点击事件
+     */
+    private fun isClickEvent(clickTime: Long, endTime: Long) : Boolean {
+        val timeInterval = endTime - clickTime
+        return !mCanUseGesture
+                && mCurrentGestureType == GESTURE_TYPE_ERROR
+                && !mCancelGesture
+                && timeInterval < SINGLE_CLICK_DURATION
+    }
+
+    private fun resetFlags() {
+        mCancelGesture = false
+        mCanUseGesture = false
+        mStartGesture = true
+    }
+
+    fun videoSingleClick() {
+        mVideoClickListener?.videoSingleClick()
+    }
+
+    private fun videoDoubleClick() {
+        mVideoClickListener?.videoDoubleClick()
+    }
+
     fun onDestroy() {
-        mClickEventHandler.removeCallbacksAndMessages(null)
+        mClickEventHandler?.removeCallbacksAndMessages(null)
+        mClickEventHandler = null
 
         mVideoClickListener = null
         mVideoGestureListener = null
@@ -274,7 +278,7 @@ class VideoPlayerView : ConstraintLayout {
     // 回调接口，原来执行点击事件
     interface VideoClickListener {
         fun videoSingleClick()
-        fun videoDoodleClick()
+        fun videoDoubleClick()
         fun videoLongClick()
     }
 
@@ -289,8 +293,28 @@ class VideoPlayerView : ConstraintLayout {
 
             val videoPlayerView: VideoPlayerView? = mVideoPlayerView?.get()
             when (msg.what) {
+                SINGLE_CLICK_MSG -> {
+                    videoPlayerView?.videoSingleClick()
+                }
+                LONG_CLICK_START_MSG -> {
 
+                }
+                LONG_CLICK_END_MSG -> {
+
+                }
             }
+        }
+
+        fun sendMessage(msgFlag: Int) {
+            val msg = Message()
+            msg.what = msgFlag
+            this.sendMessage(msg)
+        }
+
+        fun sendMessageDelayed(msgFlag: Int, delayMillis: Long) {
+            val msg = Message()
+            msg.what = msgFlag
+            this.sendMessageDelayed(msg, delayMillis)
         }
     }
 }
