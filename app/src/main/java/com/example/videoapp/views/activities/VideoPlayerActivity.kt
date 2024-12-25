@@ -233,13 +233,11 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
                 }
 
                 override fun videoLongClick() {
-                    showOrHideMultiSpeedBar(true)
-//                    (mVideoPlayerPresenter as VideoPlayerPresenter).changePlayerSpeed(2.0f)
+                    (mVideoPlayerPresenter as VideoPlayerPresenter).changePlayerSpeed(2.0f)
                 }
 
                 override fun videoLongClickEnd() {
-                    showOrHideMultiSpeedBar(false)
-//                    (mVideoPlayerPresenter as VideoPlayerPresenter).resetPlayerSpeed()
+                    (mVideoPlayerPresenter as VideoPlayerPresenter).resetPlayerSpeed()
                 }
 
             }
@@ -303,7 +301,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
         )
     }
 
-    private fun showOrHideMultiSpeedBar(isShow: Boolean) {
+    fun showOrHideMultiSpeedBar(isShow: Boolean) {
         if (isShow) {
             mMultiSpeedPlayBar.visibility = View.VISIBLE
         } else {

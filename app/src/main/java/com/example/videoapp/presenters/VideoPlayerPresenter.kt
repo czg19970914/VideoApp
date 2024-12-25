@@ -187,21 +187,24 @@ class VideoPlayerPresenter: VideoPresenter {
         }
     }
 
-    fun changePlayerSpeed(speed: Float): Boolean {
-        val playbackParams = mMediaPlayer?.playbackParams?.setSpeed(speed)
-        if (playbackParams != null) {
-            mMediaPlayer?.playbackParams = playbackParams
-            return true
-        } else {
-            return false
+    fun changePlayerSpeed(speed: Float) {
+        if (mMediaPlayer != null && mMediaPlayer!!.isPlaying) {
+            val playbackParams = mMediaPlayer?.playbackParams?.setSpeed(speed)
+            if (playbackParams != null) {
+                mMediaPlayer?.playbackParams = playbackParams
+                (mVideoPlayerView as VideoPlayerActivity).showOrHideMultiSpeedBar(true)
+            }
         }
     }
 
     fun resetPlayerSpeed() {
         val playbackParams = mMediaPlayer?.playbackParams
-        if (playbackParams != null && playbackParams.speed != 1.0f) {
+        if (playbackParams != null &&
+            playbackParams.speed != 1.0f &&
+            playbackParams.speed != 0.0f) {
             playbackParams.setSpeed(1.0f)
             mMediaPlayer?.playbackParams = playbackParams
         }
+        (mVideoPlayerView as VideoPlayerActivity).showOrHideMultiSpeedBar(false)
     }
 }
