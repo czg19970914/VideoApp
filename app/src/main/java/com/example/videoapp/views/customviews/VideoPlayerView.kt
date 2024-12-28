@@ -27,9 +27,9 @@ class VideoPlayerView : ConstraintLayout {
         const val TAG = "VideoPlayerView"
         
         // 长按超过多少毫秒才触发手势的阈值
-        const val LONG_PRESSED_THRESHOLD = 150L
+        const val LONG_PRESSED_THRESHOLD = 50L
         // 长按后再经过一段时间间隔来判断用户的意图
-        const val GET_TYPE_TIME = LONG_PRESSED_THRESHOLD + 300L
+        const val GET_TYPE_TIME = LONG_PRESSED_THRESHOLD + 150L
 
         // 真机上MOVE触发敏感，扩大触发范围阈值
         const val IS_MOVE_THRESHOLD = 5
@@ -39,9 +39,9 @@ class VideoPlayerView : ConstraintLayout {
         // 双击事件中点击最长事件间隔
         const val DOUBLE_CLICK_INTERVAL = 150L
         // 单击事件延时触发，需要比双击事件判定时间长
-        const val SINGLE_CLICK_DELAY = DOUBLE_CLICK_INTERVAL + DOUBLE_CLICK_INTERVAL + 50L
+        const val SINGLE_CLICK_DELAY = SINGLE_CLICK_DURATION + DOUBLE_CLICK_INTERVAL + 50L
         // 长按事件触发的所需要的事件阈值
-        const val LONG_CLICK_TIME_THRESHOLD = 1500L
+        const val LONG_CLICK_TIME_THRESHOLD = 1000L
 
         // 触发手势的几种类型
         const val GESTURE_TYPE_ERROR = 0

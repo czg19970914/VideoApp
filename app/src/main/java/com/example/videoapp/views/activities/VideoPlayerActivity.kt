@@ -13,6 +13,7 @@ import android.media.AudioManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.MotionEvent
 import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
 import android.view.View
@@ -96,6 +97,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
         mVideoPlayerPresenter.setView(this)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_video_player)
@@ -142,6 +144,9 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
             }
 
         }
+
+        // 屏蔽toolbar上手势事件
+        mToolBarGroup.setOnTouchListener { p0, p1 -> true }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
