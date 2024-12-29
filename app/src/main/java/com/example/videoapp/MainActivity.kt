@@ -89,11 +89,6 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         (mDescriptionPresenter as VideoDescriptionPresenter).getNameList()
 
         mLeftMenuCancel.setOnClickListener {
-//            val rotateAnimator = RotateAnimation(0f, 180f,
-//                it.width / 2.toFloat(), it.height / 2.toFloat())
-//            rotateAnimator.duration = 500
-//            it.startAnimation(rotateAnimator)
-
             closeLeftMenu()
         }
         initDetailRecyclerView()

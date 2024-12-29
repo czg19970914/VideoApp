@@ -67,8 +67,8 @@ class VideoPlayerPresenter: VideoPresenter {
 
         mMediaPlayer?.setOnPreparedListener {
             it.start()
+            (mVideoPlayerView as VideoPlayerActivity).initToolbar()
             (mVideoPlayerView as VideoPlayerActivity).initVideoSeekBar()
-
             (mVideoPlayerView as VideoPlayerActivity).setVideoClick()
             (mVideoPlayerView as VideoPlayerActivity).setVideoGesture()
 

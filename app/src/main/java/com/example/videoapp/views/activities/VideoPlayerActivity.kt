@@ -13,7 +13,6 @@ import android.media.AudioManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.MotionEvent
 import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
 import android.view.View
@@ -97,7 +96,6 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
         mVideoPlayerPresenter.setView(this)
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_video_player)
@@ -121,13 +119,6 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
                     resources.displayMetrics.widthPixels,
                     resources.displayMetrics.heightPixels
                 )
-
-                mHorizontalScreenButton.setOnClickListener {
-                    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                }
-                mVerticalScreenButton.setOnClickListener {
-                    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-                }
             }
 
             override fun onSurfaceTextureSizeChanged(p0: SurfaceTexture, p1: Int, p2: Int) {
@@ -144,9 +135,6 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
             }
 
         }
-
-        // 屏蔽toolbar上手势事件
-        mToolBarGroup.setOnTouchListener { p0, p1 -> true }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -311,6 +299,26 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
             mMultiSpeedPlayBar.visibility = View.VISIBLE
         } else {
             mMultiSpeedPlayBar.visibility = View.GONE
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    fun initToolbar() {
+        // 屏蔽toolbar上手势事件
+        mToolBarGroup.setOnTouchListener { p0, p1 -> true }
+
+        mVideoPlayedImage.setOnClickListener{
+            (mVideoPlayerPresenter as VideoPlayerPresenter).pauseStateChanged()
+        }
+        mVideoPausedImage.setOnClickListener{
+            (mVideoPlayerPresenter as VideoPlayerPresenter).pauseStateChanged()
+        }
+
+        mHorizontalScreenButton.setOnClickListener {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        }
+        mVerticalScreenButton.setOnClickListener {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
     }
 
