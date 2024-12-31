@@ -15,4 +15,12 @@
     <dimen name="multi_speed_play_bar_margin_top">50dp</dimen>
 
     <dimen name="video_item_text_height">30dp</dimen>
+
+    <dimen name="main_item_card_view_margin_start">3dp</dimen>
+    <dimen name="main_item_card_view_margin_end">3dp</dimen>
+    <dimen name="main_item_card_view_margin_top">3dp</dimen>
+    <dimen name="main_item_card_view_margin_bottom">3dp</dimen>
+
+    <dimen name="main_item_text_view_padding_start">15dp</dimen>
+    <dimen name="main_item_text_view_padding_top">5dp</dimen>
 </resources>
