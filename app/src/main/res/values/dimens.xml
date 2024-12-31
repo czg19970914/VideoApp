@@ -13,4 +13,6 @@
     <dimen name="tool_bar_item_margin_end">10dp</dimen>
 
     <dimen name="multi_speed_play_bar_margin_top">50dp</dimen>
+
+    <dimen name="video_item_text_height">30dp</dimen>
 </resources>
