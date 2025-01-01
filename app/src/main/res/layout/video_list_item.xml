@@ -10,7 +10,7 @@
         android:layout_marginTop="@dimen/main_item_card_view_margin_top"
         android:layout_marginBottom="@dimen/main_item_card_view_margin_bottom"
         app:cardCornerRadius="@dimen/video_item_radius"
-        app:cardElevation="0dp">
+        app:cardElevation="@dimen/main_item_card_view_card_elevation">
 
     <LinearLayout
             android:layout_width="match_parent"

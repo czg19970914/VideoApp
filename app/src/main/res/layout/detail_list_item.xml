@@ -4,18 +4,18 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="5dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
+        android:layout_marginStart="@dimen/detail_item_card_view_margin_start"
+        android:layout_marginEnd="@dimen/detail_item_card_view_margin_end"
+        android:layout_marginTop="@dimen/detail_item_card_view_margin_top"
+        android:layout_marginBottom="@dimen/detail_item_card_view_margin_bottom"
         app:cardCornerRadius="@dimen/video_item_radius"
-        app:cardElevation="0dp"
+        app:cardElevation="@dimen/detail_item_card_view_card_elevation"
         >
 
     <ImageView
             android:id="@+id/detail_item_image"
-            android:layout_width="120dp"
-            android:layout_height="200dp"
+            android:layout_width="@dimen/detail_image_view_width"
+            android:layout_height="@dimen/detail_image_view_height"
             android:background="@color/black"/>
 
 </com.example.videoapp.views.customviews.CustomCardView>

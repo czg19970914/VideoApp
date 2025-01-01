@@ -20,7 +20,22 @@
     <dimen name="main_item_card_view_margin_end">3dp</dimen>
     <dimen name="main_item_card_view_margin_top">3dp</dimen>
     <dimen name="main_item_card_view_margin_bottom">3dp</dimen>
-
+    <dimen name="main_item_card_view_card_elevation">0dp</dimen>
     <dimen name="main_item_text_view_padding_start">10dp</dimen>
     <dimen name="main_item_text_view_padding_top">5dp</dimen>
+
+    <dimen name="detail_item_card_view_margin_start">5dp</dimen>
+    <dimen name="detail_item_card_view_margin_end">5dp</dimen>
+    <dimen name="detail_item_card_view_margin_top">5dp</dimen>
+    <dimen name="detail_item_card_view_margin_bottom">5dp</dimen>
+    <dimen name="detail_item_card_view_card_elevation">0dp</dimen>
+    <dimen name="detail_image_view_width">120dp</dimen>
+    <dimen name="detail_image_view_height">200dp</dimen>
+
+    <dimen name="loading_dialog_text_size">20sp</dimen>
+
+    <dimen name="name_list_item_card_view_margin_start">10dp</dimen>
+    <dimen name="name_list_item_card_view_margin_end">10dp</dimen>
+    <dimen name="name_list_item_card_view_card_elevation">0dp</dimen>
+    <dimen name="name_list_item_bottom_line_height">3dp</dimen>
 </resources>

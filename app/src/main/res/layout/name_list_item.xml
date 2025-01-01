@@ -4,9 +4,9 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
-        app:cardElevation="0dp">
+        android:layout_marginStart="@dimen/name_list_item_card_view_margin_start"
+        android:layout_marginEnd="@dimen/name_list_item_card_view_margin_end"
+        app:cardElevation="@dimen/name_list_item_card_view_card_elevation">
 
     <LinearLayout
             android:layout_width="wrap_content"
@@ -26,7 +26,7 @@
         <View
                 android:id="@+id/name_item_bottom_line"
                 android:layout_width="match_parent"
-                android:layout_height="3dp"
+                android:layout_height="@dimen/name_list_item_bottom_line_height"
                 android:background="@color/name_select_item"/>
 
     </LinearLayout>
