@@ -32,6 +32,13 @@ class VideoDescriptionModel: VideoModel {
 
         // 缓存图片cache的大小
         const val BITMAP_CACHE_SIZE = 400
+
+        // 访问服务器url的拼接字符
+        const val VIDEO_URL_INTERFACE_AND_PARAM = "videoPlay?file_name="
+
+        // 获取服务器返回图片的imageBytes中map映射的索引值
+        // 该项目服务端使用的是base64字符来传输图片，并且在返回的字典数据中索引值为imageBase64Str
+        const val VIDEO_IMAGE_RES_STR_INDEX = "imageBase64Str"
     }
 
     private var mDescriptionPresenter: VideoPresenter? = null
@@ -116,7 +123,8 @@ class VideoDescriptionModel: VideoModel {
                                     continue
                                 }
                                 val completeUrl =
-                                    ConfigParams.baseUrl + "videoPlay?file_name=" + subVideoDescriptionEntities[index].subVideoPath
+                                    ConfigParams.baseUrl + VIDEO_URL_INTERFACE_AND_PARAM +
+                                            subVideoDescriptionEntities[index].subVideoPath
                                 val cacheImage = mBitmapCache.get(key)
                                 if(cacheImage != null) {
                                     videoBitmaps.add(Pair(completeUrl, cacheImage))
@@ -180,12 +188,13 @@ class VideoDescriptionModel: VideoModel {
                 continue
             }
             val completeUrl =
-                ConfigParams.baseUrl + "videoPlay?file_name=" + subVideoDescriptionEntities[index].subVideoPath
+                ConfigParams.baseUrl + VIDEO_URL_INTERFACE_AND_PARAM +
+                        subVideoDescriptionEntities[index].subVideoPath
             val imageBytes =
                 networkService.getVideoImageBytes(subVideoDescriptionEntities[index].subImageName!!)
             var videoImage: Bitmap = blankViewImage
             try {
-                videoImage = VideoUtils.base64StrToBitmap(imageBytes["imageBase64Str"]!!)
+                videoImage = VideoUtils.base64StrToBitmap(imageBytes[VIDEO_IMAGE_RES_STR_INDEX]!!)
             } catch (e: Exception) {
                 Log.i(TAG, "getSelectVideoDescription: 网络获取错误")
             }

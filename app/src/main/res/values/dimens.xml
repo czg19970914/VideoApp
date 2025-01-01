@@ -21,6 +21,6 @@
     <dimen name="main_item_card_view_margin_top">3dp</dimen>
     <dimen name="main_item_card_view_margin_bottom">3dp</dimen>
 
-    <dimen name="main_item_text_view_padding_start">15dp</dimen>
+    <dimen name="main_item_text_view_padding_start">10dp</dimen>
     <dimen name="main_item_text_view_padding_top">5dp</dimen>
 </resources>

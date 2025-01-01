@@ -22,7 +22,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/black"
-                app:whRatio="16:7"
+                app:whRatio="16:9"
                 android:contentDescription="@string/video_item_image_desc"/>
         <TextView
                 android:id="@+id/video_item_text"

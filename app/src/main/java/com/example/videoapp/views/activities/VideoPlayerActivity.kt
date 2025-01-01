@@ -114,7 +114,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
             @SuppressLint("ClickableViewAccessibility")
             override fun onSurfaceTextureAvailable(p0: SurfaceTexture, p1: Int, p2: Int) {
                 (mVideoPlayerPresenter as VideoPlayerPresenter).startMediaPlayer(
-                    intent.getStringExtra("video_url")!!,
+                    intent.getStringExtra(VIDEO_URL_INDEX)!!,
                     mVideoTextureView, mVideoSeekBar,
                     resources.displayMetrics.widthPixels,
                     resources.displayMetrics.heightPixels
@@ -171,10 +171,13 @@ class VideoPlayerActivity : AppCompatActivity(), VideoView {
     companion object {
         const val TAG = "VideoPlayerActivity"
 
+        // 传递到播放页中视频url在intent中的索引
+        const val VIDEO_URL_INDEX = "video_url"
+
         @JvmStatic
         fun startVideoPlayerActivity(context: Context, url: String) {
             val intent = Intent(context, VideoPlayerActivity::class.java)
-            intent.putExtra("video_url", url)
+            intent.putExtra(VIDEO_URL_INDEX, url)
 
             context.startActivity(intent)
         }

@@ -4,6 +4,8 @@
     <string name="show_seek_time_default_time">00:00/00:00</string>
     <string name="video_item_text_default_str">暂时的文案</string>
 
+    <string name="is_in_refreshing_text">当前正在刷新数据</string>
+
     <string name="video_played_image_desc">video_played_image</string>
     <string name="video_paused_image_desc">video_played_image</string>
     <string name="horizontal_screen_button_desc">horizontal_screen_button</string>

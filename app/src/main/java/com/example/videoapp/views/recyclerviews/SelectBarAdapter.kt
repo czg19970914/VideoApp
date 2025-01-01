@@ -18,15 +18,10 @@ class SelectBarAdapter(context: Context, nameList: ArrayList<NameEntity>):
         const val TAG = "SelectBarAdapter"
     }
 
-    private val mNameList: ArrayList<NameEntity>
-    private val mContext: Context
+    private val mNameList: ArrayList<NameEntity> = nameList
+    private val mContext: Context = context
 
     private var mOnSelectBarClickListener: OnSelectBarClickListener? = null
-
-    init {
-        mNameList = nameList
-        mContext = context
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectBarViewHolder {
         val view = LayoutInflater.from(parent.context)

@@ -318,7 +318,7 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         return if(!mIsInUpdate) {
             true
         }else {
-            Toast.makeText(this, "当前正在刷新数据", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, this.resources.getString(R.string.is_in_refreshing_text), Toast.LENGTH_SHORT).show()
             false
         }
     }

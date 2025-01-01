@@ -6,9 +6,5 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.videoapp.R
 
 class DetailItemViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-    val mDetailItemImage: ImageView
-
-    init {
-        mDetailItemImage = itemView.findViewById(R.id.detail_item_image)
-    }
+    val mDetailItemImage: ImageView = itemView.findViewById(R.id.detail_item_image)
 }
