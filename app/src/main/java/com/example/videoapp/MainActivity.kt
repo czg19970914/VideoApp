@@ -190,6 +190,7 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
             if(isDown)
                 mVideoListLayoutManager?.scrollToPositionWithOffset(0, 0)
             else
+                // TODO 这里上滑定位有问题，需要优化
                 mVideoListLayoutManager?.scrollToPositionWithOffset(
                     mVideoListAdapter!!.itemCount.coerceAtMost(
                         ConfigParams.getDescriptionNum / 2), 0
