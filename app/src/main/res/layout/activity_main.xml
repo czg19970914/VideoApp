@@ -18,8 +18,8 @@
                 android:layout_height="@dimen/select_name_bar_height"
                 android:background="@color/name_select_bar"/>
 
-        <com.scwang.smart.refresh.layout.SmartRefreshLayout
-                android:id="@+id/smart_refresh_layout"
+        <com.example.videoapp.views.customviews.RefreshLayout
+                android:id="@+id/refresh_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -28,7 +28,19 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"/>
 
-        </com.scwang.smart.refresh.layout.SmartRefreshLayout>
+        </com.example.videoapp.views.customviews.RefreshLayout>
+
+<!--        <com.scwang.smart.refresh.layout.SmartRefreshLayout-->
+<!--                android:id="@+id/smart_refresh_layout"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent">-->
+
+<!--            <androidx.recyclerview.widget.RecyclerView-->
+<!--                    android:id="@+id/video_recycler_view"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="match_parent"/>-->
+
+<!--        </com.scwang.smart.refresh.layout.SmartRefreshLayout>-->
 
     </LinearLayout>
 

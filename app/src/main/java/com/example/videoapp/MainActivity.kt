@@ -26,10 +26,11 @@ import com.example.videoapp.views.recyclerviews.DetailRecyclerViewAdapter
 import com.example.videoapp.views.recyclerviews.SelectBarAdapter
 import com.example.videoapp.views.recyclerviews.VideoRecyclerViewAdapter
 import com.example.videoapp.views.recyclerviews.VideoRecyclerViewAdapter.OnImageClickListener
-import com.scwang.smart.refresh.footer.ClassicsFooter
-import com.scwang.smart.refresh.header.ClassicsHeader
-import com.scwang.smart.refresh.layout.SmartRefreshLayout
-import com.scwang.smart.refresh.layout.api.RefreshLayout
+//import com.scwang.smart.refresh.footer.ClassicsFooter
+//import com.scwang.smart.refresh.header.ClassicsHeader
+//import com.scwang.smart.refresh.layout.SmartRefreshLayout
+//import com.scwang.smart.refresh.layout.api.RefreshLayout
+import com.example.videoapp.views.customviews.RefreshLayout
 import kotlinx.coroutines.*
 
 
@@ -37,8 +38,11 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
     private val mSelectNameBar: RecyclerView by lazy {
         findViewById(R.id.select_name_bar)
     }
-    private val mRefreshLayout: SmartRefreshLayout by lazy {
-        findViewById(R.id.smart_refresh_layout)
+//    private val mRefreshLayout: SmartRefreshLayout by lazy {
+//        findViewById(R.id.smart_refresh_layout)
+//    }
+    private val mRefreshLayout: RefreshLayout by lazy {
+        findViewById(R.id.refresh_layout)
     }
     private val mVideoRecyclerView: RecyclerView by lazy {
         findViewById(R.id.video_recycler_view)
@@ -147,26 +151,43 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
     }
 
     private fun initRefreshLayout(selectName: String) {
-        //设置头部刷新的样式
-        mRefreshLayout.setRefreshHeader(ClassicsHeader(this))
-        //设置页脚刷新的样式
-        mRefreshLayout.setRefreshFooter(ClassicsFooter(this))
-        //设置头部刷新时间监听
-        mRefreshLayout.setOnRefreshListener(null)
-        mRefreshLayout.setOnRefreshListener {
-            mIsInUpdate = true
-            (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(
-                selectName, false, it
-            ) { refreshLayout -> refreshLayout.finishRefresh() }
-        }
-        //设置尾部刷新时间监听
-        mRefreshLayout.setOnLoadMoreListener(null)
-        mRefreshLayout.setOnLoadMoreListener {
-            mIsInUpdate = true
-            (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(
-                selectName, true, it
-            ) { refreshLayout -> refreshLayout.finishLoadMore() }
-        }
+//        //设置头部刷新的样式
+//        mRefreshLayout.setRefreshHeader(ClassicsHeader(this))
+//        //设置页脚刷新的样式
+//        mRefreshLayout.setRefreshFooter(ClassicsFooter(this))
+//        //设置头部刷新时间监听
+//        mRefreshLayout.setOnRefreshListener(null)
+//        mRefreshLayout.setOnRefreshListener {
+//            mIsInUpdate = true
+//            (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(
+//                selectName, false, it
+//            ) { refreshLayout -> refreshLayout.finishRefresh() }
+//        }
+//        //设置尾部刷新时间监听
+//        mRefreshLayout.setOnLoadMoreListener(null)
+//        mRefreshLayout.setOnLoadMoreListener {
+//            mIsInUpdate = true
+//            (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(
+//                selectName, true, it
+//            ) { refreshLayout -> refreshLayout.finishLoadMore() }
+//        }
+
+        mRefreshLayout.setLoadMoreListener(object : RefreshLayout.LoadMorListener{
+            override fun loadDownMore() {
+                mIsInUpdate = true
+                (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(
+                    selectName, true
+                )
+            }
+
+            override fun loadUpMore() {
+                mIsInUpdate = true
+                (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(
+                    selectName, false
+                )
+            }
+
+        })
     }
 
     suspend fun showSelectBar(nameList: ArrayList<NameEntity>)
@@ -181,23 +202,41 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         closeWaitingDialog()
     }
 
-    suspend fun updateVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>, isDown: Boolean,
-                                            refreshLayout: RefreshLayout,
-                                            refreshOperation: (RefreshLayout) -> Unit)
+//    suspend fun updateVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>, isDown: Boolean,
+//                                            refreshLayout: RefreshLayout,
+//                                            refreshOperation: (RefreshLayout) -> Unit)
+//    = withContext(Dispatchers.Main) {
+//        if(videoEntities.size > 0){
+//            mVideoListAdapter?.updateVideoDescription(videoEntities)
+//            if(isDown)
+//                mVideoListLayoutManager?.scrollToPositionWithOffset(0, 0)
+//            else
+//                // TODO 这里上滑定位有问题，需要优化
+//                mVideoListLayoutManager?.scrollToPositionWithOffset(
+//                    mVideoListAdapter!!.itemCount.coerceAtMost(
+//                        ConfigParams.getDescriptionNum / 2), 0
+//                )
+//        }
+//        refreshOperation(refreshLayout)
+//        mIsInUpdate = false
+//    }
+
+    suspend fun updateVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>,
+                                            isDown: Boolean)
     = withContext(Dispatchers.Main) {
         if(videoEntities.size > 0){
             mVideoListAdapter?.updateVideoDescription(videoEntities)
             if(isDown)
                 mVideoListLayoutManager?.scrollToPositionWithOffset(0, 0)
             else
-                // TODO 这里上滑定位有问题，需要优化
+            // TODO 这里上滑定位有问题，需要优化
                 mVideoListLayoutManager?.scrollToPositionWithOffset(
                     mVideoListAdapter!!.itemCount.coerceAtMost(
                         ConfigParams.getDescriptionNum / 2), 0
                 )
         }
-        refreshOperation(refreshLayout)
         mIsInUpdate = false
+        mRefreshLayout.finishLoadMode()
     }
 
     suspend fun switchNameRecyclerView(videoEntities: ArrayList<VideoEntity>)

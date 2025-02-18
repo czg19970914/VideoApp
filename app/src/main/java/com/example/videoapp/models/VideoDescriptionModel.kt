@@ -87,10 +87,103 @@ class VideoDescriptionModel: VideoModel {
         }
     }
 
+//    fun getSelectVideoDescription(context: Context, selectName: String, isDown: Boolean, blankViewImage: Bitmap,
+//                                  isUpdate: Boolean,
+//                                  isInit: Boolean,
+//                                  refreshLayout: RefreshLayout?, refreshOperation: ((RefreshLayout) -> Unit)?) {
+//        CoroutineScope(Dispatchers.IO).launch {
+//            val videEntities = ArrayList<VideoEntity>()
+//
+//            val allVideoDescriptionMap: Map<String, List<VideoDescriptionEntity>> =
+//                VideoUtils.getJsonToMap(File(context.filesDir , JSON_PATH))
+//
+//            val videoDescriptionEntities =
+//                allVideoDescriptionMap.getOrDefault(selectName, null)
+//            if(videoDescriptionEntities != null) {
+//                var selectId = mMinId - 1
+//                if(isDown)
+//                    selectId = mMaxId + 1
+//
+//                if(selectId >=0 && selectId < videoDescriptionEntities.size) {
+//                    if (!isUpdate || isDown) {
+//                        mMinId = 0.coerceAtLeast(selectId - ConfigParams.getDescriptionNum / 2 + 1)
+//                        mMaxId =
+//                            (videoDescriptionEntities.size - 1).coerceAtMost(selectId + ConfigParams.getDescriptionNum / 2)
+//                    } else {
+//                        mMinId = 0.coerceAtLeast(selectId - ConfigParams.getDescriptionNum / 2)
+//                        mMaxId =
+//                            (videoDescriptionEntities.size - 1).coerceAtMost(selectId + ConfigParams.getDescriptionNum / 2 + 1)
+//                    }
+//                    for (id in mMinId..mMaxId) {
+//                        val videoTitle = videoDescriptionEntities[id].title
+//                        val subVideoDescriptionEntities = videoDescriptionEntities[id].subVideoDescriptionEntities
+//                        if (!subVideoDescriptionEntities.isNullOrEmpty()) {
+//                            val videoBitmaps = ArrayList<Pair<String, Bitmap>>()
+//
+//                            // 并行优化
+//                            // 暂存需要网络请求的实体
+//                            val networkSubVideoDescriptionEntities = mutableListOf<SubVideoDescriptionEntity>()
+//                            for (index in subVideoDescriptionEntities.indices) {
+//                                val key = subVideoDescriptionEntities[index].subVideoPath
+//                                if(key.isNullOrEmpty()) {
+//                                    continue
+//                                }
+//                                val completeUrl =
+//                                    ConfigParams.baseUrl + VIDEO_URL_INTERFACE_AND_PARAM +
+//                                            subVideoDescriptionEntities[index].subVideoPath
+//                                val cacheImage = mBitmapCache.get(key)
+//                                if(cacheImage != null) {
+//                                    videoBitmaps.add(Pair(completeUrl, cacheImage))
+//                                } else {
+//                                    networkSubVideoDescriptionEntities.add(subVideoDescriptionEntities[index])
+//                                }
+//                            }
+//                            val networkSubVideoDescriptionList = networkSubVideoDescriptionEntities.toList()
+//                            if (networkSubVideoDescriptionList.size < MULTI_COROUTINES_THRESHOLD) {
+//                                getSubVideoDescriptionTask(networkSubVideoDescriptionList, videoBitmaps,
+//                                    blankViewImage, 0, networkSubVideoDescriptionList.size,
+//                                    networkSubVideoDescriptionList.size)
+//                            } else {
+//                                val taskLen = (networkSubVideoDescriptionList.size / COROUTINES_NUM) + 1
+//                                val deferredList = (0 until COROUTINES_NUM).map {
+//                                    async {
+//                                        getSubVideoDescriptionTask(networkSubVideoDescriptionList,
+//                                            videoBitmaps, blankViewImage,
+//                                            it*taskLen, (it+1)*taskLen,
+//                                            networkSubVideoDescriptionList.size)
+//                                    }
+//                                }
+//                                deferredList.awaitAll()
+//                            }
+//
+//                            // 子视频第一个视频截图作为总封面
+//                            if(videoBitmaps.size > 0) {
+//                                val videoEntity = VideoEntity(
+//                                    id, videoBitmaps[0].first, videoTitle!!, videoBitmaps[0].second)
+//                                videoEntity.mBitmapArray = videoBitmaps
+//                                videEntities.add(videoEntity)
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//            if (isUpdate) {
+//                if (refreshLayout != null && refreshOperation != null) {
+//                    (mDescriptionPresenter as VideoDescriptionPresenter).updateVideoInfoRecyclerView(
+//                        videEntities, isDown, refreshLayout, refreshOperation
+//                    )
+//                }
+//            } else {
+//                (mDescriptionPresenter as VideoDescriptionPresenter).initVideoInfoRecyclerView(
+//                    isInit, videEntities
+//                )
+//            }
+//        }
+//    }
+
     fun getSelectVideoDescription(context: Context, selectName: String, isDown: Boolean, blankViewImage: Bitmap,
                                   isUpdate: Boolean,
-                                  isInit: Boolean,
-                                  refreshLayout: RefreshLayout?, refreshOperation: ((RefreshLayout) -> Unit)?) {
+                                  isInit: Boolean) {
         CoroutineScope(Dispatchers.IO).launch {
             val videEntities = ArrayList<VideoEntity>()
 
@@ -168,11 +261,9 @@ class VideoDescriptionModel: VideoModel {
                 }
             }
             if (isUpdate) {
-                if (refreshLayout != null && refreshOperation != null) {
-                    (mDescriptionPresenter as VideoDescriptionPresenter).updateVideoInfoRecyclerView(
-                        videEntities, isDown, refreshLayout, refreshOperation
-                    )
-                }
+                (mDescriptionPresenter as VideoDescriptionPresenter).updateVideoInfoRecyclerView(
+                    videEntities, isDown
+                )
             } else {
                 (mDescriptionPresenter as VideoDescriptionPresenter).initVideoInfoRecyclerView(
                     isInit, videEntities
