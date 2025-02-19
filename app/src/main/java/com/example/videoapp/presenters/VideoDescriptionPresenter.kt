@@ -10,7 +10,6 @@ import com.example.videoapp.interfaces.VideoPresenter
 import com.example.videoapp.interfaces.VideoView
 import com.example.videoapp.models.VideoDescriptionModel
 import com.example.videoapp.utils.VideoUtils
-import com.scwang.smart.refresh.layout.api.RefreshLayout
 
 class VideoDescriptionPresenter: VideoPresenter {
 //    companion object{
@@ -50,11 +49,6 @@ class VideoDescriptionPresenter: VideoPresenter {
     fun getServerData(selectName: String, isInit: Boolean) {
         // 注意这里需要重置model中算法的id!!!!!
         (mDescriptionModel as VideoDescriptionModel).resetIndex()
-//        (mDescriptionModel as VideoDescriptionModel).getSelectVideoDescription(
-//            (mDescriptionView as MainActivity).baseContext, selectName,
-//            false, mBlankVideoImage,
-//            false, isInit, null, null
-//        )
         (mDescriptionModel as VideoDescriptionModel).getSelectVideoDescription(
             (mDescriptionView as MainActivity).baseContext, selectName,
             false, mBlankVideoImage,
@@ -70,16 +64,6 @@ class VideoDescriptionPresenter: VideoPresenter {
         }
     }
 
-//    fun updateServerData(selectName: String, isDown: Boolean, refreshLayout: RefreshLayout,
-//                         refreshOperation: (RefreshLayout) -> Unit) {
-//
-//        (mDescriptionModel as VideoDescriptionModel).getSelectVideoDescription(
-//            (mDescriptionView as MainActivity).baseContext, selectName,
-//            isDown, mBlankVideoImage,
-//            true, false, refreshLayout, refreshOperation
-//        )
-//    }
-
     fun updateServerData(selectName: String, isDown: Boolean) {
         (mDescriptionModel as VideoDescriptionModel).getSelectVideoDescription(
             (mDescriptionView as MainActivity).baseContext, selectName,
@@ -87,13 +71,6 @@ class VideoDescriptionPresenter: VideoPresenter {
             true, false
         )
     }
-
-//    suspend fun updateVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>,
-//                                            isDown: Boolean, refreshLayout: RefreshLayout,
-//                                            refreshOperation: (RefreshLayout) -> Unit) {
-//        (mDescriptionView as MainActivity).updateVideoInfoRecyclerView(videoEntities, isDown,
-//            refreshLayout, refreshOperation)
-//    }
 
     suspend fun updateVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>,
                                             isDown: Boolean) {

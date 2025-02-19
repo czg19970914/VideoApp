@@ -27,10 +27,6 @@ import com.example.videoapp.views.recyclerviews.DetailRecyclerViewAdapter
 import com.example.videoapp.views.recyclerviews.SelectBarAdapter
 import com.example.videoapp.views.recyclerviews.VideoRecyclerViewAdapter
 import com.example.videoapp.views.recyclerviews.VideoRecyclerViewAdapter.OnImageClickListener
-//import com.scwang.smart.refresh.footer.ClassicsFooter
-//import com.scwang.smart.refresh.header.ClassicsHeader
-//import com.scwang.smart.refresh.layout.SmartRefreshLayout
-//import com.scwang.smart.refresh.layout.api.RefreshLayout
 import com.example.videoapp.views.customviews.RefreshLayout
 import kotlinx.coroutines.*
 
@@ -39,9 +35,6 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
     private val mSelectNameBar: RecyclerView by lazy {
         findViewById(R.id.select_name_bar)
     }
-//    private val mRefreshLayout: SmartRefreshLayout by lazy {
-//        findViewById(R.id.smart_refresh_layout)
-//    }
     private val mRefreshLayout: RefreshLayout by lazy {
         findViewById(R.id.refresh_layout)
     }
@@ -154,27 +147,6 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
     }
 
     private fun initRefreshLayout(selectName: String) {
-//        //设置头部刷新的样式
-//        mRefreshLayout.setRefreshHeader(ClassicsHeader(this))
-//        //设置页脚刷新的样式
-//        mRefreshLayout.setRefreshFooter(ClassicsFooter(this))
-//        //设置头部刷新时间监听
-//        mRefreshLayout.setOnRefreshListener(null)
-//        mRefreshLayout.setOnRefreshListener {
-//            mIsInUpdate = true
-//            (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(
-//                selectName, false, it
-//            ) { refreshLayout -> refreshLayout.finishRefresh() }
-//        }
-//        //设置尾部刷新时间监听
-//        mRefreshLayout.setOnLoadMoreListener(null)
-//        mRefreshLayout.setOnLoadMoreListener {
-//            mIsInUpdate = true
-//            (mDescriptionPresenter as VideoDescriptionPresenter).updateServerData(
-//                selectName, true, it
-//            ) { refreshLayout -> refreshLayout.finishLoadMore() }
-//        }
-
         mRefreshLayout.setLoadMoreListener(object : RefreshLayout.LoadMorListener{
             override fun loadDownMore() {
                 mIsInUpdate = true
@@ -205,29 +177,9 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         closeWaitingDialog()
     }
 
-//    suspend fun updateVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>, isDown: Boolean,
-//                                            refreshLayout: RefreshLayout,
-//                                            refreshOperation: (RefreshLayout) -> Unit)
-//    = withContext(Dispatchers.Main) {
-//        if(videoEntities.size > 0){
-//            mVideoListAdapter?.updateVideoDescription(videoEntities)
-//            if(isDown)
-//                mVideoListLayoutManager?.scrollToPositionWithOffset(0, 0)
-//            else
-//                // TODO 这里上滑定位有问题，需要优化
-//                mVideoListLayoutManager?.scrollToPositionWithOffset(
-//                    mVideoListAdapter!!.itemCount.coerceAtMost(
-//                        ConfigParams.getDescriptionNum / 2), 0
-//                )
-//        }
-//        refreshOperation(refreshLayout)
-//        mIsInUpdate = false
-//    }
-
     suspend fun updateVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>,
                                             isDown: Boolean)
     = withContext(Dispatchers.Main) {
-        mRefreshLayout.finishLoadMode()
         if(videoEntities.size > 0){
             mVideoListAdapter?.updateVideoDescription(videoEntities)
             if (isDown) {
@@ -239,6 +191,7 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
             }
         }
         mIsInUpdate = false
+        mRefreshLayout.sndLoadFinishMessage()
     }
 
     suspend fun switchNameRecyclerView(videoEntities: ArrayList<VideoEntity>)
@@ -359,11 +312,10 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         val cardWidth = (windowWidth - 2 * (cardMarginStart + cardMarginEnd)) / 2
         val imageHeight = cardWidth / 16 * 9
         val cardTextHeight = resources.getDimensionPixelSize(R.dimen.video_item_text_height)
-        val cardTextPaddingTop = resources.getDimensionPixelSize(R.dimen.main_item_text_view_padding_top)
-        val cardHeight = imageHeight + cardTextHeight + cardTextPaddingTop
+        val cardHeight = imageHeight + cardTextHeight
 
-        var descriptionNumRemainder = (windowHeight - selectNameBarHeight) % (cardHeight + cardMarginTop + cardMarginTBottom)
-        var descriptionNum = (windowHeight - selectNameBarHeight) / (cardHeight + cardMarginTop + cardMarginTBottom)
+        var descriptionNumRemainder = (windowHeight - selectNameBarHeight - RefreshLayout.PADDING_BOTTOM) % (cardHeight + cardMarginTop + cardMarginTBottom)
+        var descriptionNum = (windowHeight - selectNameBarHeight - RefreshLayout.PADDING_BOTTOM) / (cardHeight + cardMarginTop + cardMarginTBottom)
         if (descriptionNumRemainder > cardHeight * 0.2) {
             descriptionNum += 1
         } else {
@@ -377,6 +329,7 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         super.onDestroy()
 
         mLeftMenuContent.animation?.cancel()
+        mRefreshLayout.onDestroy()
     }
 
     override fun onSelectBarClick(selectName: String) {

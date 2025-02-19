@@ -1,6 +1,9 @@
 package com.example.videoapp.views.customviews
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -8,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.videoapp.R
+import java.lang.ref.WeakReference
 
 
 /**
@@ -22,7 +26,15 @@ class RefreshLayout: ViewGroup {
         const val START_LOAD_THRESHOLD = 100L
 
         // 给布局底部加一些padding
-        const val PADDING_BOTTOM = 80
+        const val PADDING_BOTTOM = 150
+
+        // 加载更多消息
+        const val LOAD_DOWN_MORE_MSG = 1
+        const val LOAD_UP_MORE_MSG = 2
+        const val LOAD_FINISH_MSG = 3
+        // 发送消息延时
+        const val LOAD_MORE_DELAY = 25L
+        const val LOAD_FINISH_DELAY = 50L
     }
     constructor(context: Context): super(context)
     constructor(context: Context, attrs: AttributeSet): super(context, attrs)
@@ -38,6 +50,8 @@ class RefreshLayout: ViewGroup {
     private val mLoadingView: View = LayoutInflater.from(this.context).inflate(R.layout.loading_item, null)
 
     private var mLoadMoreListener: LoadMorListener? = null
+
+    private var mLoadMoreHandler: LoadMoreHandler? = LoadMoreHandler(this)
 
     init {
         mLoadingView.visibility = GONE
@@ -131,7 +145,7 @@ class RefreshLayout: ViewGroup {
                         if (mIsUpdateDown) {
                             if (mStartY - ev.y > START_LOAD_THRESHOLD) {
                                 mIsLoading = true
-                                mLoadMoreListener?.loadDownMore()
+                                mLoadMoreHandler?.sendMessageDelayed(LOAD_DOWN_MORE_MSG, LOAD_MORE_DELAY)
                             }
                             mLoadViewHeight = calculateLoadViewHeight(mStartY, ev.y,
                                 START_LOAD_THRESHOLD.toInt(), true)
@@ -139,7 +153,7 @@ class RefreshLayout: ViewGroup {
                         } else if (mIsUpdateUp) {
                             if (ev.y - mStartY > START_LOAD_THRESHOLD) {
                                 mIsLoading = true
-                                mLoadMoreListener?.loadUpMore()
+                                mLoadMoreHandler?.sendMessageDelayed(LOAD_UP_MORE_MSG, LOAD_MORE_DELAY)
                             }
                             mLoadViewHeight = calculateLoadViewHeight(mStartY, ev.y,
                                 START_LOAD_THRESHOLD.toInt(), false)
@@ -166,7 +180,10 @@ class RefreshLayout: ViewGroup {
         return super.dispatchTouchEvent(ev)
     }
 
-    fun finishLoadMode() {
+    fun sndLoadFinishMessage() {
+        mLoadMoreHandler?.sendMessageDelayed(LOAD_FINISH_MSG, LOAD_FINISH_DELAY)
+    }
+    private fun finishLoadMode() {
         if (mIsLoading) {
             dismissLoadView()
             mIsLoading = false
@@ -198,10 +215,51 @@ class RefreshLayout: ViewGroup {
         return loadViewHeight
     }
 
+    fun onDestroy() {
+        mLoadMoreHandler?.removeCallbacksAndMessages(null)
+        mLoadMoreHandler = null
+
+        mLoadMoreListener = null
+    }
+
     interface LoadMorListener {
         fun loadDownMore()
 
         fun loadUpMore()
+    }
+
+    class LoadMoreHandler(refreshLayout: RefreshLayout): Handler(Looper.getMainLooper()) {
+        private final var mRefreshLayout: WeakReference<RefreshLayout>? = null
+
+        init {
+            mRefreshLayout = WeakReference<RefreshLayout>(refreshLayout)
+        }
+
+        override fun handleMessage(msg: Message) {
+            super.handleMessage(msg)
+
+            val refreshLayout: RefreshLayout? = mRefreshLayout?.get()
+            when (msg.what) {
+                LOAD_DOWN_MORE_MSG -> {
+                    refreshLayout?.mLoadMoreListener?.loadDownMore()
+                }
+
+                LOAD_UP_MORE_MSG -> {
+                    refreshLayout?.mLoadMoreListener?.loadUpMore()
+                }
+
+                LOAD_FINISH_MSG -> {
+                    removeCallbacksAndMessages(null)
+                    refreshLayout?.finishLoadMode()
+                }
+            }
+        }
+
+        fun sendMessageDelayed(msgFlag: Int, delayMillis: Long) {
+            val msg = Message()
+            msg.what = msgFlag
+            this.sendMessageDelayed(msg, delayMillis)
+        }
     }
 
 }
