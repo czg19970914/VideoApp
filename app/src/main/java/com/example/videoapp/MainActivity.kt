@@ -22,6 +22,7 @@ import com.example.videoapp.entities.VideoEntity
 import com.example.videoapp.interfaces.VideoPresenter
 import com.example.videoapp.interfaces.VideoView
 import com.example.videoapp.presenters.VideoDescriptionPresenter
+import com.example.videoapp.utils.ScreenUtils
 import com.example.videoapp.views.recyclerviews.DetailRecyclerViewAdapter
 import com.example.videoapp.views.recyclerviews.SelectBarAdapter
 import com.example.videoapp.views.recyclerviews.VideoRecyclerViewAdapter
@@ -82,6 +83,8 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        calculateDescriptionNum()
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         window.statusBarColor = ContextCompat.getColor(this, R.color.status_bar)
@@ -224,19 +227,18 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
     suspend fun updateVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>,
                                             isDown: Boolean)
     = withContext(Dispatchers.Main) {
+        mRefreshLayout.finishLoadMode()
         if(videoEntities.size > 0){
             mVideoListAdapter?.updateVideoDescription(videoEntities)
-            if(isDown)
-                mVideoListLayoutManager?.scrollToPositionWithOffset(0, 0)
-            else
-            // TODO 这里上滑定位有问题，需要优化
-                mVideoListLayoutManager?.scrollToPositionWithOffset(
-                    mVideoListAdapter!!.itemCount.coerceAtMost(
-                        ConfigParams.getDescriptionNum / 2), 0
-                )
+            if (isDown) {
+                val updateDownOffsetY = (mDescriptionPresenter as VideoDescriptionPresenter).getUpdateDownOffsetY()
+                mVideoListLayoutManager?.scrollToPositionWithOffset(0, updateDownOffsetY)
+            } else {
+                val updateUpOffsetItem = (mDescriptionPresenter as VideoDescriptionPresenter).getUpdateUpOffsetItem()
+                mVideoListLayoutManager?.scrollToPositionWithOffset(updateUpOffsetItem, 0)
+            }
         }
         mIsInUpdate = false
-        mRefreshLayout.finishLoadMode()
     }
 
     suspend fun switchNameRecyclerView(videoEntities: ArrayList<VideoEntity>)
@@ -342,6 +344,33 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
         initRefreshLayout(selectName)
         showWaitingDialog()
         (mDescriptionPresenter as VideoDescriptionPresenter).getServerData(selectName, false)
+    }
+
+    private fun calculateDescriptionNum() {
+        val windowWidth = ScreenUtils.getWindowWidth(this)
+        val windowHeight = ScreenUtils.getWindowHeight(this)
+        val selectNameBarHeight = resources.getDimensionPixelSize(R.dimen.select_name_bar_height)
+
+        val cardMarginStart = resources.getDimensionPixelSize(R.dimen.main_item_card_view_margin_start)
+        val cardMarginEnd = resources.getDimensionPixelSize(R.dimen.main_item_card_view_margin_end)
+        val cardMarginTop = resources.getDimensionPixelSize(R.dimen.main_item_card_view_margin_top)
+        val cardMarginTBottom = resources.getDimensionPixelSize(R.dimen.main_item_card_view_margin_bottom)
+
+        val cardWidth = (windowWidth - 2 * (cardMarginStart + cardMarginEnd)) / 2
+        val imageHeight = cardWidth / 16 * 9
+        val cardTextHeight = resources.getDimensionPixelSize(R.dimen.video_item_text_height)
+        val cardTextPaddingTop = resources.getDimensionPixelSize(R.dimen.main_item_text_view_padding_top)
+        val cardHeight = imageHeight + cardTextHeight + cardTextPaddingTop
+
+        var descriptionNumRemainder = (windowHeight - selectNameBarHeight) % (cardHeight + cardMarginTop + cardMarginTBottom)
+        var descriptionNum = (windowHeight - selectNameBarHeight) / (cardHeight + cardMarginTop + cardMarginTBottom)
+        if (descriptionNumRemainder > cardHeight * 0.2) {
+            descriptionNum += 1
+        } else {
+            descriptionNumRemainder = 0
+        }
+        (mDescriptionPresenter as VideoDescriptionPresenter).setDescriptionNum(descriptionNum * 2 * 2)
+        (mDescriptionPresenter as VideoDescriptionPresenter).setUpdateDownOffsetY(descriptionNumRemainder)
     }
 
     override fun onDestroy() {

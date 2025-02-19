@@ -115,4 +115,20 @@ class VideoDescriptionPresenter: VideoPresenter {
 
         return detailData
     }
+
+    fun setDescriptionNum(descriptionNum: Int) {
+        (mDescriptionModel as VideoDescriptionModel).setDescriptionNum(descriptionNum)
+    }
+
+    fun setUpdateDownOffsetY(updateDownOffsetY: Int) {
+        (mDescriptionModel as VideoDescriptionModel).setUpdateDownOffsetY(updateDownOffsetY)
+    }
+
+    fun getUpdateDownOffsetY(): Int {
+        return (mDescriptionModel as VideoDescriptionModel).getUpdateDownOffsetY()
+    }
+
+    fun getUpdateUpOffsetItem(): Int {
+        return (mDescriptionModel as VideoDescriptionModel).getUpdateUpOffsetItem()
+    }
 }

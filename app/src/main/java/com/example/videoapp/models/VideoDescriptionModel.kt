@@ -43,8 +43,11 @@ class VideoDescriptionModel: VideoModel {
 
     private var mDescriptionPresenter: VideoPresenter? = null
 
+    private var mDescriptionNum = 0
+    private var mUpdateDownOffsetY = 0
+    private var mUpdateUpOfsetItem = mDescriptionNum / 2
     private var mMinId = 1
-    private var mMaxId = 23
+    private var mMaxId = mDescriptionNum + 1
 
     private val networkService: NetworkService = NetworkService.createService()
 
@@ -198,14 +201,16 @@ class VideoDescriptionModel: VideoModel {
                     selectId = mMaxId + 1
 
                 if(selectId >=0 && selectId < videoDescriptionEntities.size) {
-                    if (!isUpdate || isDown) {
-                        mMinId = 0.coerceAtLeast(selectId - ConfigParams.getDescriptionNum / 2 + 1)
-                        mMaxId =
-                            (videoDescriptionEntities.size - 1).coerceAtMost(selectId + ConfigParams.getDescriptionNum / 2)
+                    if (isInit || !isUpdate) {
+                        mMinId = 0
+                        mMaxId = (videoDescriptionEntities.size - 1).coerceAtMost(mDescriptionNum - 1)
+                    } else if (isDown) {
+                        mMinId = 0.coerceAtLeast(selectId - mDescriptionNum / 2 + 1)
+                        mMaxId = (videoDescriptionEntities.size - 1).coerceAtMost(selectId + mDescriptionNum / 2)
                     } else {
-                        mMinId = 0.coerceAtLeast(selectId - ConfigParams.getDescriptionNum / 2)
-                        mMaxId =
-                            (videoDescriptionEntities.size - 1).coerceAtMost(selectId + ConfigParams.getDescriptionNum / 2 + 1)
+                        mMinId = 0.coerceAtLeast(selectId - mDescriptionNum / 2)
+                        mMaxId = (videoDescriptionEntities.size - 1).coerceAtMost(selectId + mDescriptionNum / 2 + 1)
+                        setUpdateUpOffsetItem(selectId - mMinId + 1)
                     }
                     for (id in mMinId..mMaxId) {
                         val videoTitle = videoDescriptionEntities[id].title
@@ -304,6 +309,28 @@ class VideoDescriptionModel: VideoModel {
 
     fun resetIndex(){
         mMinId = 1
-        mMaxId = 23
+        mMaxId = mDescriptionNum + 1
+        setUpdateUpOffsetItem(mDescriptionNum / 2)
+    }
+
+    fun setDescriptionNum(descriptionNum: Int) {
+        mDescriptionNum = descriptionNum
+        resetIndex()
+    }
+
+    fun setUpdateDownOffsetY(updateOffsetY: Int) {
+        mUpdateDownOffsetY = updateOffsetY
+    }
+
+    fun getUpdateDownOffsetY(): Int {
+        return mUpdateDownOffsetY
+    }
+
+    fun setUpdateUpOffsetItem(updateUpOffsetItem: Int) {
+        mUpdateUpOfsetItem = updateUpOffsetItem
+    }
+
+    fun getUpdateUpOffsetItem(): Int {
+        return mUpdateUpOfsetItem
     }
 }
