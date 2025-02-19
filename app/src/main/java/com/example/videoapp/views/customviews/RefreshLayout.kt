@@ -2,7 +2,6 @@ package com.example.videoapp.views.customviews
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -12,8 +11,8 @@ import com.example.videoapp.R
 
 
 /**
- * 可以上拉下拉刷新数据的Layout，里面包裹一个RecyclerView
- * 注意：是定制的Layout，里面只能存放一个RecyclerView
+ * 可以上拉下拉刷新数据的Layout，里面包裹一个RecyclerView和一个LoadView
+ * 注意：是定制的Layout，里面只能存放一个RecyclerView和一个LoadView
  */
 class RefreshLayout: ViewGroup {
     companion object {
@@ -21,9 +20,6 @@ class RefreshLayout: ViewGroup {
 
         // 拖动开始更新数据的手势阈值
         const val START_LOAD_THRESHOLD = 100L
-
-        // loading界面所需要的高度
-        const val LOADING_VIEW_HEIGHT = 80
 
         // 给布局底部加一些padding
         const val PADDING_BOTTOM = 80
@@ -37,15 +33,21 @@ class RefreshLayout: ViewGroup {
     private var mIsUpdateUp: Boolean = false
     private var mStartX: Float = 0f
     private var mStartY: Float = 0f
+    private var mLoadViewHeight: Int = 0
 
     private val mLoadingView: View = LayoutInflater.from(this.context).inflate(R.layout.loading_item, null)
 
     private var mLoadMoreListener: LoadMorListener? = null
 
+    init {
+        mLoadingView.visibility = GONE
+        addView(mLoadingView, 0)
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val childCount = childCount
-        if (childCount > 2) {
+        if (childCount != 2) {
             return
         }
         measureChildren(widthMeasureSpec, heightMeasureSpec)
@@ -53,48 +55,42 @@ class RefreshLayout: ViewGroup {
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         val childCount = childCount
-        if (childCount > 2) {
+        if (childCount != 2) {
             return
         }
         val bottom = b - PADDING_BOTTOM
-        when (childCount) {
-            1 -> {
-                val child = getChildAt(0)
-                if (child.visibility != GONE && child is RecyclerView) {
-                    child.layout(0, 0, r, bottom)
-                }
+        val child1 = getChildAt(0)
+        val child2 = getChildAt(1)
+        val recyclerView: RecyclerView
+        val loadView: View
+        if (child1 is RecyclerView) {
+            recyclerView = child1
+            loadView = child2
+        } else if (child2 is RecyclerView) {
+            recyclerView = child2
+            loadView = child1
+        } else {
+            return
+        }
+        recyclerView.layout(0, 0, r, bottom)
+        if (mIsUpdateDown) {
+            if (mIsLoading) {
+                loadView.layout(0, bottom - START_LOAD_THRESHOLD.toInt(), r, bottom)
+            } else {
+                loadView.layout(0, bottom - mLoadViewHeight, r, bottom)
             }
-            2 -> {
-                if (mIsLoading) {
-                    val child1 = getChildAt(0)
-                    val child2 = getChildAt(1)
-                    val recyclerView: RecyclerView
-                    val loadView: View
-                    if (child1 is RecyclerView) {
-                        recyclerView = child1
-                        loadView = child2
-                    } else if (child2 is RecyclerView) {
-                        recyclerView = child2
-                        loadView = child1
-                    } else {
-                        return
-                    }
-                    recyclerView.layout(0, 0, r, bottom)
-                    if (mIsUpdateDown) {
-                        loadView.layout(0, bottom - LOADING_VIEW_HEIGHT, r, bottom)
-                    } else if (mIsUpdateUp) {
-                        loadView.layout(0, 0, r, LOADING_VIEW_HEIGHT)
-                    }
-                } else {
-                    Log.i(TAG, "onLayout: state is error!")
-                }
+        } else if (mIsUpdateUp) {
+            if (mIsLoading) {
+                loadView.layout(0, 0, r, START_LOAD_THRESHOLD.toInt())
+            } else {
+                loadView.layout(0, 0, r, mLoadViewHeight)
             }
         }
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         val childCount = childCount
-        if (childCount > 2) {
+        if (childCount != 2) {
             return super.dispatchTouchEvent(ev)
         }
         val action = ev?.actionMasked
@@ -104,34 +100,65 @@ class RefreshLayout: ViewGroup {
                     if (mIsLoading) {
                         return false
                     }
-                    if (childCount == 1) {
-                        val child = getChildAt(0)
-                        if (child.visibility != GONE && child is RecyclerView) {
-                            if (!child.canScrollVertically(1)) {
-                                if (!mIsUpdateDown) {
-                                    mStartY = ev.y
-                                    mIsUpdateDown = true
-                                }
-                            } else if (!child.canScrollVertically(-1)) {
-                                if (!mIsUpdateUp) {
-                                    mStartY = ev.y
-                                    mIsUpdateUp = true
-                                }
-                            } else {
-                                mIsUpdateDown = false
-                                mIsUpdateUp = false
+                    val child1 = getChildAt(0)
+                    val child2 = getChildAt(1)
+                    val recyclerView: RecyclerView
+                    if (child1 is RecyclerView) {
+                        recyclerView = child1
+                    } else if (child2 is RecyclerView) {
+                        recyclerView = child2
+                    } else {
+                        return super.dispatchTouchEvent(ev)
+                    }
+                    if (recyclerView.visibility != GONE) {
+                        if (!recyclerView.canScrollVertically(1)) {
+                            if (!mIsUpdateDown) {
+                                mStartY = ev.y
+                                mIsUpdateDown = true
+                                showLoadView()
                             }
-                            if ((mIsUpdateDown && mStartY - ev.y > START_LOAD_THRESHOLD) ||
-                                (mIsUpdateUp && ev.y - mStartY > START_LOAD_THRESHOLD)) {
-                                mIsLoading = true
-                                addLoadView()
-                                if (mIsUpdateDown) {
-                                    mLoadMoreListener?.loadDownMore()
-                                } else if (mIsUpdateUp) {
-                                    mLoadMoreListener?.loadUpMore()
-                                }
+                        } else if (!recyclerView.canScrollVertically(-1)) {
+                            if (!mIsUpdateUp) {
+                                mStartY = ev.y
+                                mIsUpdateUp = true
+                                showLoadView()
                             }
+                        } else {
+                            mIsUpdateDown = false
+                            mIsUpdateUp = false
+                            dismissLoadView()
                         }
+                        if (mIsUpdateDown) {
+                            if (mStartY - ev.y > START_LOAD_THRESHOLD) {
+                                mIsLoading = true
+                                mLoadMoreListener?.loadDownMore()
+                            }
+                            mLoadViewHeight = calculateLoadViewHeight(mStartY, ev.y,
+                                START_LOAD_THRESHOLD.toInt(), true)
+                            requestLayout()
+                        } else if (mIsUpdateUp) {
+                            if (ev.y - mStartY > START_LOAD_THRESHOLD) {
+                                mIsLoading = true
+                                mLoadMoreListener?.loadUpMore()
+                            }
+                            mLoadViewHeight = calculateLoadViewHeight(mStartY, ev.y,
+                                START_LOAD_THRESHOLD.toInt(), false)
+                            requestLayout()
+                        }
+                    }
+                }
+
+                MotionEvent.ACTION_UP -> {
+                    if (!mIsLoading) {
+                        mLoadViewHeight = 0
+                        dismissLoadView()
+                    }
+                }
+
+                MotionEvent.ACTION_CANCEL -> {
+                    if (!mIsLoading) {
+                        mLoadViewHeight = 0
+                        dismissLoadView()
                     }
                 }
             }
@@ -141,21 +168,34 @@ class RefreshLayout: ViewGroup {
 
     fun finishLoadMode() {
         if (mIsLoading) {
-            removeLoadView()
+            dismissLoadView()
             mIsLoading = false
         }
     }
 
-    private fun addLoadView() {
-        addView(mLoadingView)
-    }
-
-    private fun removeLoadView() {
-        removeView(mLoadingView)
-    }
-
     fun setLoadMoreListener(loadMorListener: LoadMorListener) {
         mLoadMoreListener = loadMorListener
+    }
+
+    private fun showLoadView() {
+        mLoadingView.visibility = VISIBLE
+        mLoadingView.bringToFront()
+    }
+
+    private fun dismissLoadView() {
+        mLoadingView.visibility = GONE
+    }
+
+    private fun calculateLoadViewHeight(startY: Float, currentY: Float,
+                                        maxHeight: Int, isDown: Boolean): Int {
+        val moveY = if (isDown) {
+            (startY - currentY).toInt()
+        } else {
+            (currentY - startY).toInt()
+        }
+        var loadViewHeight = 0.coerceAtLeast(moveY)
+        loadViewHeight = loadViewHeight.coerceAtMost(maxHeight)
+        return loadViewHeight
     }
 
     interface LoadMorListener {

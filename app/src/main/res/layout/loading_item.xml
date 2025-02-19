@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_gravity="center"
+              android:background="@color/trans_blank">
 
     <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="load_data"
-            tools:ignore="MissingConstraints" />
+            android:textSize="@dimen/loading_dialog_text_size"
+            android:textColor="@color/white"
+            android:text="@string/loading_dialog_text"
+            android:layout_gravity="center"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
