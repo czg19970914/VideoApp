@@ -38,4 +38,7 @@
     <dimen name="name_list_item_card_view_margin_end">10dp</dimen>
     <dimen name="name_list_item_card_view_card_elevation">0dp</dimen>
     <dimen name="name_list_item_bottom_line_height">3dp</dimen>
+
+    <dimen name="load_more_process_width">100px</dimen>
+    <dimen name="load_more_process_height">100px</dimen>
 </resources>

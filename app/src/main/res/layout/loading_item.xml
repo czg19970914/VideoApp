@@ -7,17 +7,8 @@
               android:background="@color/trans_blank">
 
     <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/load_more_process_width"
+            android:layout_height="@dimen/load_more_process_height"
             android:gravity="center"/>
-
-<!--    <TextView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="0dp"-->
-<!--            android:layout_weight="1"-->
-<!--            android:textSize="@dimen/loading_dialog_text_size"-->
-<!--            android:textColor="@color/white"-->
-<!--            android:text="@string/loading_dialog_text"-->
-<!--            android:gravity="center"/>-->
 
 </LinearLayout>
