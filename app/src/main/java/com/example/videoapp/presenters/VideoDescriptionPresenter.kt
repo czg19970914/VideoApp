@@ -72,6 +72,10 @@ class VideoDescriptionPresenter: VideoPresenter {
         )
     }
 
+    fun canUpdateMore(direction: Int): Boolean {
+        return (mDescriptionModel as VideoDescriptionModel).canUpdateMore(direction)
+    }
+
     suspend fun updateVideoInfoRecyclerView(videoEntities: ArrayList<VideoEntity>,
                                             isDown: Boolean) {
         (mDescriptionView as MainActivity).updateVideoInfoRecyclerView(videoEntities, isDown)

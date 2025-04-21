@@ -48,6 +48,8 @@ class VideoDescriptionModel: VideoModel {
     private var mMinId = 1
     private var mMaxId = mDescriptionNum + 1
 
+    private var mSelectNameListSize = -1
+
     private val networkService: NetworkService = NetworkService.createService()
 
     private val mBitmapCache: LRUCache = LRUCache(BITMAP_CACHE_SIZE)
@@ -101,6 +103,7 @@ class VideoDescriptionModel: VideoModel {
             val videoDescriptionEntities =
                 allVideoDescriptionMap.getOrDefault(selectName, null)
             if(videoDescriptionEntities != null) {
+                mSelectNameListSize = videoDescriptionEntities.size
                 var selectId = mMinId - 1
                 if(isDown)
                     selectId = mMaxId + 1
@@ -180,6 +183,19 @@ class VideoDescriptionModel: VideoModel {
                 )
             }
         }
+    }
+
+    fun canUpdateMore(direction: Int): Boolean {
+        var selectId = 0
+        if (direction > 0) {
+            selectId = mMaxId + 1
+        } else {
+            selectId = mMinId - 1
+        }
+        if (mSelectNameListSize < 0 || selectId < 0 || selectId >= mSelectNameListSize) {
+            return false
+        }
+        return true
     }
 
     // 将获取subVideoDescription分成几段完成并行优化的执行

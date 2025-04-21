@@ -162,6 +162,10 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
                 )
             }
 
+            override fun canLoadMore(direction: Int): Boolean {
+                return (mDescriptionPresenter as VideoDescriptionPresenter).canUpdateMore(direction)
+            }
+
         })
     }
 

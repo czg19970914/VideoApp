@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.videoapp.R
 import java.lang.ref.WeakReference
@@ -46,6 +47,8 @@ class RefreshLayout: ViewGroup {
     private var mStartX: Float = 0f
     private var mStartY: Float = 0f
     private var mLoadViewHeight: Int = 0
+
+    private var mCanShowNoMoreToast: Boolean = true
 
     private val mLoadingView: View = LayoutInflater.from(this.context).inflate(R.layout.loading_item, null)
 
@@ -110,6 +113,10 @@ class RefreshLayout: ViewGroup {
         val action = ev?.actionMasked
         action?.let {
             when (action) {
+                MotionEvent.ACTION_DOWN -> {
+                    mCanShowNoMoreToast = true
+                }
+
                 MotionEvent.ACTION_MOVE -> {
                     if (mIsLoading) {
                         return false
@@ -126,21 +133,26 @@ class RefreshLayout: ViewGroup {
                     }
                     if (recyclerView.visibility != GONE) {
                         if (!recyclerView.canScrollVertically(1)) {
+                            if (!canLoadingMore(1)) {
+                                return super.dispatchTouchEvent(ev)
+                            }
                             if (!mIsUpdateDown) {
                                 mStartY = ev.y
                                 mIsUpdateDown = true
                                 showLoadView()
                             }
                         } else if (!recyclerView.canScrollVertically(-1)) {
+                            if (!canLoadingMore(-1)) {
+                                return super.dispatchTouchEvent(ev)
+                            }
                             if (!mIsUpdateUp) {
                                 mStartY = ev.y
                                 mIsUpdateUp = true
                                 showLoadView()
                             }
                         } else {
-                            mIsUpdateDown = false
-                            mIsUpdateUp = false
                             dismissLoadView()
+                            mCanShowNoMoreToast = true
                         }
                         if (mIsUpdateDown) {
                             if (mStartY - ev.y > START_LOAD_THRESHOLD) {
@@ -164,14 +176,12 @@ class RefreshLayout: ViewGroup {
 
                 MotionEvent.ACTION_UP -> {
                     if (!mIsLoading) {
-                        mLoadViewHeight = 0
                         dismissLoadView()
                     }
                 }
 
                 MotionEvent.ACTION_CANCEL -> {
                     if (!mIsLoading) {
-                        mLoadViewHeight = 0
                         dismissLoadView()
                     }
                 }
@@ -180,13 +190,31 @@ class RefreshLayout: ViewGroup {
         return super.dispatchTouchEvent(ev)
     }
 
+    private fun canLoadingMore(direction: Int): Boolean {
+        if (mLoadMoreListener?.canLoadMore(direction) == false) {
+            dismissLoadView(false)
+            if (mLoadViewHeight > 5) {
+                if (mCanShowNoMoreToast) {
+                    Toast.makeText(
+                        this.context, this.resources.getString(
+                            R.string.no_more_data_loading_text
+                        ),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    mCanShowNoMoreToast = false
+                }
+                return false
+            }
+        }
+        return true
+    }
+
     fun sndLoadFinishMessage() {
         mLoadMoreHandler?.sendMessageDelayed(LOAD_FINISH_MSG, LOAD_FINISH_DELAY)
     }
     private fun finishLoadMode() {
         if (mIsLoading) {
             dismissLoadView()
-            mIsLoading = false
         }
     }
 
@@ -199,8 +227,14 @@ class RefreshLayout: ViewGroup {
         mLoadingView.bringToFront()
     }
 
-    private fun dismissLoadView() {
+    private fun dismissLoadView(needResetFlag: Boolean = true) {
         mLoadingView.visibility = GONE
+        mIsLoading = false
+        if (needResetFlag) {
+            mIsUpdateDown = false
+            mIsUpdateUp = false
+            mLoadViewHeight = 0
+        }
     }
 
     private fun calculateLoadViewHeight(startY: Float, currentY: Float,
@@ -226,6 +260,8 @@ class RefreshLayout: ViewGroup {
         fun loadDownMore()
 
         fun loadUpMore()
+
+        fun canLoadMore(direction: Int): Boolean
     }
 
     class LoadMoreHandler(refreshLayout: RefreshLayout): Handler(Looper.getMainLooper()) {

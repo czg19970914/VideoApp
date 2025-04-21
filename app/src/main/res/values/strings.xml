@@ -8,6 +8,8 @@
 
     <string name="loading_dialog_text">加载数据中......</string>
 
+    <string name="no_more_data_loading_text">无更多数据加载</string>
+
     <string name="video_played_image_desc">video_played_image</string>
     <string name="video_paused_image_desc">video_played_image</string>
     <string name="horizontal_screen_button_desc">horizontal_screen_button</string>
