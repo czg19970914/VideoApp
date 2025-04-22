@@ -195,7 +195,7 @@ class MainActivity : AppCompatActivity(), VideoView, SelectBarAdapter.OnSelectBa
             }
         }
         mIsInUpdate = false
-        mRefreshLayout.sndLoadFinishMessage()
+        mRefreshLayout.finishLoadMode()
     }
 
     suspend fun switchNameRecyclerView(videoEntities: ArrayList<VideoEntity>)
